@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+
+ :root {
+  /* ===== MAIN COLORS ===== */
+  /* Primary (Amber) */
+  --primary-50: #fffbeb;
+  --primary-100: #fef3c7;
+  --primary-200: #fde68a;
+  --primary-300: #fcd34d;
+  --primary-400: #fbbf24;
+  --primary-500: #f59e0b;
+  --primary-600: #d97706;
+  --primary-700: #b45309;
+  --primary-800: #92400e;
+  --primary-900: #78350f;
+
+  /* Secondary (Blue) */
+  --secondary-50: #eff6ff;
+  --secondary-100: #dbeafe;
+  --secondary-200: #bfdbfe;
+  --secondary-300: #93c5fd;
+  --secondary-400: #60a5fa;
+  --secondary-500: #3b82f6;
+  --secondary-600: #2563eb;
+  --secondary-700: #1d4ed8;
+  --secondary-800: #1e40af;
+  --secondary-900: #1e3a8a;
+
+  /* Neutral (Stone/Gray) */
+  --neutral-50: #fafaf9;
+  --neutral-100: #f5f5f4;
+  --neutral-200: #e7e5e4;
+  --neutral-300: #d6d3d1;
+  --neutral-400: #a8a29e;
+  --neutral-500: #78716c;
+  --neutral-600: #57534e;
+  --neutral-700: #44403c;
+  --neutral-800: #292524;
+  --neutral-900: #1c1917;
+
+  /* Success/Error */
+  --success-400: #4ade80;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --error-400: #f87171;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+
+  /* ===== BACKGROUND GRADIENTS ===== */
+  --bg-main: linear-gradient(135deg, var(--primary-25) 0%, var(--neutral-50) 50%, var(--primary-50) 100%);
+  --bg-surface: rgba(255, 255, 255, 0.8);
+  --bg-surface-hover: rgba(255, 251, 235, 0.6);
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  
+  /* Button Gradients */
+  --btn-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  --btn-primary-hover: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  --btn-secondary: linear-gradient(135deg, var(--secondary-500) 0%, var(--secondary-600) 100%);
+  --btn-secondary-hover: linear-gradient(135deg, var(--secondary-600) 0%, var(--secondary-700) 100%);
+
+  /* Accent Gradients */
+  --gradient-amber: linear-gradient(135deg, var(--primary-200) 0%, var(--primary-300) 100%);
+  --gradient-blue: linear-gradient(135deg, var(--secondary-200) 0%, var(--secondary-300) 100%);
+  
+  /* ===== TEXT COLORS ===== */
+  --text-primary: var(--neutral-900);
+  --text-secondary: var(--neutral-700);
+  --text-muted: var(--neutral-600);
+  --text-light: var(--neutral-500);
+  --text-white: #ffffff;
+  --text-accent: var(--primary-600);
+  --text-accent-hover: var(--primary-700);
+
+  /* ===== BORDERS ===== */
+  --border-light: rgba(245, 158, 11, 0.2);
+  --border-medium: rgba(245, 158, 11, 0.3);
+  --border-neutral: rgba(214, 211, 209, 0.5);
+  --border-focus: rgba(245, 158, 11, 0.6);
+
+  /* ===== SHADOWS ===== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-amber: 0 10px 15px -3px rgba(245, 158, 11, 0.2);
+  --shadow-blue: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+
+  /* ===== BACKDROP BLUR ===== */
+  --blur-sm: blur(8px);
+  --blur-md: blur(12px);
+  --blur-lg: blur(16px);
+}
+
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
