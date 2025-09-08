@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { 
@@ -13,7 +13,17 @@ import {
   ArrowRight 
 } from 'lucide-react'
 
-export default function ResetPasswordPage() {
+// Loading component for Suspense fallback
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+      <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
+
+// Main component that uses useSearchParams
+function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -83,11 +93,7 @@ export default function ResetPasswordPage() {
   }
 
   if (!isValidSession && !message) {
-    return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
   return (
@@ -228,5 +234,14 @@ export default function ResetPasswordPage() {
         )}
       </div>
     </div>
+  )
+}
+
+// Main page component with Suspense wrapper
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }

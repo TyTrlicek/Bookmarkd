@@ -254,8 +254,8 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <BookOpen className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-stone-900">MyBookHive</h1>
-                <p className="text-stone-600 text-sm">Your reading companion</p>
+                <h1 className="text-2xl font-bold text-stone-900">Bookmarkd</h1>
+                <p className="text-stone-600 text-sm">Keep track of your books effortlessly</p>
               </div>
             </div>
 
