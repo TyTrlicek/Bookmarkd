@@ -19,9 +19,20 @@ const { checkAndUnlockAchievements } = require('./utils');
 
 const app = express();
 const PORT = process.env.PORT || 7000;
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'https://bookmarkd.fun',  
+    'https://www.bookmarkd.fun'
+  ],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
-app.use(cors());
 app.use(collectionRoute);
 app.use(rankingRoute)
 app.use(replyRoute)
