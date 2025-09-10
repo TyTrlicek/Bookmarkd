@@ -347,7 +347,7 @@ return (
                     )}
                   </div>
                   
-                  {notifications.length > 0 && (
+                  {/* {notifications.length > 0 && (
                     <div className="p-3 border-t border-stone-600 bg-stone-900">
                       <Link 
                         href="/notifications" 
@@ -357,7 +357,7 @@ return (
                         View all notifications
                       </Link>
                     </div>
-                  )}
+                  )} */}
                 </div>
               )}
             </div>
@@ -468,7 +468,7 @@ return (
                 )}
               </div>
               
-              {notifications.length > 0 && (
+              {/* {notifications.length > 0 && (
                 <div className="p-3 border-t border-stone-600 bg-stone-900">
                   <Link 
                     href="/notifications" 
@@ -478,7 +478,7 @@ return (
                     View all notifications
                   </Link>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         )}
