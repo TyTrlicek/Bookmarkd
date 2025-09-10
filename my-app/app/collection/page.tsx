@@ -310,22 +310,22 @@ const BookListItem = ({ book }: {book: BookInList}) => {
       <div className="p-4 md:p-6">
         {/* Desktop Layout (md and up) */}
         <div className="hidden md:flex gap-6">
-          {/* Book Cover */}
+          {/* Book Cover - Fixed dimensions */}
           <div className="relative flex-shrink-0">
-            <div className="relative overflow-hidden rounded-lg shadow-lg group-hover:shadow-2xl transition-shadow duration-300">
+            <div className="relative overflow-hidden rounded-lg shadow-lg group-hover:shadow-2xl transition-shadow duration-300 w-48 h-72">
               <Image 
                 src={book.book.image || '/placeholder-book-cover.png'}
                 alt={book.book.title}
-                width={170}
-                height={280}
-                className="object-cover"
+                width={192}
+                height={288}
+                className="w-full h-full object-cover"
+                style={{ objectFit: 'cover' }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>
-          
           {/* Content */}
-          <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 min-w-0 flex flex-col py-6 pr-6">
             {/* Header Section */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
@@ -398,11 +398,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                   )}
                 </>
               ) : (
-                <span
-                      className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 px-3 py-1 rounded-full text-xs font-medium border border-amber-500/30 hover:from-amber-500/30 hover:to-amber-600/30 transition-colors backdrop-blur-sm"
-                    >
-                      No Genres Found
-                    </span>
+                <span className="text-xs text-stone-500 italic hidden">No categories</span>
               )}
             </div>
             
@@ -482,23 +478,24 @@ const BookListItem = ({ book }: {book: BookInList}) => {
           </div>
         </div>
 
-        {/* Mobile Layout (below md) - REDESIGNED WITH LARGE IMAGE */}
-        <div className="md:hidden flex gap-0 h-36 -m-4">
-          {/* Book Cover - Large on mobile, takes full height */}
+        {/* Mobile Layout (below md) - Fixed image dimensions */}
+        <div className="md:hidden flex gap-2 h-36 -m-4">
+          {/* Book Cover - Fixed dimensions, no spacing on top/left/bottom */}
           <div className="flex-shrink-0">
-            <div className="relative overflow-hidden rounded-lg shadow-lg h-full">
+            <div className="relative overflow-hidden rounded-l-xl w-20 h-36">
               <Image 
                 src={book.book.image || '/placeholder-book-cover.png'}
                 alt={book.book.title}
                 width={80}
-                height={125}
-                className="object-cover h-full w-auto"
+                height={144}
+                className="w-full h-full object-cover"
+                style={{ objectFit: 'cover' }}
               />
             </div>
           </div>
 
           {/* Content - Compact layout */}
-          <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+          <div className="flex-1 min-w-0 flex flex-col justify-between py-5 pr-4">
             {/* Top section: Title + Edit button */}
             <div>
               <div className="flex items-start gap-2 mb-1">
@@ -545,6 +542,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                 </div>
               )}
 
+              {/* First genre only with proper +X handling */}
               {/* {book.book.categories && book.book.categories.length > 0 && (
                 <>
                   <span className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 px-2 py-0.5 rounded-full text-xs font-medium border border-amber-500/30 backdrop-blur-sm truncate max-w-20" title={book.book.categories[0]}>
@@ -564,8 +562,6 @@ const BookListItem = ({ book }: {book: BookInList}) => {
     </div>
   );
 };
-  
-
 return (
     <div className="min-h-screen">
       {/* Header */}
