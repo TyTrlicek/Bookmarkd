@@ -24,6 +24,8 @@ import useAuthStore from '@/store/authStore'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Footer from '../components/Footer'
+
 
 export default function AuthPage() {
   const [email, setEmail] = useState('')

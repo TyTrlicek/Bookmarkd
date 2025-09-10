@@ -38,6 +38,7 @@ import EnhancedHero from './components/EnhancedHero' // Updated hero component
 import { UserActivity } from './types/types'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
+import Footer from './components/Footer'
 
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState('trending')
@@ -269,7 +270,9 @@ const HomePage = () => {
             </div>
           </section>
         </div>
+        <Footer />
       </div>
+
     </div>
   )}
 

@@ -307,8 +307,9 @@ const BookListItem = ({ book }: {book: BookInList}) => {
 
   return (
     <div className="group bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-black/30 hover:border-amber-500/30 transition-all duration-300 overflow-hidden">
-      <div className="p-6">
-        <div className="flex gap-6">
+      <div className="p-4 md:p-6">
+        {/* Desktop Layout (md and up) */}
+        <div className="hidden md:flex gap-6">
           {/* Book Cover */}
           <div className="relative flex-shrink-0">
             <div className="relative overflow-hidden rounded-lg shadow-lg group-hover:shadow-2xl transition-shadow duration-300">
@@ -380,50 +381,47 @@ const BookListItem = ({ book }: {book: BookInList}) => {
 
             {/* Categories */}
             <div className="flex flex-wrap gap-2 mb-4 min-h-[26px]">
-  {book.book.categories && book.book.categories.length > 0 ? (
-    <>
-      {book.book.categories.slice(0, 4).map((category, idx) => (
-        <span
-          key={idx}
-          className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 px-3 py-1 rounded-full text-xs font-medium border border-amber-500/30 hover:from-amber-500/30 hover:to-amber-600/30 transition-colors backdrop-blur-sm"
-        >
-          {category}
-        </span>
-      ))}
-      {book.book.categories.length > 4 && (
-        <span className="text-xs text-stone-400 px-2 py-1">
-          +{book.book.categories.length - 4} more
-        </span>
-      )}
-    </>
-  ) : (
-    // 👇 placeholder keeps space consistent when no categories
-    <span className="text-xs text-stone-500 italic hidden">No categories</span>
-  )}
-</div>
-
+              {book.book.categories && book.book.categories.length > 0 ? (
+                <>
+                  {book.book.categories.slice(0, 4).map((category, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 px-3 py-1 rounded-full text-xs font-medium border border-amber-500/30 hover:from-amber-500/30 hover:to-amber-600/30 transition-colors backdrop-blur-sm"
+                    >
+                      {category}
+                    </span>
+                  ))}
+                  {book.book.categories.length > 4 && (
+                    <span className="text-xs text-stone-400 px-2 py-1">
+                      +{book.book.categories.length - 4} more
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs text-stone-500 italic hidden">No categories</span>
+              )}
+            </div>
             
             {/* Comment Section */}
             <div className="mt-auto">
               {isEditingComment ? (
-                // Editing Mode
                 <div className="bg-gradient-to-r from-white/5 to-white/10 border border-amber-500/30 rounded-lg p-4 relative backdrop-blur-sm">
                   <div className="flex items-start gap-3">
                     <MessageSquare className="w-4 h-4 text-amber-400 mt-1 flex-shrink-0" />
                     <div className="flex-1">
                       <textarea
-  value={commentValue}
-  onChange={(e) => setCommentValue(e.target.value)}
-  onKeyDown={handleKeyDown}
-  placeholder="Add your thoughts about this book..."
-  className="w-full bg-transparent text-stone-200 text-sm leading-relaxed resize-none border-none outline-none placeholder-stone-400 min-h-[60px]"
-  autoFocus
-  maxLength={100}
-/>
-<div className="flex items-center justify-between mt-3 pt-2 border-t border-white/10">
-  <div className="text-xs text-stone-400">
-    Press Ctrl+Enter to save, Esc to cancel • {commentValue.length}/100
-  </div>
+                        value={commentValue}
+                        onChange={(e) => setCommentValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Add your thoughts about this book..."
+                        className="w-full bg-transparent text-stone-200 text-sm leading-relaxed resize-none border-none outline-none placeholder-stone-400 min-h-[60px]"
+                        autoFocus
+                        maxLength={100}
+                      />
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/10">
+                        <div className="text-xs text-stone-400">
+                          Press Ctrl+Enter to save, Esc to cancel • {commentValue.length}/100
+                        </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={handleCancelComment}
@@ -445,7 +443,6 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                   </div>
                 </div>
               ) : (
-                // Display Mode
                 <div className="bg-gradient-to-r from-white/5 to-white/10 border border-white/10 rounded-lg p-4 relative backdrop-blur-sm group/comment">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -478,6 +475,175 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout (below md) */}
+        <div className="md:hidden">
+          {/* Header with Edit Button */}
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              <div className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm inline-flex items-center gap-1.5 ${getStatusColor(book.status ?? '')}`}>
+                {getStatusIcon(book.status ?? '')}
+                {getStatusText(book.status ?? '')}
+              </div>
+            </div>
+            <button
+              onClick={() => handleOpenEditPopup(book)}
+              className="p-2 text-stone-400 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors backdrop-blur-sm"
+              title="Edit book"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Book Cover and Content */}
+          <div className="flex gap-4">
+            {/* Book Cover - Left Side */}
+            <div className="flex-shrink-0">
+              <div className="relative overflow-hidden rounded-lg shadow-lg group-hover:shadow-2xl transition-shadow duration-300">
+                <Image 
+                  src={book.book.image || '/placeholder-book-cover.png'}
+                  alt={book.book.title}
+                  width={100}
+                  height={160}
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </div>
+
+            {/* Right Side Content */}
+            <div className="flex-1 min-w-0 flex flex-col justify-start">
+              {/* Title */}
+              <Link href={`/book/${book.book.openLibraryId}`} className="group/link">
+                <h3 className="font-bold text-lg text-white mb-2 hover:text-amber-400 transition-colors line-clamp-2">
+                  {book.book.title}
+                </h3>
+              </Link>
+              
+              {/* Author */}
+              <p className="text-stone-300 font-medium text-sm mb-2">{book.book.author}</p>
+              
+              {/* Categories/Genres */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {book.book.categories && book.book.categories.length > 0 ? (
+                  <>
+                    {book.book.categories.slice(0, 2).map((category, idx) => (
+                      <span
+                        key={idx}
+                        className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 px-2 py-1 rounded-full text-xs font-medium border border-amber-500/30 backdrop-blur-sm"
+                      >
+                        {category}
+                      </span>
+                    ))}
+                    {book.book.categories.length > 2 && (
+                      <span className="text-xs text-stone-400 px-2 py-1">
+                        +{book.book.categories.length - 2}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-xs text-stone-500 italic">No categories</span>
+                )}
+              </div>
+
+              {/* Rating and Stars */}
+              <div className="flex items-center gap-2 mb-2">
+                {(book.rating || 0) > 0 ? (
+                  <>
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`w-3.5 h-3.5 ${i < Math.ceil((book.rating || 0) / 2) ? 'text-amber-400 fill-amber-400' : 'text-stone-500'}`} 
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-semibold text-white">{book.rating}/10</span>
+                  </>
+                ) : (
+                  <span className="text-sm text-stone-400">No rating</span>
+                )}
+              </div>
+
+              {/* Added Date */}
+              <p className="text-stone-400 text-xs">Added {new Date(book.addedAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          {/* Comment Section - Full Width Below */}
+          <div className="mt-4">
+            {isEditingComment ? (
+              <div className="bg-gradient-to-r from-white/5 to-white/10 border border-amber-500/30 rounded-lg p-3 relative backdrop-blur-sm">
+                <div className="flex items-start gap-3">
+                  <MessageSquare className="w-4 h-4 text-amber-400 mt-1 flex-shrink-0" />
+                  <div className="flex-1">
+                    <textarea
+                      value={commentValue}
+                      onChange={(e) => setCommentValue(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Add your thoughts about this book..."
+                      className="w-full bg-transparent text-stone-200 text-sm leading-relaxed resize-none border-none outline-none placeholder-stone-400 min-h-[60px]"
+                      autoFocus
+                      maxLength={100}
+                    />
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/10">
+                      <div className="text-xs text-stone-400">
+                        {commentValue.length}/100
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleCancelComment}
+                          className="p-1.5 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                          title="Cancel"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={handleSaveComment}
+                          className="p-1.5 text-stone-400 hover:text-green-400 hover:bg-green-500/10 rounded transition-colors"
+                          title="Save comment"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-white/5 to-white/10 border border-white/10 rounded-lg p-3 relative backdrop-blur-sm group/comment">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    {book.comment ? (
+                      <div className="flex items-start gap-3">
+                        <div className="text-stone-400 mt-0.5">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h4v10h-10z"/>
+                          </svg>
+                        </div>
+                        <p className="text-stone-300 text-sm leading-relaxed italic flex-1">
+                          {book.comment}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 text-stone-400">
+                        <MessageSquare className="w-4 h-4" />
+                        <p className="text-sm italic">No comment</p>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleStartEditComment}
+                    className="ml-3 p-1.5 text-stone-400 hover:text-amber-400 hover:bg-amber-500/10 rounded transition-colors opacity-0 group-hover/comment:opacity-100 flex-shrink-0"
+                    title="Edit comment"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -663,7 +829,7 @@ return (
 
             {/* Status Filter Tabs */}
             <div className="border-b border-white/10">
-              <nav className="flex space-x-8 justify-start">
+              <nav className="flex space-x-2 lg:space-x-8 justify-start">
                 <button
                   type="button"
                   onClick={() => setStatusFilter('all')}
