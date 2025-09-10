@@ -3,7 +3,8 @@ import { getBookData } from "@/utils/util";
 import BookClient from "./BookClient";
 import Script from "next/script";
 
-interface PageProps {
+// ✅ Don't call it PageProps — avoid collision
+interface BookPageProps {
   params: { id: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 }
@@ -12,7 +13,7 @@ const truncate = (str: string, max = 160) =>
   str.length > max ? str.slice(0, max).trim() + "…" : str;
 
 export async function generateMetadata(
-  { params }: PageProps
+  { params }: BookPageProps
 ): Promise<Metadata> {
   const id = decodeURIComponent(params.id);
   const book = await getBookData(id);
@@ -68,7 +69,7 @@ export async function generateMetadata(
   };
 }
 
-export default async function BookPage({ params }: PageProps) {
+export default async function BookPage({ params }: BookPageProps) {
   const id = decodeURIComponent(params.id);
   const book = await getBookData(id);
 
