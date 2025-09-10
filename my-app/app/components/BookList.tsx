@@ -88,7 +88,7 @@ const BookList = ({ trendingData }: BookListProps): React.JSX.Element => {
         {/* Carousel Navigation Buttons */}
         <button
           onClick={() => scroll('left')}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-stone-800/80 backdrop-blur-sm hover:bg-stone-700/90 border border-stone-600/50 hover:border-amber-500/30 rounded-full flex items-center justify-center text-stone-300 hover:text-amber-200 shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 group hover:scale-110"
+          className="absolute hidden lg:flex left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-stone-800/80 backdrop-blur-sm hover:bg-stone-700/90 border border-stone-600/50 hover:border-amber-500/30 rounded-full items-center justify-center text-stone-300 hover:text-amber-200 shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 group hover:scale-110"
         >
           <svg className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -97,7 +97,7 @@ const BookList = ({ trendingData }: BookListProps): React.JSX.Element => {
 
         <button
           onClick={() => scroll('right')}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-stone-800/80 backdrop-blur-sm hover:bg-stone-700/90 border border-stone-600/50 hover:border-amber-500/30 rounded-full flex items-center justify-center text-stone-300 hover:text-amber-200 shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 group hover:scale-110"
+          className="absolute hidden right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-stone-800/80 backdrop-blur-sm hover:bg-stone-700/90 border border-stone-600/50 hover:border-amber-500/30 rounded-full lg:flex items-center justify-center text-stone-300 hover:text-amber-200 shadow-2xl hover:shadow-amber-500/10 transition-all duration-300 group hover:scale-110"
         >
           <svg className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -124,8 +124,8 @@ const BookList = ({ trendingData }: BookListProps): React.JSX.Element => {
           </div>
 
           {/* Gradient overlays for smooth edges */}
-          <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-stone-900 via-stone-900/80 to-transparent z-25 pointer-events-none" />
-          <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-stone-900 via-stone-900/80 to-transparent z-25 pointer-events-none" />
+          <div className="absolute left-0 top-0 w-20 h-full hidden lg:block bg-gradient-to-r from-stone-900 via-stone-900/80 to-transparent z-25 pointer-events-none" />
+          <div className="absolute right-0 top-0 w-20 h-full hidden lg:block bg-gradient-to-l from-stone-900 via-stone-900/80 to-transparent z-25 pointer-events-none" />
         </div>
 
         {/* Bottom subtle glow line */}

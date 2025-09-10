@@ -296,7 +296,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
           className="px-4 py-2 text-red-400 bg-white/5 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors flex items-center gap-2 backdrop-blur-sm"
         >
           <Trash2 className="w-4 h-4" />
-          Delete Book
+          Delete
         </button>
         
         <div className="flex items-center gap-3">
@@ -313,7 +313,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
             className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all flex items-center gap-2 shadow-lg"
           >
             <Save className="w-4 h-4" />
-            Save Changes
+            Save
           </button>
         </div>
       </div>
