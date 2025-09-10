@@ -479,15 +479,15 @@ const BookListItem = ({ book }: {book: BookInList}) => {
         </div>
 
         {/* Mobile Layout (below md) - REDESIGNED WITH LARGE IMAGE */}
-        <div className="md:hidden flex gap-4 h-28">
+        <div className="md:hidden flex gap-4 h-36">
           {/* Book Cover - Large on mobile, takes full height */}
           <div className="flex-shrink-0">
             <div className="relative overflow-hidden rounded-lg shadow-lg h-full">
               <Image 
                 src={book.book.image || '/placeholder-book-cover.png'}
                 alt={book.book.title}
-                width={70}
-                height={112}
+                width={80}
+                height={125}
                 className="object-cover h-full w-auto"
               />
             </div>
