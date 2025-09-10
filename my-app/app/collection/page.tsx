@@ -307,7 +307,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
 
   return (
     <div className="group bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-black/30 hover:border-amber-500/30 transition-all duration-300 overflow-hidden">
-      <div className="p-4 md:p-6">
+      <div className="md:p-6">
         {/* Desktop Layout (md and up) */}
         <div className="hidden md:flex gap-6">
           {/* Book Cover */}
@@ -316,8 +316,8 @@ const BookListItem = ({ book }: {book: BookInList}) => {
               <Image 
                 src={book.book.image || '/placeholder-book-cover.png'}
                 alt={book.book.title}
-                width={156}
-                height={256}
+                width={180}
+                height={300}
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -479,22 +479,22 @@ const BookListItem = ({ book }: {book: BookInList}) => {
         </div>
 
         {/* Mobile Layout (below md) - REDESIGNED WITH LARGE IMAGE */}
-        <div className="md:hidden flex gap-4 h-36">
-          {/* Book Cover - Large on mobile, takes full height */}
+        <div className="md:hidden flex gap-2 h-36 -m-4">
+          {/* Book Cover - Large on mobile, takes full height, no spacing on top/left/bottom */}
           <div className="flex-shrink-0">
-            <div className="relative overflow-hidden rounded-lg shadow-lg h-full">
+            <div className="relative overflow-hidden rounded-l-xl h-full">
               <Image 
                 src={book.book.image || '/placeholder-book-cover.png'}
                 alt={book.book.title}
                 width={80}
-                height={125}
+                height={144}
                 className="object-cover h-full w-auto"
               />
             </div>
           </div>
 
           {/* Content - Compact layout */}
-          <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+          <div className="flex-1 min-w-0 flex flex-col justify-between py-5 pr-4">
             {/* Top section: Title + Edit button */}
             <div>
               <div className="flex items-start gap-2 mb-1">
@@ -541,7 +541,8 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                 </div>
               )}
 
-              {/* {book.book.categories && book.book.categories.length > 0 && (
+              {/* First genre only with proper +X handling */}
+              {book.book.categories && book.book.categories.length > 0 && (
                 <>
                   <span className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 px-2 py-0.5 rounded-full text-xs font-medium border border-amber-500/30 backdrop-blur-sm truncate max-w-20" title={book.book.categories[0]}>
                     {book.book.categories[0]}
@@ -552,7 +553,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                     </span>
                   )}
                 </>
-              )} */}
+              )}
             </div>
           </div>
         </div>
