@@ -2,15 +2,16 @@
 import { getBookData } from '@/utils/util';
 import BookClient from './BookClient';
 import Script from 'next/script';
+import { Metadata } from 'next';
 
-interface BookPageProps {
+type BookPageProps = {
   params: { id: string };
 }
 
 const truncate = (str: string, max = 160) =>
   str.length > max ? str.slice(0, max).trim() + '…' : str;
 
-export async function generateMetadata({ params }: BookPageProps) {
+export async function generateMetadata({ params }: BookPageProps): Promise<Metadata> {
   const id = decodeURIComponent(params.id);
   const book = await getBookData(id);
 

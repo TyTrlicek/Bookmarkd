@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, X, Star, BookOpen, Clock, Calendar, Target, Award, Flame, Users } from 'lucide-react';
+import { Trophy, X, Star, BookOpen, Clock, Calendar, Target, Award, Flame, Users, Shapes, MessageSquare, Feather, Zap } from 'lucide-react';
 
 // Achievement notification component
 const AchievementNotification = ({ achievements, onClose }: any) => {
@@ -9,29 +9,27 @@ const AchievementNotification = ({ achievements, onClose }: any) => {
 
   // Achievement icon mapping
   const getAchievementIcon = (type: any) => {
-    const iconMap: any = {
-      'first_book': BookOpen,
-      'night_owl': Clock,
-      'early_bird': Calendar,
-      'streak': Flame,
-      'high_rating': Star,
-      'collection_milestone': Target,
-      'community': Users,
-      default: Trophy
-    };
-    return iconMap[type] || iconMap.default;
+  const iconMap: any = {
+    milestone: BookOpen,
+    genre: Shapes,
+    review: MessageSquare,
+    author: Feather,
+    quirky: Zap,
+    default: Trophy,
   };
+  return iconMap[type] || iconMap.default;
+};
 
   // Achievement color schemes
-  const getAchievementColors = (rarity: any) => {
+  const getAchievementColors = (tier: number) => {
     const colorMap: any = {
-      common: 'from-gray-400 to-gray-600',
-      uncommon: 'from-green-400 to-green-600',
-      rare: 'from-blue-400 to-blue-600',
-      epic: 'from-purple-400 to-purple-600',
-      legendary: 'from-yellow-400 to-yellow-600'
+      1: 'from-gray-400 to-gray-600',
+      2: 'from-green-400 to-green-600',
+      3: 'from-blue-400 to-blue-600',
+      4: 'from-purple-400 to-purple-600',
+      5: 'from-yellow-400 to-yellow-600'
     };
-    return colorMap[rarity] || colorMap.common;
+    return colorMap[tier] || colorMap[1]
   };
 
   const handleNext = () => {
@@ -50,8 +48,8 @@ const AchievementNotification = ({ achievements, onClose }: any) => {
   if (!achievements || achievements.length === 0 || !isVisible) return null;
 
   const currentAchievement = achievements[currentIndex];
-  const Icon = getAchievementIcon(currentAchievement.type);
-  const colors = getAchievementColors(currentAchievement.rarity);
+  const Icon = getAchievementIcon(currentAchievement.category);
+  const colors = getAchievementColors(currentAchievement.tier);
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-100 p-4">

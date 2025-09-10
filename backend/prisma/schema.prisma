@@ -134,7 +134,7 @@ model ReviewReplyVote {
   user   User        @relation(fields: [userId], references: [id])
   reply  ReviewReply @relation(fields: [replyId], references: [id])
 
-  @@unique([userId, replyId]) // ensures one vote per user per reply
+  @@unique([userId, replyId]) 
 }
 
 

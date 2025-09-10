@@ -314,7 +314,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
             // Use different endpoints for reviews vs replies
             const endpoint = itemType === 'review' 
                 ? `${process.env.NEXT_PUBLIC_API_URL}/reviews/${itemId}/vote`
-                : `${process.env.NEXT_PUBLIC_API_URL}/${itemId}/vote`;
+                : `${process.env.NEXT_PUBLIC_API_URL}/replies/${itemId}/vote`;
 
             const response = await axios.post(endpoint, {}, {
                 headers: {

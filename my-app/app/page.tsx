@@ -34,7 +34,7 @@ import Header from './components/Header'
 import axios from 'axios'
 import useAuthStore from '@/store/authStore'
 import { supabase } from '@/lib/supabaseClient'
-import EnhancedHero from './components/EnhancedHero' // Updated hero component
+import EnhancedHero from './components/EnhancedHero'
 import { UserActivity } from './types/types'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
