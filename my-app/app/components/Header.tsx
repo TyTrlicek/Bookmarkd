@@ -62,7 +62,7 @@ const Header = () => {
     const accessToken = session?.access_token;
 
     if (!accessToken) {
-      router.push('/auth');
+      setNotifications([])
       return;
     }
 
@@ -264,8 +264,8 @@ return (
             <a href="/" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Home</a>
             <a href="/browse" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Browse</a>
             <a href="/collection" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">My Collection</a>
-            <a href="#" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Clubs</a>
             <a href="/rankings" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Rankings</a>
+            <a href="#" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Clubs</a>
           </nav>
 
           {/* Desktop Search */}

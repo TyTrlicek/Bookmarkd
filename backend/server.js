@@ -16,6 +16,14 @@ const favoriteRoute = require('./routes/favorite')
 const redis = require ('./lib/redis');
 const { checkAndUnlockAchievements } = require('./utils');
 
+const openLibraryAPI = axios.create({
+  baseURL: 'https://openlibrary.org',
+  headers: {
+    'User-Agent': 'BookMarkd/1.0 (bookmarkd.fun@gmail.com)',
+    'Accept': 'application/json',
+  },
+});
+
 
 const app = express();
 const PORT = process.env.PORT || 7000;
@@ -86,10 +94,10 @@ app.get('/api/search', async (req, res) => {
     }
 
     // Fallback to OpenLibrary
-    const response = await axios.get('https://openlibrary.org/search.json', {
+    const response = await openLibraryAPI.get('/search.json', {
       params: {
         q: query,
-        limit: 50, // fetch more, filter later
+        limit: 50,
       },
     });
 
@@ -368,7 +376,7 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
     }
 
     // Fetch from Open Library if not in DB
-    const response = await axios.get(`https://openlibrary.org/works/${id}.json`);
+    const response = await axios.openLibraryAPI(`/works/${id}.json`);
     const book = response.data;
 
     // Fetch author names from author keys
@@ -381,7 +389,7 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
             const authorKey = a.author?.key;
             if (!authorKey) return 'Unknown Author';
 
-            const authorRes = await axios.get(`https://openlibrary.org${authorKey}.json`);
+            const authorRes = await axios.openLibraryAPI(`/${authorKey}.json`);
             return authorRes.data?.name || 'Unknown Author';
           } catch (err) {
             console.error('Error fetching author:', err.message);
@@ -396,7 +404,7 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
 
 if (!coverId) {
   try {
-    const editionsRes = await axios.get(`https://openlibrary.org/works/${id}/editions.json?limit=10`);
+    const editionsRes = await axios.openLibraryAPI(`/${id}/editions.json?limit=10`);
     const editions = editionsRes.data.entries;
 
     for (const ed of editions) {
@@ -413,7 +421,7 @@ if (!coverId) {
 
 if(!isbn) {
   try {
-    const editionsRes = await axios.get(`https://openlibrary.org/works/${id}/editions.json?limit=10`);
+    const editionsRes = await axios.openLibraryAPI(`/${id}/editions.json?limit=10`);
     const editions = editionsRes.data.entries;
 
     for (const ed of editions) {

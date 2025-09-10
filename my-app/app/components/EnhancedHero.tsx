@@ -49,14 +49,13 @@ const fetchFavoriteBooks = async () => {
 
   console.log(response.data)
 
-  // Transform backend favorites into frontend-friendly format
   return response.data.map((fav: any) => ({
     id: fav.book.id,
     title: fav.book.title,
     author: fav.book.author,
-    image: fav.book.image, // Prisma field
-    publishedDate: fav.book.publishedDate, // derive from when user favorited it
-    rating: 5, // you don’t store rating in Favorite, so maybe default or calculate
+    image: fav.book.image,
+    publishedDate: fav.book.publishedDate, 
+    rating: 5,
   }));
 };
 
@@ -103,7 +102,6 @@ const fetchFavoriteBooks = async () => {
     };
   }, [searchQuery, debouncedSearch]);
 
-  // Handle mouse movement for cinematic effect
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
@@ -116,7 +114,6 @@ const fetchFavoriteBooks = async () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !(modalRef.current as Node).contains(event.target as Node)) {
@@ -136,7 +133,6 @@ const fetchFavoriteBooks = async () => {
     };
   }, [showSearchModal]);
 
-  // Fetch favorite books on component mount
   useEffect(() => {
     const loadFavoriteBooks = async () => {
       try {
@@ -154,7 +150,6 @@ const fetchFavoriteBooks = async () => {
     loadFavoriteBooks();
   }, [propFavoriteBooks]);
 
-  // Handle removing a book from favorites
   const handleRemoveBook = async (bookId: string) => {
 
           const {
@@ -181,7 +176,6 @@ const fetchFavoriteBooks = async () => {
     setFavoriteBooks(prev => prev.filter(book => String(book.id) !== bookId));
   };
 
-  // Handle adding a book from search results
   const handleAddBookFromSearch = async (selectedBook: BookData) => {
     const {
       data: { session }

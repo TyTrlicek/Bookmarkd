@@ -103,4 +103,8 @@ export  const formatDate = (dateString: string) => {
         if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
         return `${Math.ceil(diffDays / 30)} months ago`;
     };
+
+  export const truncate = (str: string, max = 160) =>
+  str.length > max ? str.slice(0, max).trim() + '…' : str;
+
   

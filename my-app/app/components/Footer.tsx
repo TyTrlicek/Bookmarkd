@@ -125,7 +125,7 @@ const Footer = () => {
               </div>
               
               <p className="text-stone-300 mb-6 leading-relaxed">
-                A personal reading companion built by a book lover, for book lovers. 
+                A personal reading companion built by a reader, for readers. 
                 Track your reading journey, discover great books, and share your thoughts with our growing community.
               </p>
 
@@ -243,18 +243,11 @@ const Footer = () => {
           <div className="max-w-7xl mx-auto px-6 py-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-stone-400 text-sm">
-                <span>© {currentYear} Bookmarkd. Made with</span>
-                <Heart className="w-4 h-4 text-red-400 fill-current" />
-                <span>for book lovers</span>
+                <span>© {currentYear} Bookmarkd.</span>
+                <span>All Rights Reserved.</span>
               </div>
               
               <div className="flex items-center gap-6 text-sm text-stone-400">
-                <a href="/accessibility" className="hover:text-amber-400 transition-colors">
-                  Accessibility
-                </a>
-                <a href="/sitemap" className="hover:text-amber-400 transition-colors">
-                  Sitemap
-                </a>
                 <div className="flex items-center gap-1">
                   <BookOpen className="w-4 h-4" />
                   <span>Powered by OpenLibrary</span>

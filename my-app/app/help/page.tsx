@@ -42,7 +42,7 @@ const page = () => {
       question: 'What is Bookmarkd?',
       icon: BookOpen,
       category: 'Getting Started',
-      answer: `Bookmarkd is your personal digital library and book discovery platform. Track your reading progress, rate and review books, get personalized recommendations, and connect with other book lovers.
+      answer: `Bookmarkd is your personal digital library and book discovery platform. Track your reading progress, rate and review books, get personalized recommendations, and connect with other readers.
 
 Key features:
 • Track books you've read, want to read, and are currently reading
@@ -121,7 +121,7 @@ Your books will appear in your collections page.`
 • Search by ISBN if available
 
 **Request a missing book:**
-• Contact our support team with book details
+• Contact our support with book details
 • Include: title, author, ISBN (if available), publication year
 • We'll work to add it to our database
 
@@ -226,7 +226,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
     },
     {
       title: 'Contact Support',
-      description: 'Get help from our team',
+      description: 'Get help from us directly',
       icon: MessageCircle,
       color: 'from-purple-500 to-purple-600',
       action: () => setOpenFAQ(8)
@@ -421,7 +421,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
             
             <h3 className="text-xl font-bold text-white mb-3">Still need help?</h3>
             <p className="text-stone-300 mb-6">
-              Can't find the answer you're looking for? Our support team is here to help.
+              Can't find the answer you're looking for? We are here to help.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

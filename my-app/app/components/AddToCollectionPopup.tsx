@@ -4,6 +4,8 @@ import axios from 'axios';
 import useAuthStore from '@/store/authStore';
 import { supabase } from '@/lib/supabaseClient';
 import AchievementNotification from './AchievementNotification';
+import { useRouter } from 'next/navigation';
+
 
 interface AddToCollectionPopupProps {
   openLibraryId: string
@@ -20,6 +22,8 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInCollection, setIsInCollection] = useState(false);
   const [showRatingDropdown, setShowRatingDropdown] = useState(false);
+
+  const router = useRouter();
 
   console.log('userStatus', userStatus);
 
@@ -77,6 +81,7 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
       if (!accessToken) {
         console.error('User not authenticated');
+        router.push('/auth');
         setIsSubmitting(false);
         
         return;

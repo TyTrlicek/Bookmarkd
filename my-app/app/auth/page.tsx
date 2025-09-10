@@ -268,7 +268,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </h2>
               <p className="text-lg text-stone-600">
                 {authMode === 'login' 
-                  ? 'Continue tracking your amazing reading progress and connect with fellow book lovers.'
+                  ? 'Continue tracking your amazing reading progress and connect with fellow readers.'
                   : 'Join thousands of readers who are discovering, tracking, and sharing their favorite books.'
                 }
               </p>

@@ -29,6 +29,7 @@ import useAuthStore from '@/store/authStore'
 import axios from 'axios'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
+import Footer from '../components/Footer'
 
 export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -312,8 +313,8 @@ const allAchievements = [
   { id: 17, name: "Reviewer I", description: "Write your first review", icon: "✍️" },
   { id: 18, name: "Reviewer II", description: "Write 10 reviews", icon: "📝" },
   { id: 19, name: "Reviewer III", description: "Write 50 reviews", icon: "📝" },
-  { id: 20, name: "Night Owl", description: "Log a book after midnight", icon: "🌙" },
-  { id: 21, name: "Old Timer", description: "Log a book that's been in your TBR for over a year", icon: "⏳" },
+  { id: 20, name: "Old Timer", description: "Log a book that's been in your TBR for over a year", icon: "⏳" },
+  { id: 21, name: "Night Owl", description: "Log a book after midnight", icon: "🌙" },
   { id: 22, name: "Honest Critic", description: "Give 10 books a 1-star rating", icon: "⭐" },
   { id: 23, name: "Balanced Critic", description: "Give at least one book each rating from 1–10 stars", icon: "⚖️" }
 ];
@@ -725,6 +726,7 @@ allowedGenres.forEach((genre) => {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   )
 }

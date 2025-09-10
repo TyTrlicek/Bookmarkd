@@ -112,7 +112,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
             const accessToken = session?.access_token;
         
             if (!accessToken) {
-                router.push('/auth');
+                setUser(null);
                 return;
             }
         
@@ -128,7 +128,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                 console.log(response.data);
             } catch (error) {
                 console.error('Failed to fetch user:', error);
-                router.push('/auth');
+                setUser(null);
             }
         };
 
@@ -221,7 +221,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
       
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/create-reply`, {
                 reviewId: reviewId,
-                parentId: null, // Always null since we're only allowing one layer
+                parentId: null, 
                 content: replyText,
             }, {
                 headers: {
