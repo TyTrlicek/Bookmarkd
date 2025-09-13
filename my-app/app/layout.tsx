@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image.png", // 1200x630 recommended
+        url: "/brand-image.png", // 1200x630 recommended
         width: 1200,
         height: 630,
         alt: "Bookmarkd – Track Your Reading Journey",
@@ -58,13 +58,13 @@ export const metadata: Metadata = {
     title: "Bookmarkd – Track Your Reading Journey & Discover Great Books",
     description:
       "Bookmarkd is a personal reading companion. Track books you’ve read, organize your collection, rate and review titles, and explore global rankings powered by book lovers worldwide.",
-    images: ["/og-image.png"],
+    images: ["/brand-image.png"],
     creator: "@Bookmarkd", // optional Twitter handle
   },
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/brand-logo.png",
   },
 };
 

@@ -57,6 +57,8 @@ import useAuthStore from '@/store/authStore'
 import { supabase } from '@/lib/supabaseClient'
 import EditCollectionPopup from '../components/EditCollectionPopup'
 import Image from 'next/image'
+import Footer from '../components/Footer'
+import { useRouter } from 'next/navigation'
 
 const MyCollectionPage = () => {
   const [viewMode, setViewMode] = useState('list')
@@ -69,7 +71,7 @@ const MyCollectionPage = () => {
   const [tempStatus, setTempStatus] = useState<string | undefined>('')
   const [isFavorite, setIsFavorite] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
-
+  const router = useRouter();
   
   // Edit popup state
   const [editingBook, setEditingBook] = useState<BookInList | null>(null)
@@ -103,7 +105,8 @@ const MyCollectionPage = () => {
     const accessToken = session?.access_token;
   
     if (!accessToken) {
-      console.error('No access token available')
+
+      router.push('/auth')
       return
     }
   
@@ -558,6 +561,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
             </div>
           </div>
         </div>
+        
       </div>
     </div>
   );
@@ -837,6 +841,7 @@ return (
             </div>
           </div>
         </div>
+         <Footer />
       </div>
 
       {/* Edit Popup */}
@@ -854,6 +859,8 @@ return (
         setTempRating={setTempRating} 
         hoverRating={hoverRating}
       />
+     
+
     </div>
   )
 }

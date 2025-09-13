@@ -426,7 +426,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="mailto:support@bookmarkd.com"
+                href="mailto:support@bookmarkd.fun"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Mail className="w-4 h-4" />
@@ -434,7 +434,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
               </a>
               
               <a
-                href="mailto:feedback@bookmarkd.com"
+                href="mailto:feedback@bookmarkd.fun"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Star className="w-4 h-4" />

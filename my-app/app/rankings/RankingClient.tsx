@@ -99,11 +99,6 @@ const [pagination, setPagination] = useState({
       
       const accessToken = session?.access_token;
 
-      if (!accessToken) {
-        router.push('auth');
-        return;
-      }
-
       console.log('selected genre', selectedGenre);
 
       // Build query parameters including pagination

@@ -36,7 +36,7 @@ const fetchFavoriteBooks = async () => {
   const accessToken = session?.access_token;
 
   if (!accessToken) {
-    router.push("/auth");
+    setFavoriteBooks([]);
     return [];
   }
 

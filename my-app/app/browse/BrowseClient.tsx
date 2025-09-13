@@ -34,6 +34,7 @@ import BookCard from '../components/BookCard'
 import { getSearchData } from '@/utils/util'
 import { BookData } from '../types/types'
 import debounce from 'lodash/debounce';
+import Footer from '../components/Footer'
 
 
 
@@ -450,6 +451,7 @@ const BrowseClient = () => {
             </div>
           )}
         </div>
+        <Footer />
       </div>
 
       <style jsx>{`

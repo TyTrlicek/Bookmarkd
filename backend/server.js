@@ -13,6 +13,7 @@ const replyRoute = require('./routes/reply')
 const userRoute = require('./routes/user')
 const activityRoute = require('./routes/activity')
 const favoriteRoute = require('./routes/favorite')
+const recomendationRoute = require('./routes/reccomendation')
 const redis = require ('./lib/redis');
 const { checkAndUnlockAchievements } = require('./utils');
 
@@ -47,6 +48,7 @@ app.use(replyRoute)
 app.use('/api/users', userRoute);
 app.use('/api/activity', activityRoute);
 app.use(favoriteRoute);
+app.use(recomendationRoute)
 
 
 app.get('/api/search', async (req, res) => {

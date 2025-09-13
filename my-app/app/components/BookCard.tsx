@@ -59,6 +59,7 @@ const BookCard = ({ book, id }: BookCardProps ) => {
 
   // Function to get score color based on value
   const getScoreColor = (score: number) => {
+    if(score === 0) return 'text-stone-400'
     if (score >= 8) return 'text-emerald-400'
     if (score >= 6.5) return 'text-blue-400'
     if (score >= 5) return 'text-amber-400'
@@ -212,7 +213,7 @@ const BookCard = ({ book, id }: BookCardProps ) => {
           {book.averageRating !== null && book.averageRating !== undefined && (
             <div className="flex items-center gap-2">
               <span className={`text-lg font-bold ${getScoreColor(book.averageRating)}`}>
-                {book.averageRating.toFixed(2)}
+                {book.averageRating > 0 ? book.averageRating.toFixed(2) : 'N/A'}
               </span>
               <span className="text-xs text-stone-500 uppercase tracking-wide">
                 Score

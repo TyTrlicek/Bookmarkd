@@ -1,94 +1,72 @@
 const express = require('express');
-const cors = require('cors');
-const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
+const redis = require ('../lib/redis');
 
 const router = express.Router();
-router.use(cors());
 
-router.get('/api/rankings', authenticateUser, async (req, res) => {
-    const { 
-      sort = 'rating', 
-      limit = 100, 
-      page = 1,
-      genre,
-      year,
-      search 
-    } = req.query;
-  
-    const userId = req.userId;
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+router.get('/api/rankings', attachIfUserExists, async (req, res) => {
+  const {
+    sort = 'rating',
+    limit = 100,
+    page = 1,
+    genre,
+    year
+  } = req.query;
+
+  // userId may be undefined if not signed in
+  const userId = req.userId;
+
+  try {
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const offset = (pageNum - 1) * limitNum;
+
+    // Order
+    let orderBy;
+    if (sort === 'rating') {
+      orderBy = [
+        { averageRating: 'desc' },
+        { totalRatings: 'desc' }
+      ];
+    } else if (sort === 'popularity') {
+      orderBy = [
+        { totalRatings: 'desc' },
+        { averageRating: 'desc' }
+      ];
+    } else {
+      return res.status(400).json({ error: 'Invalid sort parameter. Use "rating" or "popularity".' });
     }
 
-    console.log('genre', genre);
-  
-    try {
-      // Calculate offset for pagination
-      const pageNum = Math.max(1, parseInt(page));
-      const limitNum = Math.min(100, Math.max(1, parseInt(limit))); // Cap at 100, min 1
-      const offset = (pageNum - 1) * limitNum;
+    // Filter
+    const whereClause = {
+      totalRatings: { gt: 0 },
+      averageRating: { gt: 0 }
+    };
 
-      let orderBy;
-      if (sort === 'rating') {
-        orderBy = [
-          { averageRating: 'desc' },
-          { totalRatings: 'desc' },
-        ];
-      } else if (sort === 'popularity') {
-        orderBy = [
-          { totalRatings: 'desc' },
-          { averageRating: 'desc' },
-        ];
-      } else {
-        return res.status(400).json({ error: 'Invalid sort parameter. Use "rating" or "popularity".' });
-      }
+    if (genre && genre !== 'all') whereClause.categories = { has: genre };
+    if (year && year !== 'all') {
+      if (year === '2020s') whereClause.publishedDate = { gte: '2020-01-01' };
+      else if (year === '2010s') whereClause.publishedDate = { gte: '2010-01-01', lt: '2020-01-01' };
+      else if (year === '2000s') whereClause.publishedDate = { gte: '2000-01-01', lt: '2010-01-01' };
+      else if (year === '1990s') whereClause.publishedDate = { gte: '1990-01-01', lt: '2000-01-01' };
+      else if (year === '1980s') whereClause.publishedDate = { gte: '1980-01-01', lt: '1990-01-01' };
+      else if (year === 'older') whereClause.publishedDate = { lt: '1980-01-01' };
+    }
 
-      // Build where clause for filters
-      const whereClause = {
-        totalRatings: { gt: 0 },
-        averageRating: { gt: 0 }
-      };
+    // Global cache key (user-independent)
+    const cacheKey = `rankings:sort=${sort}:limit=${limit}:page=${page}:genre=${genre ?? 'all'}:year=${year ?? 'all'}`;
 
-      // Add genre filter
-      if (genre && genre !== 'all') {
-        whereClause.categories = {
-          has: genre
-        };
-      }
+    // Try cache
+    let cached = await redis.get(cacheKey);
+    let books;
+    if (cached) {
+      console.log(`[Rankings] Served from cache for key=${cacheKey}`);
+      books = JSON.parse(cached);
+    } else {
+      console.log(`[Rankings] Cache miss for key=${cacheKey}, querying DB`);
 
-      // Add year filter
-      if (year && year !== 'all') {
-        if (year === '2020s') {
-          whereClause.publishedDate = { gte: '2020-01-01' };
-        } else if (year === '2010s') {
-          whereClause.publishedDate = { gte: '2010-01-01', lt: '2020-01-01' };
-        } else if (year === '2000s') {
-          whereClause.publishedDate = { gte: '2000-01-01', lt: '2010-01-01' };
-        } else if (year === '1990s') {
-          whereClause.publishedDate = { gte: '1990-01-01', lt: '2000-01-01' };
-        } else if (year === '1980s') {
-          whereClause.publishedDate = { gte: '1980-01-01', lt: '1990-01-01' };
-        } else if (year === 'older') {
-          whereClause.publishedDate = { lt: '1980-01-01' };
-        }
-      }
-
-      // Add search filter
-      if (search) {
-        whereClause.OR = [
-          { title: { contains: search, mode: 'insensitive' } },
-          { author: { contains: search, mode: 'insensitive' } }
-        ];
-      }
-
-      // Get total count for pagination info
-      const totalBooks = await prisma.book.count({
-        where: whereClause
-      });
-
-      // Get books with pagination
-      const books = await prisma.book.findMany({
+      // Fetch books
+      books = await prisma.book.findMany({
         where: whereClause,
         orderBy,
         skip: offset,
@@ -102,46 +80,57 @@ router.get('/api/rankings', authenticateUser, async (req, res) => {
           image: true,
           averageRating: true,
           totalRatings: true,
-          categories: true,
-          userBooks: {
-            where: {
-              userId: userId,
-            },
-            select: {
-              rating: true,
-            },
-          },
-        },
-      });
-  
-      const result = books.map(book => ({
-        ...book,
-        userRating: book.userBooks[0]?.rating ?? null,
-        userBooks: undefined,
-      }));
-
-      // Calculate pagination metadata
-      const totalPages = Math.ceil(totalBooks / limitNum);
-      const hasNextPage = pageNum < totalPages;
-      const hasPreviousPage = pageNum > 1;
-
-      res.json({ 
-        books: result,
-        pagination: {
-          currentPage: pageNum,
-          totalPages,
-          totalBooks,
-          booksPerPage: limitNum,
-          hasNextPage,
-          hasPreviousPage,
-          startIndex: offset + 1,
-          endIndex: Math.min(offset + limitNum, totalBooks)
+          categories: true
         }
       });
-    } catch (err) {
-      console.error('Error fetching ranked books:', err.message);
-      res.status(500).json({ error: 'Failed to fetch ranked books' });
+
+      // Cache for 1 hour
+      const cacheTTL = 3600;
+      await redis.set(cacheKey, JSON.stringify(books), 'EX', cacheTTL);
+      console.log(`[Rankings] Cached result for key=${cacheKey} (TTL=${cacheTTL}s)`);
     }
+
+    // If user is signed in, fetch their ratings separately
+    let userRatings = {};
+    if (userId) {
+      const ratings = await prisma.userBook.findMany({
+        where: { userId, bookId: { in: books.map(b => b.id) } },
+        select: { bookId: true, rating: true },
+      });
+      ratings.forEach(r => {
+        userRatings[r.bookId] = r.rating;
+      });
+    }
+
+    const result = books.map(book => ({
+      ...book,
+      userRating: userRatings[book.id] ?? null
+    }));
+
+    // Pagination metadata
+    const totalBooks = await prisma.book.count({ where: whereClause });
+    const totalPages = Math.ceil(totalBooks / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPreviousPage = pageNum > 1;
+
+    res.json({
+      books: result,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        totalBooks,
+        booksPerPage: limitNum,
+        hasNextPage,
+        hasPreviousPage,
+        startIndex: offset + 1,
+        endIndex: Math.min(offset + limitNum, totalBooks)
+      }
+    });
+
+  } catch (err) {
+    console.error('[Rankings] Error fetching rankings:', err);
+    res.status(500).json({ error: 'Failed to fetch ranked books' });
+  }
 });
 
 module.exports = router;

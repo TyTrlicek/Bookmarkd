@@ -3,6 +3,8 @@ import { X, Star, Plus, ChevronDown, BookOpen, Clock, CheckCircle2, ListPlus, Ch
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation'
+
 
 interface RankingAddToCollectionPopupProps {
   openLibraryId: string;
@@ -25,6 +27,8 @@ export default function RankingAddToCollectionPopup({
   const [showRatingDropdown, setShowRatingDropdown] = useState(false);
   
   const [mounted, setMounted] = useState(false);
+
+  const router = useRouter();
 
   // Ensure component is mounted before rendering portal
   useEffect(() => {
@@ -97,7 +101,7 @@ export default function RankingAddToCollectionPopup({
       const accessToken = session?.access_token;
 
       if (!accessToken) {
-        console.error('User not authenticated');
+        router.push('auth');
         setIsSubmitting(false);
         return;
       }

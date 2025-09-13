@@ -3,7 +3,6 @@ const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser')
 
 const router = express.Router();
-router.use(cors());
 
 router.post('/create-review', authenticateUser, async (req, res) => { 
   const userId = req.userId;

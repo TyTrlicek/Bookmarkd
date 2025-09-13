@@ -4,7 +4,6 @@ const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
 
 const router = express.Router();
-router.use(cors());
 
 router.get('/unread', authenticateUser, async (req, res) => {
     const userId = req.userId;
