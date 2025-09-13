@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/brand-logo.png",
+        url: "https://bookmarkd.fun/brand-logo.png",
         width: 1200,
         height: 630,
         alt: "Bookmarkd Book Rankings",
