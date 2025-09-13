@@ -1,0 +1,24 @@
+# Node modules and build artifacts
+node_modules
+dist
+
+# Environment files (optional, don’t copy secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker and IDE configs
+Dockerfile*
+docker-compose*.yml
+.vscode
