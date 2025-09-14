@@ -41,7 +41,7 @@ router.post('/create-review', authenticateUser, async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    if (error.code === 'P2002') {
       return res.status(400).json({ error: 'You have already submitted a review for this book.' });
     }
 
@@ -201,7 +201,6 @@ router.get('/reviews/:openLibraryId', async (req, res) => {
                   avatar_url: true,
                 },
               },
-              // Remove all the nested 'children' includes since we don't need them
             },
           },
         },
@@ -212,6 +211,7 @@ router.get('/reviews/:openLibraryId', async (req, res) => {
         id: review.id,
         username: review.user.username,
         userId: review.user.id,
+        updatedAt: review.updatedAt,
         recommendation: review.recommendation,
         content: review.content,
         createdAt: review.createdAt,
@@ -220,6 +220,7 @@ router.get('/reviews/:openLibraryId', async (req, res) => {
           id: reply.id,
           content: reply.content,
           createdAt: reply.createdAt,
+          updatedAt: reply.updatedAt,
           username: reply.user.username,
           userId: reply.user.id,
           helpfulCount: reply.helpfulCount,
@@ -400,6 +401,203 @@ router.post('/replies/:replyId/vote', authenticateUser, async (req, res) => {
   }
 });
 
+// Add these routes to your existing routes.js file
+
+// Edit Review
+router.put('/reviews/:reviewId', authenticateUser, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const userId = req.userId;
+    const { content, recommendation, containsSpoilers } = req.body;
+
+    if (!content || !recommendation) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Verify ownership
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { userId: true }
+    });
+
+    if (!review) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+
+    if (review.userId !== userId) {
+      return res.status(403).json({ error: 'You can only edit your own reviews' });
+    }
+
+    const updatedReview = await prisma.review.update({
+      where: { id: reviewId },
+      data: {
+        content,
+        recommendation,
+        containsSpoilers,
+        updatedAt: new Date()
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      id: updatedReview.id,
+      content: updatedReview.content,
+      recommendation: updatedReview.recommendation,
+      containsSpoilers: updatedReview.containsSpoilers,
+      updatedAt: updatedReview.updatedAt,
+      username: updatedReview.user.username,
+      avatar_url: updatedReview.user.avatar_url
+    });
+
+  } catch (error) {
+    console.error('Error updating review:', error);
+    res.status(500).json({ error: 'Failed to update review' });
+  }
+});
+
+// Delete Review
+router.delete('/reviews/:reviewId', authenticateUser, async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const userId = req.userId;
+
+    // Verify ownership
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { userId: true }
+    });
+
+    if (!review) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+
+    if (review.userId !== userId) {
+      return res.status(403).json({ error: 'You can only delete your own reviews' });
+    }
+
+    await prisma.reviewReplyVote.deleteMany({
+  where: {
+    reply: { reviewId: reviewId }
+  }
+  });
+
+// Delete replies
+await prisma.reviewReply.deleteMany({
+  where: { reviewId: reviewId }
+});
+    await prisma.review.delete({
+      where: { id: reviewId }
+    });
+
+    res.json({ success: true, message: 'Review deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res.status(500).json({ error: 'Failed to delete review' });
+  }
+});
+
+// Edit Reply
+router.put('/replies/:replyId', authenticateUser, async (req, res) => {
+  try {
+    const { replyId } = req.params;
+    const userId = req.userId;
+    const { content } = req.body;
+
+    if (!content?.trim()) {
+      return res.status(400).json({ error: 'Content is required' });
+    }
+
+    if (content.length > 1000) {
+      return res.status(400).json({ error: 'Reply content too long (max 1000 characters)' });
+    }
+
+    // Verify ownership
+    const reply = await prisma.reviewReply.findUnique({
+      where: { id: replyId },
+      select: { userId: true }
+    });
+
+    if (!reply) {
+      return res.status(404).json({ error: 'Reply not found' });
+    }
+
+    if (reply.userId !== userId) {
+      return res.status(403).json({ error: 'You can only edit your own replies' });
+    }
+
+    const updatedReply = await prisma.reviewReply.update({
+      where: { id: replyId },
+      data: {
+        content: content.trim(),
+        updatedAt: new Date()
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatar_url: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      id: updatedReply.id,
+      content: updatedReply.content,
+      updatedAt: updatedReply.updatedAt,
+      username: updatedReply.user.username,
+      avatar_url: updatedReply.user.avatar_url,
+      helpfulCount: updatedReply.helpfulCount
+    });
+
+  } catch (error) {
+    console.error('Error updating reply:', error);
+    res.status(500).json({ error: 'Failed to update reply' });
+  }
+});
+
+// Delete Reply
+router.delete('/replies/:replyId', authenticateUser, async (req, res) => {
+  try {
+    const { replyId } = req.params;
+    const userId = req.userId;
+
+    // Verify ownership
+    const reply = await prisma.reviewReply.findUnique({
+      where: { id: replyId },
+      select: { userId: true }
+    });
+
+    if (!reply) {
+      return res.status(404).json({ error: 'Reply not found' });
+    }
+
+    if (reply.userId !== userId) {
+      return res.status(403).json({ error: 'You can only delete your own replies' });
+    }
+
+    // Delete reply (cascade will handle votes, etc.)
+    await prisma.reviewReply.delete({
+      where: { id: replyId }
+    });
+
+    res.json({ success: true, message: 'Reply deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting reply:', error);
+    res.status(500).json({ error: 'Failed to delete reply' });
+  }
+});
 
 
       

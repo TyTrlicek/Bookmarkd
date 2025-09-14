@@ -75,6 +75,8 @@ export interface ReplyData {
   replies?: ReplyData[];
   isOfficial?: boolean;
   avatar_url?: string;
+  updatedAt?: string;
+  userId?: string;
 }
 
 // Add interface for review data with replies
@@ -87,6 +89,8 @@ export interface ReviewData {
   username: string;
   replies?: ReplyData[];
   avatar_url: string;
+  userId?: string;
+  updatedAt?: string;
 }
 
 export interface UserActivity {

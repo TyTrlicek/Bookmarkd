@@ -139,7 +139,7 @@ const page = () => {
 • Some data may be retained for legal/security purposes
 
 **Account Deletion:**
-• Users may contact us to request account deletion or data export
+• Users may delete their account by going to the profile settings and clicking "Delete Account"
 • Upon deletion, all personal data is permanently removed
 **Data Export:**
 • Request a copy of your data by contacting support

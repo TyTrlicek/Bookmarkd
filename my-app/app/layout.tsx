@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     canonical: "https://bookmarkd.fun",
   },
   openGraph: {
-    title: "Bookmarkd – Track Your Reading Journey & Discover Great Books",
+    title: "Bookmarkd – Track Your Books and Discover New Reads",
     description:
       "Bookmarkd is your personal book hub. Track and organize your collection, discover new titles, rate and review books, and explore global rankings fueled by a community of passionate readers.",
     url: "https://bookmarkd.fun",

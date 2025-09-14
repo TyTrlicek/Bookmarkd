@@ -22,7 +22,9 @@ import {
   X,
   Upload,
   Save,
-  Camera
+  Camera,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react'
 import Header from '../components/Header'
 import useAuthStore from '@/store/authStore'
@@ -50,6 +52,9 @@ export default function AccountPage() {
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [achievementCount, setAchievementCount] = useState(0);
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const router = useRouter()
 
@@ -188,6 +193,43 @@ useEffect(() => {
     const fileInput = document.getElementById('editProfileImage') as HTMLInputElement
     if (fileInput) fileInput.value = ''
   }
+
+  const handleDeleteAccount = async () => {
+  if (!user || deleteConfirmText !== 'DELETE') return;
+  
+  setIsDeleting(true);
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
+
+    if (!accessToken) {
+      alert('Session expired. Please log in again.');
+      return;
+    }
+
+    const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/users/delete`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status === 200) {
+      // Clear local session
+      await supabase.auth.signOut();
+      useAuthStore.getState().clearSession();
+      
+      // Redirect to auth page with a message
+      router.push('/auth?message=Account deleted successfully');
+    }
+  } catch (error) {
+    console.error('Failed to delete account:', error);
+    alert('Failed to delete account. Please try again.');
+  }
+
+  setIsDeleting(false);
+};
 
   const uploadImage = async (userId: string): Promise<string | null> => {
     if (!newProfileImage) return null
@@ -416,6 +458,84 @@ allowedGenres.forEach((genre) => {
               </div>
             </div>
           </div>
+
+          {/* Delete Account Modal */}
+{showDeleteModal && (
+  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowDeleteModal(false)}>
+    <div className="bg-stone-900 border border-red-500/30 rounded-3xl max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      {/* Modal Header */}
+      <div className="flex items-center justify-between p-8 border-b border-red-500/20">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-red-400" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-white">Delete Account</h3>
+            <p className="text-red-400 text-sm">This action cannot be undone</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowDeleteModal(false)}
+          className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors"
+        >
+          <X className="w-6 h-6 text-stone-400" />
+        </button>
+      </div>
+
+      {/* Modal Content */}
+      <div className="p-8 space-y-6">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
+          <h4 className="text-red-300 font-semibold mb-3">What will be deleted:</h4>
+          <ul className="text-red-200 text-sm space-y-2">
+            <li>• Your profile and account information</li>
+            <li>• All your book collections and ratings</li>
+            <li>• All your reviews and comments</li>
+            <li>• Your reading history and achievements</li>
+            <li>• Your profile picture and settings</li>
+          </ul>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-stone-300 mb-3">
+            Type "DELETE" to confirm:
+          </label>
+          <input
+            type="text"
+            placeholder="DELETE"
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            className="w-full px-4 py-3 bg-black/30 border border-red-500/30 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors placeholder-stone-500 text-white"
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4 pt-4">
+          <button
+            onClick={() => setShowDeleteModal(false)}
+            disabled={isDeleting}
+            className="flex-1 px-6 py-3 border border-white/30 text-stone-300 rounded-xl hover:bg-white/10 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={isDeleting || deleteConfirmText !== 'DELETE'}
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isDeleting ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <Trash2 className="w-5 h-5" />
+                Delete Forever
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -667,6 +787,18 @@ allowedGenres.forEach((genre) => {
                   />
                 </div>
               </div>
+
+              <button 
+              onClick={() => {
+                setShowEditModal(false)
+                setShowDeleteModal(true)
+                
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-xl border border-red-500/30 transition-all backdrop-blur-sm group"
+            >
+              <Trash2 className="w-5 h-5" />
+              Delete Account
+            </button>
 
               {/* Bio Field */}
               {/* <div>

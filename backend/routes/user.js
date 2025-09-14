@@ -2,6 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
+const { createClient } = require('@supabase/supabase-js');
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const router = express.Router();
 
@@ -95,6 +101,84 @@ router.get('/me', authenticateUser, async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  router.delete('/delete', authenticateUser, async (req, res) => {
+  const userId = req.userId;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    // Use a transaction to ensure all deletions succeed together
+    await prisma.$transaction(async (tx) => {
+      // Delete user achievements
+      await tx.userAchievement.deleteMany({
+        where: { userId }
+      });
+
+      // Delete user activities (both as actor and target)
+      await tx.userActivity.deleteMany({
+        where: { 
+          OR: [
+            { userId },
+            { actorId: userId }
+          ]
+        }
+      });
+
+      // Delete review reply votes
+      await tx.reviewReplyVote.deleteMany({
+        where: { userId }
+      });
+
+      // Delete review votes
+      await tx.reviewVote.deleteMany({
+        where: { userId }
+      });
+
+      // Delete review replies
+      await tx.reviewReply.deleteMany({
+        where: { userId }
+      });
+
+      // Delete reviews
+      await tx.review.deleteMany({
+        where: { userId }
+      });
+
+      // Delete user books
+      await tx.userBook.deleteMany({
+        where: { userId }
+      });
+
+      // Delete favorites
+      await tx.favorite.deleteMany({
+        where: { userId }
+      });
+
+      // Finally, delete the user
+      await tx.user.delete({
+        where: { id: userId }
+      });
+    });
+ const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    
+    if (authError) {
+      console.error('Failed to delete user from Supabase Auth:', authError);
+    }
+
+    // Delete profile image from storage if it exists
+    const { error: storageError } = await supabaseAdmin.storage
+      .from('avatar')
+      .remove([`avatar/${userId}`]);
+
+    return res.status(200).json({ message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    return res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
 
   router.get('/stats', authenticateUser, async (req, res) => {
   const userId = req.userId;

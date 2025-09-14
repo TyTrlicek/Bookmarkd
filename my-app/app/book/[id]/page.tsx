@@ -28,6 +28,7 @@ import AddToCollectionPopup from '@/app/components/AddToCollectionPopup'
 
 import Review from '@/app/components/Review'
 import Image from 'next/image'
+import Footer from '@/app/components/Footer'
 
 const BookPage = () => {
   const params = useParams()
@@ -303,6 +304,7 @@ return (
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </div>
   )

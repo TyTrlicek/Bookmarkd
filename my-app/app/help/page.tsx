@@ -96,7 +96,7 @@ Your books will appear in your collections page.`
 //       answer: `Yes, you have full control over your reviews and ratings:
 
 // **Editing:**
-// • Go to your profile or the book's page
+// • Go to the book's page
 // • Click the edit icon on your review
 // • Update your rating or review text
 // • Save changes

@@ -401,7 +401,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                   )}
                 </>
               ) : (
-                <span className="text-xs text-stone-500 italic hidden">No categories</span>
+                <span className="text-xs text-stone-400 italic">No categories</span>
               )}
             </div>
             
@@ -580,7 +580,7 @@ return (
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Reading Overview</h2>
-            <p className="text-stone-300">Track your reading progress and goals</p>
+            <p className="text-stone-300">Track your reading Status</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

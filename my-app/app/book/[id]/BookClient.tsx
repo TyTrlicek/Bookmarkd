@@ -25,10 +25,8 @@ import {
   ExternalLink
 } from 'lucide-react'
 import AddToCollectionPopup from '@/app/components/AddToCollectionPopup'
-
 import Review from '@/app/components/Review'
 import Image from 'next/image'
-import Footer from '@/app/components/Footer'
 
 interface BookClientProps {
   id: string;
@@ -304,7 +302,6 @@ return (
             </div>
           </div>
         </div>
-        <Footer />
       </div>
       
     </div>
