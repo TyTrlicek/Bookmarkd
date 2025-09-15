@@ -2,11 +2,12 @@ import { supabase } from '@/lib/supabaseClient';
 import axios from 'axios';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Plus } from 'lucide-react';
+import { Search, X, Plus, BookOpen, Star, Heart, Users, TrendingUp } from 'lucide-react';
 import { debounce } from 'lodash';
 import { getSearchData } from '@/utils/util';
 import { BookData } from '../types/types';
 import Image from 'next/image';
+import useAuthStore from '@/store/authStore';
 
 interface FavoriteBooksHeroProps {
   favoriteBooks?: BookData[];
@@ -26,39 +27,39 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
   const router = useRouter();
   const searchRef = useRef(null);
   const modalRef = useRef(null);
+  const { session } = useAuthStore()
 
   // Mock fetch function to simulate API call
-const fetchFavoriteBooks = async () => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const fetchFavoriteBooks = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-  const accessToken = session?.access_token;
+    const accessToken = session?.access_token;
 
-  if (!accessToken) {
-    setFavoriteBooks([]);
-    return [];
-  }
+    if (!accessToken) {
+      setFavoriteBooks([]);
+      return [];
+    }
 
-  const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-  console.log(response.data)
+    console.log(response.data)
 
-  return response.data.map((fav: any) => ({
-    id: fav.book.id,
-    title: fav.book.title,
-    author: fav.book.author,
-    image: fav.book.image,
-    publishedDate: fav.book.publishedDate, 
-    rating: 5,
-  }));
-};
-
+    return response.data.map((fav: any) => ({
+      id: fav.book.id,
+      title: fav.book.title,
+      author: fav.book.author,
+      image: fav.book.image,
+      publishedDate: fav.book.publishedDate, 
+      rating: 5,
+    }));
+  };
 
   // Search functionality from Header component
   const handleSearch = async (query: string) => {
@@ -151,27 +152,26 @@ const fetchFavoriteBooks = async () => {
   }, [propFavoriteBooks]);
 
   const handleRemoveBook = async (bookId: string) => {
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
+    
+    const accessToken = session?.access_token;
 
-          const {
-            data: { session }
-          } = await supabase.auth.getSession();
-          
-          const accessToken = session?.access_token;
+    if (!accessToken) {
+      throw new Error('No access token available')
+    }
 
-          if (!accessToken) {
-            throw new Error('No access token available')
-          }
-
-          // Make API call to delete book
-          await axios.delete(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/favorites/${bookId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          )
+    // Make API call to delete book
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/favorites/${bookId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
 
     setFavoriteBooks(prev => prev.filter(book => String(book.id) !== bookId));
   };
@@ -230,47 +230,47 @@ const fetchFavoriteBooks = async () => {
   };
 
   // Search result item component
-const SearchResultItem = ({ book }: any) => (
-  <div 
-    className="p-4 hover:bg-stone-700 cursor-pointer border-b border-stone-600 last:border-b-0"
-    onClick={() => handleAddBookFromSearch(book)}
-  >
-    <div className="flex gap-4">
-      <div className="w-20 h-28 bg-stone-600 rounded overflow-hidden flex-shrink-0 shadow-lg">
-        <Image 
-          src={book.image || '/api/placeholder/80/112'} 
-          alt={book.title}
-          width={160}
-          height={224}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            img.style.display = 'none';
-            if (img.nextElementSibling) {
-              (img.nextElementSibling as HTMLElement).style.display = 'flex';
-            }
-          }}
-        />
-        <div className="w-full h-full bg-gradient-to-br from-amber-600 to-stone-700 flex items-center justify-center text-white text-xs font-bold text-center p-1 hidden">
-          {book.title.substring(0, 10)}...
+  const SearchResultItem = ({ book }: any) => (
+    <div 
+      className="p-4 hover:bg-stone-700 cursor-pointer border-b border-stone-600 last:border-b-0"
+      onClick={() => handleAddBookFromSearch(book)}
+    >
+      <div className="flex gap-4">
+        <div className="w-20 h-28 bg-stone-600 rounded overflow-hidden flex-shrink-0 shadow-lg">
+          <Image 
+            src={book.image || '/api/placeholder/80/112'} 
+            alt={book.title}
+            width={160}
+            height={224}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.style.display = 'none';
+              if (img.nextElementSibling) {
+                (img.nextElementSibling as HTMLElement).style.display = 'flex';
+              }
+            }}
+          />
+          <div className="w-full h-full bg-gradient-to-br from-amber-600 to-stone-700 flex items-center justify-center text-white text-xs font-bold text-center p-1 hidden">
+            {book.title.substring(0, 10)}...
+          </div>
         </div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-white text-sm mb-1 line-clamp-2">
-          {book.title}
-        </h3>
-        <p className="text-stone-300 text-xs mb-2">
-          by {book.author || 'Unknown Author'}
-        </p>
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-amber-400 bg-amber-400/20 rounded-full px-2 py-1">
-            Add to Favorites
-          </span>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-white text-sm mb-1 line-clamp-2">
+            {book.title}
+          </h3>
+          <p className="text-stone-300 text-xs mb-2">
+            by {book.author || 'Unknown Author'}
+          </p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-amber-400 bg-amber-400/20 rounded-full px-2 py-1">
+              Add to Favorites
+            </span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 
   // Create empty slots to fill up to 6 books
   const displayBooks = [...favoriteBooks];
@@ -284,6 +284,206 @@ const SearchResultItem = ({ book }: any) => (
     );
   }
 
+  // Unauthenticated User Experience
+  if (!session) {
+    return (
+      <section className="relative overflow-hidden bg-gradient-to-t from-stone-900 via-stone-800 to-amber-900 min-h-screen">
+        {/* Enhanced Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/50 z-10" />
+          <div className="absolute inset-0 opacity-30 mix-blend-overlay"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            }}
+          />
+          {/* Floating Book Silhouettes */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute opacity-5 transform rotate-12"
+                style={{
+                  left: `${10 + (i * 15)}%`,
+                  top: `${15 + ((i % 3) * 25)}%`,
+                  animation: `float 6s ease-in-out ${i * 0.5}s infinite alternate`
+                }}
+              >
+                <BookOpen className="w-16 h-16 text-white" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-20 max-w-7xl mx-auto px-6 py-20 flex items-center min-h-screen">
+          <div className="w-full">
+            {/* Hero Content */}
+            <div className="text-center mb-16 max-w-4xl mx-auto">
+              <div className="mb-8">
+                {/* <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-6">
+                  <Heart className="w-4 h-4 text-amber-400" />
+                  <span className="text-amber-400 text-sm font-medium">Track Your Reading Journey</span>
+                </div> */}
+                
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                  Discover Your Next
+                  <span className="block bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                    Favorite Book
+                  </span>
+                </h1>
+                
+                <p className="text-xl md:text-2xl text-stone-300 mb-8 leading-relaxed max-w-3xl mx-auto">
+                  Join a community of readers where you can collect, rate, and discover amazing books. 
+                  Build your personal library and never forget a great read again.
+                </p>
+              </div>
+
+              {/* Social Proof Stats */}
+              {/* <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto mb-12">
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Users className="w-6 h-6 text-amber-400 mr-2" />
+                    <span className="text-3xl font-bold text-white">50K+</span>
+                  </div>
+                  <div className="text-sm text-stone-400 uppercase tracking-wider">
+                    Active Readers
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <BookOpen className="w-6 h-6 text-amber-400 mr-2" />
+                    <span className="text-3xl font-bold text-white">2M+</span>
+                  </div>
+                  <div className="text-sm text-stone-400 uppercase tracking-wider">
+                    Books Tracked
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Star className="w-6 h-6 text-amber-400 mr-2" />
+                    <span className="text-3xl font-bold text-white">4.9</span>
+                  </div>
+                  <div className="text-sm text-stone-400 uppercase tracking-wider">
+                    User Rating
+                  </div>
+                </div>
+              </div> */}
+
+              {/* Enhanced CTA Section */}
+              <div className="bg-black/30 backdrop-blur-xl rounded-3xl border border-amber-500/20 p-8 md:p-12 max-w-2xl mx-auto relative overflow-hidden">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full -translate-x-16 -translate-y-16" />
+                <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-orange-500/10 to-transparent rounded-full translate-x-12 translate-y-12" />
+                
+                <div className="relative z-10">
+                  <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                    <BookOpen className="w-10 h-10 text-white" />
+                  </div>
+                  
+                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Sign Up Now!
+                  </h3>
+                  
+                  <p className="text-lg text-stone-300 mb-8 leading-relaxed">
+                    Create your personal library, rate and review your favorites, and discover books 
+                    you'll love based on your taste.
+                  </p>
+
+                  {/* Feature List */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left">
+                    {[
+                      { icon: Search, text: "Search millions of books" },
+                      { icon: Heart, text: "Build your favorites list" },
+                      { icon: Star, text: "Rate and review books" },
+                      { icon: TrendingUp, text: "Get personalized recommendations" }
+                    ].map((feature, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <feature.icon className="w-4 h-4 text-amber-400" />
+                        </div>
+                        <span className="text-stone-300 text-sm">{feature.text}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => router.push('/auth')}
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:-translate-y-1 transform text-lg"
+                    >
+                      Get Started!
+                    </button>
+                    
+                    <button
+                      onClick={() => router.push('/auth')}
+                      className="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 px-8 rounded-xl transition-all duration-300 border border-white/20 hover:border-white/30 backdrop-blur-sm"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-stone-500 mt-6">
+                    Free forever • No credit card required • Join in 30 seconds
+                  </p>
+                </div>
+              </div>
+
+              {/* Testimonial */}
+              {/* <div className="mt-16 max-w-3xl mx-auto">
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 md:p-8">
+                  <div className="flex items-center justify-center mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 text-amber-400 fill-current" />
+                    ))}
+                  </div>
+                  <blockquote className="text-lg md:text-xl text-stone-300 italic mb-4 leading-relaxed">
+                    "This app completely transformed how I discover and track books. 
+                    I've found so many amazing reads I never would have discovered otherwise!"
+                  </blockquote>
+                  <cite className="text-amber-400 font-medium">— Sarah M., Book Enthusiast</cite>
+                </div>
+              </div> */}
+            </div>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes fadeInUp {
+            0% {
+              opacity: 0;
+              transform: translateY(40px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0px);
+            }
+          }
+          
+          @keyframes float {
+            0% {
+              transform: translateY(0px) rotate(12deg);
+            }
+            100% {
+              transform: translateY(-20px) rotate(12deg);
+            }
+          }
+          
+          .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
+          
+          .shadow-3xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          }
+        `}</style>
+      </section>
+    );
+  }
+
+  // Authenticated User Experience (existing code)
   return (
     <>
       <section className="relative overflow-hidden bg-gradient-to-t from-stone-900 via-stone-800 to-amber-900 min-h-screen">
@@ -438,7 +638,7 @@ const SearchResultItem = ({ book }: any) => (
                 </div>
               </div>
             </div>
-          </div>
+          </div>   
         </div>
 
         <style jsx>{`
@@ -450,6 +650,15 @@ const SearchResultItem = ({ book }: any) => (
             100% {
               opacity: 1;
               transform: translateY(0px);
+            }
+          }
+          
+          @keyframes float {
+            0% {
+              transform: translateY(0px) rotate(12deg);
+            }
+            100% {
+              transform: translateY(-20px) rotate(12deg);
             }
           }
           
@@ -541,6 +750,7 @@ const SearchResultItem = ({ book }: any) => (
               )}
             </div>
           </div>
+          
         </div>
       )}
     </>

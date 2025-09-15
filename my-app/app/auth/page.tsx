@@ -232,17 +232,17 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   const features = [
     { icon: BookOpen, text: "Track your reading progress" },
-    { icon: Users, text: "Join book clubs & discussions" },
+    { icon: Users, text: "Get Personalized Recommendations" },
     { icon: Star, text: "Rate and review books" },
-    { icon: Heart, text: "Discover your next favorite read" }
+    { icon: Heart, text: "Discover your next favorite read" },
   ]
 
   const stats = [
-    { value: "50K+", label: "Books Tracked" },
-    { value: "12K+", label: "Active Readers" },
-    { value: "200+", label: "Book Clubs" },
-    { value: "4.9★", label: "User Rating" }
-  ]
+  { value: "2M+", label: "Books Available" },
+  { value: "500K+", label: "Authors" },
+  { value: "50+", label: "Achievements" },
+  { value: "24/7", label: "Book Discovery" }
+]
 
   return (
     <div className="min-h-screen bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800">
@@ -253,10 +253,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Logo & Title */}
             <div className="flex items-center gap-3 mb-8">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-amber-500/30 rounded-xl blur-lg" />
-                <div className="relative w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 border border-amber-400/30">
-                  <BookOpen className="w-7 h-7 text-white" />
-                </div>
+                  <Image src="/brand-logo.png" width={64} height={64} alt="logo" className='rounded-full'/>
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">Bookmarkd</h1>
@@ -267,12 +264,12 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Main Heading */}
             <div className="mb-10">
               <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-                {authMode === 'login' ? 'Welcome Back!' : 'Start Your Reading Journey'}
+                {authMode === 'login' ? 'Welcome Back!' : 'Sign Up For Free!'}
               </h2>
               <p className="text-lg text-stone-300">
                 {authMode === 'login' 
                   ? 'Continue tracking your amazing reading progress and connect with fellow readers.'
-                  : 'Join thousands of readers who are discovering, tracking, and sharing their favorite books.'
+                  : 'Join a community of readers who are discovering, tracking, and sharing their favorite books.'
                 }
               </p>
             </div>

@@ -690,7 +690,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
 
         {/* Filter Tabs */}
         <div className="mb-6">
-            <div className="flex gap-1 bg-black/20 backdrop-blur-sm p-1 rounded-lg w-fit border border-white/10">
+            <div className="hidden sm:flex gap-1 bg-black/20 backdrop-blur-sm p-1 rounded-lg w-fit border border-white/10">
                 <button
                     onClick={() => setReviewFilter('all')}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${

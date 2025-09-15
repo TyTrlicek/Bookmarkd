@@ -39,6 +39,7 @@ import { UserActivity } from './types/types'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
 import Footer from './components/Footer'
+import { useRouter } from 'next/navigation'
 
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState('trending')
@@ -48,6 +49,8 @@ const HomePage = () => {
   const [trendingData, setTrendingData] = useState();
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [reccomendationData, setReccomendationData] = useState<any[]>([]);
+  const router = useRouter();
+  const { session } = useAuthStore();
 
   useEffect(() => {
     useAuthStore.getState().initSession();
