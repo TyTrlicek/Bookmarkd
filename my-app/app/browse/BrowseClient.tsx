@@ -199,8 +199,8 @@ const BrowseClient = () => {
           </div>
 
           {/* Enhanced Controls Bar */}
-          <div className="bg-black/30 backdrop-blur-sm rounded-3xl border border-white/10 shadow-lg p-6 mb-8">
-            <div className="flex items-center justify-between">
+          <div className="bg-black/30 backdrop-blur-sm rounded-3xl border border-white/10 shadow-lg p-6 mb-8 md:block hidden">
+            <div className="md:flex hidden items-center justify-between">
               <div className="flex items-center gap-6">
                 <button
                   onClick={() => setShowFilters(!showFilters)}

@@ -32,6 +32,7 @@ import axios from 'axios'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
 import Footer from '../components/Footer'
+import { set } from 'lodash'
 
 export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -300,7 +301,6 @@ useEffect(() => {
           'Content-Type': 'application/json',
         },
       })
-
 setUser((prevUser) => ({
   ...prevUser,
   username: editForm.username,
@@ -313,8 +313,13 @@ setUser((prevUser) => ({
       }, 500)
 
     } catch (error) {
+      if(axios.isAxiosError(error) && error.status === 400) {
+        setEditMessage('Username already taken. Please choose another.')
+      }
+      else{
       console.error('Failed to update profile:', error)
       setEditMessage('Failed to update profile. Please try again.')
+      }
     }
 
     setIsSaving(false)
@@ -783,8 +788,12 @@ allowedGenres.forEach((genre) => {
                     placeholder="Enter your username"
                     value={editForm.username}
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                    maxLength={20}
                     className="w-full pl-12 pr-4 py-4 bg-black/30 border border-white/20 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-white backdrop-blur-sm"
                   />
+                  <p className="text-xs text-stone-500 mt-2">
+                  {editForm.username.length}/20 characters
+                </p>
                 </div>
               </div>
 

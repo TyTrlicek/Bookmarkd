@@ -186,56 +186,59 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 )}
 
       {/* Popup Overlay */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 transform transition-all animate-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-stone-50 to-stone-100 p-6 rounded-t-2xl border-b border-stone-200">
+       {isOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          {/* Mobile: slide up from bottom, Desktop: centered modal */}
+          <div className="bg-black backdrop-blur-xl border border-white/20 w-full max-w-lg mx-4 rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden flex flex-col">
+            
+            {/* Header - Fixed */}
+            <div className="bg-gradient-to-r from-stone-800/80 to-stone-700/80 backdrop-blur-sm p-4 sm:p-6 border-b border-white/10 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-stone-900 mb-1">Add to Collection</h2>
-                  <p className="text-sm text-stone-600">Rate and organize your reading</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">Add to Collection</h2>
+                  <p className="text-sm text-stone-300">Rate and organize your reading</p>
                 </div>
                 <button
                   onClick={handleClose}
-                  className="p-2 hover:bg-stone-200 rounded-full transition-colors duration-200"
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200 touch-manipulation"
                 >
-                  <X size={20} className="text-stone-500" />
+                  <X size={20} className="text-stone-300" />
                 </button>
               </div>
             </div>
 
-            {/* Form */}
-            <div className="p-6 space-y-8">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
+              
               {/* Rating Section */}
-              <div className="space-y-4">
-                <label className="block text-sm font-semibold text-stone-700 mb-2">
+              <div className="space-y-3 sm:space-y-4">
+                <label className="block text-sm font-semibold text-white mb-2">
                   Your Rating
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowRatingDropdown(!showRatingDropdown)}
-                    className="w-full p-4 bg-stone-50 border-2 border-stone-200 rounded-xl hover:border-stone-300 transition-all duration-200 flex items-center justify-between"
+                    className="w-full p-3 sm:p-4 bg-white/5 border-2 border-white/10 rounded-xl hover:border-white/20 hover:bg-white/10 transition-all duration-200 flex items-center justify-between touch-manipulation active:bg-white/15"
                   >
                     <div className="flex items-center gap-3">
                       {rating > 0 ? (
                         <>
                           <div className="flex items-center gap-1">
-                            <Star size={20} className="text-yellow-400 fill-yellow-400" />
-                            <span className="font-bold text-lg">{rating}</span>
+                            <Star size={18} className="text-amber-400 fill-amber-400" />
+                            <span className="font-bold text-base sm:text-lg text-white">{rating}</span>
                           </div>
                           <div className="text-left">
-                            <div className={`font-medium ${selectedRating?.color}`}>
+                            <div className={`font-medium text-sm sm:text-base ${selectedRating?.color}`}>
                               {selectedRating?.label}
                             </div>
-                            <div className="text-sm text-stone-600">
+                            <div className="text-xs sm:text-sm text-stone-400">
                               {selectedRating?.description}
                             </div>
                           </div>
                         </>
                       ) : (
-                        <span className="text-stone-500">Select a rating</span>
+                        <span className="text-stone-400 text-sm sm:text-base">Select a rating</span>
                       )}
                     </div>
                     <ChevronDown size={20} className={`text-stone-400 transition-transform duration-200 ${showRatingDropdown ? 'rotate-180' : ''}`} />
@@ -243,7 +246,7 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
                   {/* Rating Dropdown */}
                   {showRatingDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-stone-200 rounded-xl shadow-xl z-10 max-h-64 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-black/60 backdrop-blur-xl border-2 border-white/20 rounded-xl shadow-xl z-10 max-h-48 sm:max-h-64 overflow-y-auto">
                       {ratingOptions.map((option) => (
                         <button
                           key={option.value}
@@ -252,20 +255,20 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
                             setRating(option.value);
                             setShowRatingDropdown(false);
                           }}
-                          className={`w-full p-4 text-left hover:bg-stone-50 transition-colors duration-150 border-b border-stone-100 last:border-b-0 ${
-                            rating === option.value ? 'bg-stone-50' : ''
+                          className={`w-full p-3 sm:p-4 text-left hover:bg-white/10 active:bg-white/15 transition-colors duration-150 border-b border-white/10 last:border-b-0 touch-manipulation ${
+                            rating === option.value ? 'bg-white/10' : ''
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2 min-w-[60px]">
-                              <Star size={16} className="text-yellow-400 fill-yellow-400" />
-                              <span className="font-bold text-lg">{option.value}</span>
+                            <div className="flex items-center gap-2 min-w-[50px] sm:min-w-[60px]">
+                              <Star size={14} className="text-amber-400 fill-amber-400" />
+                              <span className="font-bold text-base sm:text-lg text-white">{option.value}</span>
                             </div>
                             <div className="flex-1">
-                              <div className={`font-medium ${option.color}`}>
+                              <div className={`font-medium text-sm sm:text-base ${option.color}`}>
                                 {option.label}
                               </div>
-                              <div className="text-sm text-stone-600">
+                              <div className="text-xs sm:text-sm text-stone-400">
                                 {option.description}
                               </div>
                             </div>
@@ -278,11 +281,11 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
               </div>
 
               {/* Status Section */}
-              <div className="space-y-4">
-                <label className="block text-sm font-semibold text-stone-700 mb-2">
+              <div className="space-y-3 sm:space-y-4">
+                <label className="block text-sm font-semibold text-white mb-2">
                   Reading Status
                 </label>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {statusOptions.map((option) => {
                     const Icon = option.icon;
                     return (
@@ -290,19 +293,19 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
                         key={option.value}
                         type="button"
                         onClick={() => setStatus(option.value)}
-                        className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left transform hover:scale-[1.02] ${
+                        className={`w-full p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 text-left touch-manipulation active:scale-[0.98] ${
                           status === option.value
-                            ? `${option.color} border-current shadow-lg`
-                            : 'border-stone-200 hover:border-stone-300 bg-stone-50 hover:bg-stone-100'
+                            ? `${option.color} shadow-lg`
+                            : 'border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 active:bg-white/15'
                         }`}
                       >
-                        <div className="flex items-center gap-4">
-                          <Icon size={20} className={status === option.value ? 'text-current' : 'text-stone-500'} />
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <Icon size={18} className={status === option.value ? 'text-current' : 'text-stone-400'} />
                           <div className="flex-1">
-                            <div className={`font-semibold ${status === option.value ? 'text-current' : 'text-stone-900'}`}>
+                            <div className={`font-semibold text-sm sm:text-base ${status === option.value ? 'text-current' : 'text-white'}`}>
                               {option.label}
                             </div>
-                            <div className={`text-sm ${status === option.value ? 'text-current opacity-80' : 'text-stone-600'}`}>
+                            <div className={`text-xs sm:text-sm ${status === option.value ? 'text-current opacity-80' : 'text-stone-400'}`}>
                               {option.description}
                             </div>
                           </div>
@@ -312,13 +315,15 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
                   })}
                 </div>
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-6">
+            {/* Fixed Bottom Actions */}
+            <div className="flex-shrink-0 p-4 sm:p-6 bg-black/20 backdrop-blur-sm border-t border-white/10">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 px-6 py-3 border-2 border-stone-300 text-stone-700 rounded-xl hover:bg-stone-50 hover:border-stone-400 transition-all duration-200 font-medium"
+                  className="w-full sm:flex-1 px-6 py-3 sm:py-3 border-2 border-white/20 text-stone-300 rounded-xl hover:bg-white/10 hover:border-white/30 hover:text-white active:bg-white/15 transition-all duration-200 font-medium touch-manipulation"
                 >
                   Cancel
                 </button>
@@ -326,7 +331,7 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
                   type="button"
                   onClick={handleSubmit}
                   disabled={!status || isSubmitting}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-stone-800 to-stone-900 text-white rounded-xl hover:from-stone-700 hover:to-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
+                  className="w-full sm:flex-1 px-6 py-3 sm:py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl active:scale-[0.98] disabled:transform-none touch-manipulation"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center gap-2">

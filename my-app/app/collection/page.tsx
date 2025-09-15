@@ -607,7 +607,7 @@ return (
         <div className="absolute inset-0 bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
         
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 hidden md:block">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Reading Overview</h2>
             <p className="text-stone-300">Track your reading Status</p>

@@ -688,49 +688,56 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
 
         {/* Filter Tabs */}
         <div className="mb-6">
-            <div className="hidden sm:flex gap-1 bg-black/20 backdrop-blur-sm p-1 rounded-lg w-fit border border-white/10">
+            <div className="flex gap-1 bg-black/20 backdrop-blur-sm p-1 rounded-lg w-full sm:w-fit border border-white/10 overflow-x-auto">
                 <button
                     onClick={() => setReviewFilter('all')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                    className={`px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                         reviewFilter === 'all'
                             ? 'bg-amber-600 text-white shadow-lg'
                             : 'text-stone-400 hover:text-white hover:bg-white/10'
                     }`}
                 >
-                    All Reviews ({reviews.length})
+                    <span className="hidden sm:inline">All Reviews</span>
+                    <span className="sm:hidden">All</span>
+                    <span className="ml-1">({reviews.length})</span>
                 </button>
                 <button
                     onClick={() => setReviewFilter('recommended')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                    className={`px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 whitespace-nowrap flex-shrink-0 ${
                         reviewFilter === 'recommended'
                             ? 'bg-amber-600 text-white shadow-lg'
                             : 'text-stone-400 hover:text-white hover:bg-white/10'
                     }`}
                 >
                     <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    Recommended ({reviews.filter(r => r.recommendation === 'recommended').length})
+                    <span className="hidden sm:inline">Recommended</span>
+                    <span className="sm:hidden truncate">Rec.</span>
+                    <span className="ml-1">({reviews.filter(r => r.recommendation === 'recommended').length})</span>
                 </button>
                 <button
                     onClick={() => setReviewFilter('mixed')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                    className={`px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 whitespace-nowrap flex-shrink-0 ${
                         reviewFilter === 'mixed'
                             ? 'bg-amber-600 text-white shadow-lg'
                             : 'text-stone-400 hover:text-white hover:bg-white/10'
                     }`}
                 >
                     <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                    Mixed ({reviews.filter(r => r.recommendation === 'mixed').length})
+                    <span>Mixed</span>
+                    <span className="ml-1">({reviews.filter(r => r.recommendation === 'mixed').length})</span>
                 </button>
                 <button
                     onClick={() => setReviewFilter('not-recommended')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                    className={`px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-all flex items-center gap-1 sm:gap-2 whitespace-nowrap flex-shrink-0 ${
                         reviewFilter === 'not-recommended'
                             ? 'bg-amber-600 text-white shadow-lg'
                             : 'text-stone-400 hover:text-white hover:bg-white/10'
                     }`}
                 >
                     <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                    Not Recommended ({reviews.filter(r => r.recommendation === 'not-recommended').length})
+                    <span className="hidden sm:inline">Not Recommended</span>
+                    <span className="sm:hidden">Not Rec.</span>
+                    <span className="ml-1">({reviews.filter(r => r.recommendation === 'not-recommended').length})</span>
                 </button>
             </div>
         </div>
@@ -771,52 +778,58 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                     const isDeleting = deletingItems.has(reviewId);
                     
                     return (
-                        <div key={index} className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
-                            <div className="flex items-start gap-3">
+                        <div key={index} className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl p-3 sm:p-4">
+                            <div className="flex items-start gap-2 sm:gap-3">
                                 {/* Avatar */}
                                 {review.avatar_url ? (
                                     <Image
-                                    width={48}
-                                    height={48}
+                                        width={48}
+                                        height={48}
                                         src={review.avatar_url}
                                         alt={`${review.username}'s profile`}
-                                        className="w-12 h-12 rounded-full flex-shrink-0 object-cover border border-white/20"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 object-cover border border-white/20"
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20" />
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20" />
                                 )}
 
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="font-medium text-white">
-                                            {review.username}
-                                        </span>
-                                        
-                                        {!isEditing && (
-                                            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm border ${
-                                                review.recommendation === 'recommended' ? 'bg-green-500/20 text-green-400 border-green-400/20' :
-                                                review.recommendation === 'mixed' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-400/20' :
-                                                'bg-red-500/20 text-red-400 border-red-400/20'
-                                            }`}>
-                                                <div className={`w-2 h-2 rounded-full ${
-                                                    review.recommendation === 'recommended' ? 'bg-green-500' :
-                                                    review.recommendation === 'mixed' ? 'bg-yellow-500' :
-                                                    'bg-red-500'
-                                                }`}></div>
-                                                {badge.label}
+                                <div className="flex-1 min-w-0">
+                                    {/* Header with username and dropdown */}
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <span className="font-medium text-white truncate">
+                                                    {review.username}
+                                                </span>
+                                                
+                                                {!isEditing && (
+                                                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm border flex-shrink-0 ${
+                                                        review.recommendation === 'recommended' ? 'bg-green-500/20 text-green-400 border-green-400/20' :
+                                                        review.recommendation === 'mixed' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-400/20' :
+                                                        'bg-red-500/20 text-red-400 border-red-400/20'
+                                                    }`}>
+                                                        <div className={`w-2 h-2 rounded-full ${
+                                                            review.recommendation === 'recommended' ? 'bg-green-500' :
+                                                            review.recommendation === 'mixed' ? 'bg-yellow-500' :
+                                                            'bg-red-500'
+                                                        }`}></div>
+                                                        <span className='hidden sm:block'>{badge.label}</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-
-                                        <span className="text-sm text-stone-400">
-                                            • {formatDate(review.createdAt)}
-                                            {review.updatedAt && review.updatedAt !== review.createdAt && (
-                                                <span className="ml-1">(edited)</span>
-                                            )}
-                                        </span>
+                                            
+                                            {/* Date on separate line on mobile */}
+                                            <div className="text-xs sm:text-sm text-stone-400">
+                                                {formatDate(review.createdAt)}
+                                                {review.updatedAt && review.updatedAt !== review.createdAt && (
+                                                    <span className="ml-1">(edited)</span>
+                                                )}
+                                            </div>
+                                        </div>
 
                                         {/* Dropdown Menu for Review Owner */}
                                         {userOwnsReview(review) && !isEditing && (
-                                            <div className="relative ml-auto">
+                                            <div className="relative flex-shrink-0">
                                                 <button
                                                     onClick={() => toggleDropdown(reviewId)}
                                                     className="text-stone-400 hover:text-white p-1 rounded transition-colors"
@@ -853,7 +866,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                             {/* Edit Recommendation */}
                                             <div>
                                                 <span className="text-sm text-stone-300 block mb-2">Recommendation:</span>
-                                                <div className="flex gap-2">
+                                                <div className="flex flex-wrap gap-2">
                                                     <button
                                                         onClick={() => setEditReviewRecommendation('recommended')}
                                                         className={`px-3 py-1 rounded-lg border transition-colors flex items-center gap-1 text-sm ${
@@ -863,7 +876,8 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                         }`}
                                                     >
                                                         <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                                        Recommended
+                                                        <span className="hidden sm:inline">Recommended</span>
+                                                        <span className="sm:hidden">👍</span>
                                                     </button>
                                                     <button
                                                         onClick={() => setEditReviewRecommendation('mixed')}
@@ -874,7 +888,8 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                         }`}
                                                     >
                                                         <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                                                        Mixed
+                                                        <span className="hidden sm:inline">Mixed</span>
+                                                        <span className="sm:hidden">👌</span>
                                                     </button>
                                                     <button
                                                         onClick={() => setEditReviewRecommendation('not-recommended')}
@@ -885,7 +900,8 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                         }`}
                                                     >
                                                         <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                                                        Not Recommended
+                                                        <span className="hidden sm:inline">Not Recommended</span>
+                                                        <span className="sm:hidden">👎</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -899,13 +915,13 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                             />
 
                                             {/* Edit Actions */}
-                                            <div className="flex justify-end gap-2">
+                                            <div className="flex justify-end gap-2 flex-wrap">
                                                 <button
                                                     onClick={cancelEditing}
                                                     className="flex items-center gap-2 px-3 py-2 text-sm text-stone-400 hover:text-white transition-colors"
                                                 >
                                                     <X className="w-4 h-4" />
-                                                    Cancel
+                                                    <span className="hidden sm:inline">Cancel</span>
                                                 </button>
                                                 <button
                                                     onClick={() => saveReviewEdit(reviewId)}
@@ -919,10 +935,10 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                         </div>
                                     ) : (
                                         <>
-                                            <p className="text-stone-300 mb-3 leading-relaxed">
+                                            <p className="text-stone-300 mb-3 leading-relaxed text-sm sm:text-base">
                                                 {review.content}
                                             </p>
-                                            <div className="flex items-center gap-4 text-sm">
+                                            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm flex-wrap">
                                                 <button 
                                                     onClick={() => handleHelpfulVote(reviewId, 'review')}
                                                     disabled={votingInProgress.has(reviewId)}
@@ -932,15 +948,16 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                             : 'text-stone-400 hover:text-white'
                                                     } ${votingInProgress.has(reviewId) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 >
-                                                    <Heart className={`w-4 h-4 ${votedReviews.has(reviewId) ? 'fill-current' : ''}`} />
-                                                    {review.helpfulCount} helpful
+                                                    <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${votedReviews.has(reviewId) ? 'fill-current' : ''}`} />
+                                                    <span>{review.helpfulCount}</span>
+                                                    <span className="hidden sm:inline">helpful</span>
                                                 </button>
                                                 <button 
                                                     onClick={() => toggleReplyForm(reviewId)}
                                                     className="flex items-center gap-1 text-stone-400 hover:text-white transition-colors"
                                                 >
-                                                    <MessageCircle className="w-4 h-4" />
-                                                    Reply
+                                                    <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                    <span className="hidden sm:inline">Reply</span>
                                                 </button>
                                                 {hasReplies && (
                                                     <button
@@ -949,13 +966,16 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                     >
                                                         {repliesExpanded ? (
                                                             <>
-                                                                <ChevronUp className="w-4 h-4" />
-                                                                Hide replies
+                                                                <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                                <span className="hidden sm:inline">Hide replies</span>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <ChevronDown className="w-4 h-4" />
-                                                                {review.replies!.length} {review.replies!.length === 1 ? 'reply' : 'replies'}
+                                                                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                                <span className="sm:hidden">{review.replies!.length}</span>
+                                                                <span className="hidden sm:inline">
+                                                                    {review.replies!.length} {review.replies!.length === 1 ? 'reply' : 'replies'}
+                                                                </span>
                                                             </>
                                                         )}
                                                     </button>
@@ -967,39 +987,39 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                     {/* Reply Form */}
                                     {replyFormVisible && !isEditing && (
                                         <div className="mt-4 pt-4 border-t border-white/10">
-                                            <div className="flex gap-3">
+                                            <div className="flex gap-2 sm:gap-3">
                                                 {user?.avatar_url ? (
                                                     <Image 
-                                                    width={32}
-                                                    height={32}
-                                                        className="w-8 h-8 rounded-full flex-shrink-0 border border-white/20 object-cover" 
+                                                        width={32}
+                                                        height={32}
+                                                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0 border border-white/20 object-cover" 
                                                         src={user.avatar_url}
                                                         alt="Your profile"
                                                     />
                                                 ) : (
-                                                    <div className="w-8 h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20"></div>
+                                                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20"></div>
                                                 )}
-                                                <div className="flex-1">
+                                                <div className="flex-1 min-w-0">
                                                     <textarea
                                                         value={replyTexts[reviewId] || ''}
                                                         onChange={(e) => handleReplyTextChange(reviewId, e.target.value)}
                                                         placeholder="Write a reply..."
-                                                        className="w-full p-3 bg-black/20 border border-white/10 rounded-lg resize-none text-white placeholder-stone-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50"
+                                                        className="w-full p-3 bg-black/20 border border-white/10 rounded-lg resize-none text-white placeholder-stone-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 text-sm"
                                                         rows={3}
                                                     />
-                                                    <div className="flex justify-end gap-2 mt-2">
+                                                    <div className="flex justify-end gap-2 mt-2 flex-wrap">
                                                         <button
                                                             onClick={() => toggleReplyForm(reviewId)}
-                                                            className="px-4 py-2 text-sm text-stone-400 hover:text-white transition-colors"
+                                                            className="px-3 py-2 text-xs sm:text-sm text-stone-400 hover:text-white transition-colors"
                                                         >
                                                             Cancel
                                                         </button>
                                                         <button
                                                             onClick={() => handleReplySubmit(reviewId)}
                                                             disabled={!replyTexts[reviewId]?.trim()}
-                                                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm rounded-lg hover:from-amber-700 hover:to-amber-800 disabled:from-stone-600 disabled:to-stone-600 disabled:cursor-not-allowed transition-all shadow-lg"
+                                                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-xs sm:text-sm rounded-lg hover:from-amber-700 hover:to-amber-800 disabled:from-stone-600 disabled:to-stone-600 disabled:cursor-not-allowed transition-all shadow-lg"
                                                         >
-                                                            <Send className="w-4 h-4" />
+                                                            <Send className="w-3 h-3 sm:w-4 sm:h-4" />
                                                             Reply
                                                         </button>
                                                     </div>
@@ -1018,38 +1038,42 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                     const isDeletingReply = deletingItems.has(reply.id);
 
                                                     return (
-                                                        <div key={reply.id} className="flex gap-3">
+                                                        <div key={reply.id} className="flex gap-2 sm:gap-3">
                                                             {reply.avatar_url ? (
                                                                 <Image
-                                                                width={32}
-                                                                height={32}
+                                                                    width={32}
+                                                                    height={32}
                                                                     src={reply.avatar_url}
                                                                     alt={`${reply.username}'s profile`}
-                                                                    className="w-8 h-8 rounded-full flex-shrink-0 object-cover border border-white/20"
+                                                                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0 object-cover border border-white/20"
                                                                 />
                                                             ) : (
-                                                                <div className="w-8 h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20" />
+                                                                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20" />
                                                             )}
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <span className={`text-sm font-medium ${reply.isOfficial ? 'text-blue-400' : 'text-white'}`}>
-                                                                        {reply.username}
-                                                                    </span>
-                                                                    {reply.isOfficial && (
-                                                                        <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium border border-blue-400/20 backdrop-blur-sm">
-                                                                            Official
-                                                                        </span>
-                                                                    )}
-                                                                    <span className="text-xs text-stone-400">
-                                                                        {formatDate(reply.createdAt)}
-                                                                        {reply.updatedAt && reply.updatedAt !== reply.createdAt && (
-                                                                            <span className="ml-1">(edited)</span>
-                                                                        )}
-                                                                    </span>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-start justify-between gap-2 mb-1">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                            <span className={`text-sm font-medium truncate ${reply.isOfficial ? 'text-blue-400' : 'text-white'}`}>
+                                                                                {reply.username}
+                                                                            </span>
+                                                                            {reply.isOfficial && (
+                                                                                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium border border-blue-400/20 backdrop-blur-sm flex-shrink-0">
+                                                                                    Official
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="text-xs text-stone-400">
+                                                                            {formatDate(reply.createdAt)}
+                                                                            {reply.updatedAt && reply.updatedAt !== reply.createdAt && (
+                                                                                <span className="ml-1">(edited)</span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
 
                                                                     {/* Dropdown for Reply Owner */}
                                                                     {userOwnsReply(reply) && !isEditingReply && (
-                                                                        <div className="relative ml-auto">
+                                                                        <div className="relative flex-shrink-0">
                                                                             <button
                                                                                 onClick={() => toggleDropdown(reply.id)}
                                                                                 className="text-stone-400 hover:text-white p-1 rounded transition-colors"
@@ -1086,16 +1110,16 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                                         <textarea
                                                                             value={editReplyContent}
                                                                             onChange={(e) => setEditReplyContent(e.target.value)}
-                                                                            className="w-full p-3 bg-black/20 border border-white/10 rounded-lg resize-none text-white placeholder-stone-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50"
+                                                                            className="w-full p-3 bg-black/20 border border-white/10 rounded-lg resize-none text-white placeholder-stone-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 text-sm"
                                                                             rows={3}
                                                                         />
-                                                                        <div className="flex justify-end gap-2">
+                                                                        <div className="flex justify-end gap-2 flex-wrap">
                                                                             <button
                                                                                 onClick={cancelEditing}
                                                                                 className="flex items-center gap-2 px-3 py-1 text-xs text-stone-400 hover:text-white transition-colors"
                                                                             >
                                                                                 <X className="w-3 h-3" />
-                                                                                Cancel
+                                                                                <span className="hidden sm:inline">Cancel</span>
                                                                             </button>
                                                                             <button
                                                                                 onClick={() => saveReplyEdit(reply.id)}
@@ -1112,7 +1136,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                                         <p className="text-stone-300 text-sm leading-relaxed mb-2">
                                                                             {reply.content}
                                                                         </p>
-                                                                        <div className="flex items-center gap-4 text-xs">
+                                                                        <div className="flex items-center gap-3 text-xs">
                                                                             <button 
                                                                                 onClick={() => handleHelpfulVote(reply.id, 'reply')}
                                                                                 disabled={votingInProgress.has(reply.id)}
