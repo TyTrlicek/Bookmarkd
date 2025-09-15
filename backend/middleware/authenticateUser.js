@@ -13,6 +13,7 @@ function authenticateUser(req, res, next) {
     }
 
     req.userId = decoded.sub;
+    req.user = decoded;
     next();
   });
 }

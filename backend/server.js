@@ -503,7 +503,7 @@ app.post('/api/user/booklist', authenticateUser, async (req, res) => {
             user = await prisma.user.create({
                 data: {
                     id: userId,
-                    email: decoded.email || '',
+                    email: user ? (user.email || '') : '',
                 },
             });
         }
