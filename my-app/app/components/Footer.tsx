@@ -125,8 +125,8 @@ const Footer = () => {
               </div>
               
               <p className="text-stone-300 mb-6 leading-relaxed">
-                A personal reading companion built by a reader, for readers. 
-                Track your reading journey, discover great books, and share your thoughts with our growing community.
+                A personal book tracking and rating site. 
+                Track your books, discover new favorites, and share your thoughts with our growing community.
               </p>
 
               {/* Social Links - Hidden until you create them */}

@@ -4,7 +4,7 @@ import RankingClient from "./RankingClient";
 export const metadata: Metadata = {
   title: "Top Ranked Books – Bookmarkd Global Book Rankings",
   description:
-    "Discover the highest rated books on Bookmarkd. See global rankings powered by book lovers worldwide and explore popular reads today.",
+    "Discover the highest rated books on Bookmarkd. See global rankings powered by a community of readers worldwide and explore popular books today.",
   authors: [{ name: "Bookmarkd" }],
   publisher: "Bookmarkd",
   creator: "Bookmarkd",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Top Ranked Books – Bookmarkd Global Book Rankings",
     description:
-      "Discover the highest rated books on Bookmarkd. See global rankings powered by book lovers worldwide and explore popular reads today.",
+    "Discover the highest rated books on Bookmarkd. See global rankings powered by a community of readers worldwide and explore popular books today.",
     url: "https://bookmarkd.fun/rankings",
     siteName: "Bookmarkd",
     type: "website",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Top Ranked Books – Bookmarkd Global Book Rankings",
     description:
-      "Discover the highest rated books on Bookmarkd. See global rankings powered by book lovers worldwide and explore popular reads today.",
+    "Discover the highest rated books on Bookmarkd. See global rankings powered by a community of readers worldwide and explore popular books today.",
     images: ["/brand-logo.png"],
   },
   icons: {

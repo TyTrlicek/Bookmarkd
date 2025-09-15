@@ -405,7 +405,7 @@ return (
         <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
-            <div className="md:col-span-1">
+            {/* <div className="md:col-span-1">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-400/10 rounded-lg blur-sm" />
                 <div className="relative bg-black/30 backdrop-blur-sm rounded-lg border border-white/20">
@@ -419,7 +419,7 @@ return (
                   />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Genre Filter */}
             <div className="relative">
@@ -474,7 +474,7 @@ return (
       {/* Enhanced Mobile Search & Filters */}
       <div className="mb-4 sm:hidden">
         <div className="flex gap-2 mb-3">
-          <div className="flex-1 relative">
+          {/* <div className="flex-1 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-400/10 rounded-lg blur-sm" />
             <div className="relative bg-black/30 backdrop-blur-sm rounded-lg border border-white/20">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-400 w-4 h-4" />
@@ -486,7 +486,7 @@ return (
                 className="w-full pl-10 pr-4 py-2 bg-transparent rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm text-white placeholder-stone-400"
               />
             </div>
-          </div>
+          </div> */}
           <button
             type="button"
             onClick={() => setShowFilters(!showFilters)}
@@ -671,21 +671,12 @@ return (
                           
                           {/* User Rating & Action */}
                           <div className="flex items-center gap-2">
-                            {book.userRating !== null ? (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-blue-500/20 border border-blue-400/30 rounded-full backdrop-blur-sm">
-                                <Star className="w-3 h-3 text-blue-400 fill-current" />
-                                <span className="text-xs font-semibold text-blue-200">{book.userRating}</span>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => ""}
-                                className="p-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all text-white shadow-lg hover:shadow-xl"
-                                title="Add to List"
-                              >
-                                <Plus className="w-3 h-3" />
-                              </button>
-                            )}
+                            <RankingAddToCollectionPopup 
+                            openLibraryId={book.openLibraryId ?? ""} 
+                            buttonType={"ranking-mobile"} 
+                            userStatus={book.userRating !== null ? 'completed' : null}
+                            onBookAdded={handleBookAdded}
+                          />
                             
                             {/* Quick Actions */}
                             {/* <button className="p-1.5 rounded-full hover:bg-amber-500/20 text-stone-400 transition-all duration-200 backdrop-blur-sm"

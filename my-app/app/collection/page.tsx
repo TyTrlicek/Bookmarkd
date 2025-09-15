@@ -365,20 +365,34 @@ const BookListItem = ({ book }: {book: BookInList}) => {
               {/* Rating */}
               <div className="flex items-center gap-2">
                 {(book.rating || 0) > 0 ? (
-                  <>
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`w-4 h-4 ${i < Math.ceil((book.rating || 0) / 2) ? 'text-amber-400 fill-amber-400' : 'text-stone-500'}`} 
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm font-semibold text-white">{book.rating}/10</span>
-                  </>
-                ) : (
-                  <span className="text-sm text-stone-400">No rating</span>
-                )}
+  <>
+    <div className="flex items-center gap-0.5">
+      {[...Array(5)].map((_, i) => {
+        const rating = book.rating || 0;
+        const starValue = (i + 1) * 2;
+        const isFilled = rating >= starValue;
+        const isHalfFilled = rating >= starValue - 1 && rating < starValue;
+        
+        return (
+          <div key={i} className="relative">
+            <Star className="w-4 h-4 text-stone-500" />
+            {isFilled && (
+              <Star className="w-4 h-4 text-amber-400 fill-amber-400 absolute inset-0" />
+            )}
+            {isHalfFilled && (
+              <div className="absolute inset-0 overflow-hidden w-1/2">
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+    <span className="text-sm font-semibold text-white">{book.rating}/10</span>
+  </>
+) : (
+  <span className="text-sm text-stone-400">No rating</span>
+)}
               </div>
             </div>
 
@@ -531,19 +545,35 @@ const BookListItem = ({ book }: {book: BookInList}) => {
               </div>
 
               {/* Rating */}
-              {(book.rating || 0) > 0 && (
-                <div className="flex items-center gap-1">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`w-2.5 h-2.5 ${i < Math.ceil((book.rating || 0) / 2) ? 'text-amber-400 fill-amber-400' : 'text-stone-500'}`} 
-                      />
-                    ))}
-                  </div>
-                  <span className="text-xs font-semibold text-white">{book.rating}/10</span>
-                </div>
-              )}
+              {(book.rating || 0) > 0 ? (
+  <>
+    <div className="flex items-center gap-0.5">
+      {[...Array(5)].map((_, i) => {
+        const rating = book.rating || 0;
+        const starValue = (i + 1) * 2; // Each star represents 2 points
+        const isFilled = rating >= starValue;
+        const isHalfFilled = rating >= starValue - 1 && rating < starValue;
+        
+        return (
+          <div key={i} className="relative">
+            <Star className="w-4 h-4 text-stone-500" />
+            {isFilled && (
+              <Star className="w-4 h-4 text-amber-400 fill-amber-400 absolute inset-0" />
+            )}
+            {isHalfFilled && (
+              <div className="absolute inset-0 overflow-hidden w-1/2">
+                <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+    <span className="text-sm font-semibold text-white">{book.rating}/10</span>
+  </>
+) : (
+  <span className="text-sm text-stone-400">No rating</span>
+)}
 
               {/* First genre only with proper +X handling */}
               {/* {book.book.categories && book.book.categories.length > 0 && (

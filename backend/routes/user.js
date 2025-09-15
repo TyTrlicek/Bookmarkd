@@ -185,6 +185,7 @@ router.get('/me', authenticateUser, async (req, res) => {
     // current year start date
     const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 
+
     console.log("TRIGGERED")
       const user = await prisma.user.findUnique({
         where: { id: req.userId },
@@ -196,8 +197,20 @@ router.get('/me', authenticateUser, async (req, res) => {
           avatar_url: true,
         },
       });
+
+      if (!user) {
+          const username = email ? email.split('@')[0] : 'user';
+
+            const newUser = await prisma.user.create({
+                data: {
+                    id: userId,
+                    email: req.user?.email,
+                    username: username
+                },
+            });
+          if (!newUser) return res.status(404).json({ error: 'User not found' });
+        }
   
-      if (!user) return res.status(404).json({ error: 'User not found' });
 
     // Use Prisma transactions to run multiple aggregates in one round-trip
     const [collectionCount, avgRatingAgg, ratedThisYearCount] = await prisma.$transaction([

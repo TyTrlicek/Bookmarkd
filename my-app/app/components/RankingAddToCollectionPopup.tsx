@@ -203,11 +203,11 @@ export default function RankingAddToCollectionPopup({
         className="p-1.5 rounded-full bg-emerald-500/80 text-white shadow-md cursor-default backdrop-blur-sm border border-emerald-400/30"
         title="In Collection"
       >
-        <Plus className="w-3 h-3" />
+        <Check className="w-3 h-3" />
       </button>
     ) : (
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {setIsOpen(true)}}
         className="p-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all text-white shadow-md hover:shadow-lg backdrop-blur-sm"
         title="Add to List"
       >
@@ -258,7 +258,7 @@ export default function RankingAddToCollectionPopup({
           <div className="p-6 space-y-8">
             {/* Rating Section */}
             <div className="space-y-4">
-              <label className="block text-sm font-semibold text-stone-200 mb-2 flex items-center gap-2">
+              <label className="text-sm font-semibold text-stone-200 mb-2 flex items-center gap-2">
                 <Star className="w-4 h-4 text-amber-400" />
                 Your Rating
               </label>

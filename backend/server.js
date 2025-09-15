@@ -491,6 +491,7 @@ const coverImage = coverId
 app.post('/api/user/booklist', authenticateUser, async (req, res) => {
     
     const userId = req.userId;
+    const user = req.user;
 
     if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
@@ -500,10 +501,13 @@ app.post('/api/user/booklist', authenticateUser, async (req, res) => {
         // Ensure user exists in database
         let user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
+          const username = email ? email.split('@')[0] : 'user';
+
             user = await prisma.user.create({
                 data: {
                     id: userId,
-                    email: user ? (user.email || '') : '',
+                    email: req.user?.email,
+                    username: username
                 },
             });
         }

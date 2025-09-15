@@ -52,7 +52,7 @@ const BookClient = ({id}: BookClientProps) => {
   const [popularityRank, setPopularityRank] = useState<number | null>(null);
   const [ratingRank, setRatingRank] = useState<number | null>(null);
   const [userStatus, setUserStatus] = useState<string | null>('');
-  const [reviewFilter, setReviewFilter] = useState('');
+  const [reviewFilter, setReviewFilter] = useState('all');
   const [showWriteReview, setShowWriteReview] = useState(false);
   const [userRecommendation, setUserRecommendation] = useState('');
   const [containsSpoilers, setContainsSpoilers] = useState(false);

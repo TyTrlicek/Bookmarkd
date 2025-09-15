@@ -259,7 +259,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
           </h1>
           
           <p className="text-xl text-stone-300 mb-8 leading-relaxed max-w-2xl mx-auto">
-            Find answers to common questions and learn how to make the most of your reading journey.
+            Find answers to common questions and learn how to make the most of your book tracking experience.
           </p>
           
           <div className="flex items-center justify-center gap-2 text-stone-400">
@@ -426,7 +426,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="mailto:support@bookmarkd.fun"
+                href="mailto:bookmarkd.fun@gmail.com"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Mail className="w-4 h-4" />
@@ -434,7 +434,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
               </a>
               
               <a
-                href="mailto:feedback@bookmarkd.fun"
+                href="mailto:bookmarkd.fun@gmail.com"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Star className="w-4 h-4" />

@@ -53,7 +53,6 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                 setLoading(true);
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/reviews/${id}`, {params: { id: id }});
                 setReviews(response.data || null);
-                console.log("reviews data:", response.data);
 
                 // Fetch vote status for reviews and replies
                 const { data: { session } } = await supabase.auth.getSession();
@@ -103,7 +102,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                 setLoading(false);
             }
         }
-
+        setReviewFilter('all')
         fetchReview();
     }, [id]);
 
@@ -126,7 +125,6 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                 });
         
                 setUser(response.data);
-                console.log(response.data);
             } catch (error) {
                 console.error('Failed to fetch user:', error);
                 setUser(null);
@@ -611,43 +609,43 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                 
                 {/* Recommendation Selection */}
                 <div className="mb-4">
-                    <span className="text-sm text-stone-300 block mb-3">Your recommendation:</span>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() => setUserRecommendation('recommended')}
-                            className={`px-4 py-2 rounded-lg border-2 transition-colors flex items-center gap-2 backdrop-blur-sm ${
-                                userRecommendation === 'recommended'
-                                    ? 'border-green-500 bg-green-500/20 text-green-400'
-                                    : 'border-white/10 bg-black/20 text-stone-300 hover:border-green-400/50'
-                            }`}
-                        >
-                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                            Recommended
-                        </button>
-                        <button
-                            onClick={() => setUserRecommendation('mixed')}
-                            className={`px-4 py-2 rounded-lg border-2 transition-colors flex items-center gap-2 backdrop-blur-sm ${
-                                userRecommendation === 'mixed'
-                                    ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
-                                    : 'border-white/10 bg-black/20 text-stone-300 hover:border-yellow-400/50'
-                            }`}
-                        >
-                            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            Mixed Feelings
-                        </button>
-                        <button
-                            onClick={() => setUserRecommendation('not-recommended')}
-                            className={`px-4 py-2 rounded-lg border-2 transition-colors flex items-center gap-2 backdrop-blur-sm ${
-                                userRecommendation === 'not-recommended'
-                                    ? 'border-red-500 bg-red-500/20 text-red-400'
-                                    : 'border-white/10 bg-black/20 text-stone-300 hover:border-red-400/50'
-                            }`}
-                        >
-                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                            Not Recommended
-                        </button>
-                    </div>
-                </div>
+    <span className="text-sm text-stone-300 block mb-3">Your recommendation:</span>
+    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <button
+            onClick={() => setUserRecommendation('recommended')}
+            className={`px-3 py-2 rounded-lg border-2 transition-colors flex items-center justify-center gap-2 backdrop-blur-sm text-sm font-medium min-h-[44px] ${
+                userRecommendation === 'recommended'
+                    ? 'border-green-500 bg-green-500/20 text-green-400'
+                    : 'border-white/10 bg-black/20 text-stone-300 hover:border-green-400/50'
+            }`}
+        >
+            <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0"></div>
+            <span className="truncate">Recommended</span>
+        </button>
+        <button
+            onClick={() => setUserRecommendation('mixed')}
+            className={`px-3 py-2 rounded-lg border-2 transition-colors flex items-center justify-center gap-2 backdrop-blur-sm text-sm font-medium min-h-[44px] ${
+                userRecommendation === 'mixed'
+                    ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
+                    : 'border-white/10 bg-black/20 text-stone-300 hover:border-yellow-400/50'
+            }`}
+        >
+            <div className="w-3 h-3 rounded-full bg-yellow-500 flex-shrink-0"></div>
+            <span className="truncate">Mixed Feelings</span>
+        </button>
+        <button
+            onClick={() => setUserRecommendation('not-recommended')}
+            className={`px-3 py-2 rounded-lg border-2 transition-colors flex items-center justify-center gap-2 backdrop-blur-sm text-sm font-medium min-h-[44px] ${
+                userRecommendation === 'not-recommended'
+                    ? 'border-red-500 bg-red-500/20 text-red-400'
+                    : 'border-white/10 bg-black/20 text-stone-300 hover:border-red-400/50'
+            }`}
+        >
+            <div className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0"></div>
+            <span className="truncate">Not Recommended</span>
+        </button>
+    </div>
+</div>
 
                 {/* Review Text Area */}
                 <textarea
@@ -1146,13 +1144,13 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
         </div>
 
         {/* Load More Button */}
-        {filteredReviews.length > 0 && (
+        {/* {filteredReviews.length > 0 && (
             <div className="text-center mt-6">
                 <button className="bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white px-6 py-2 rounded-lg font-medium transition-all backdrop-blur-sm">
                     Load More Reviews
                 </button>
             </div>
-        )}
+        )} */}
     </div>
     );
 }
