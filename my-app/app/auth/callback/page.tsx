@@ -27,7 +27,9 @@ export default function AuthCallback() {
           // Check if this is a new Google user and create profile in your database
           try {
             // First check if user exists in your database
-            const checkResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.id}`)
+            const checkResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
+              headers: { Authorization: `Bearer ${user.id}` },
+            })
             
             // If user doesn't exist (404), create them
             if (checkResponse.status === 404) {

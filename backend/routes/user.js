@@ -74,7 +74,6 @@ router.get('/me', authenticateUser, async (req, res) => {
     if (!id || !email || !username) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-  
     try {
       const existingUser = await prisma.user.findUnique({
         where: { username },
