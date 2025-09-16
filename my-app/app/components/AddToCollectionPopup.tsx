@@ -146,7 +146,7 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
     <div>
       {/* Trigger Button */}
       {buttonType === "book-page" && (
-  userStatus !== null ? (
+  (userStatus !== null || isInCollection) ? (
     <button          
       className="w-full font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 transform bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border-2 border-emerald-300 shadow-lg cursor-default"
     >         

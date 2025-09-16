@@ -213,8 +213,8 @@ const [pagination, setPagination] = useState({
 
   const getRankingTypeIcon = () => {
     return rankingType === 'rating' ? 
-      <Star className="w-6 h-6 sm:w-8 sm:h-8 text-white" /> : 
-      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+      <Star className="w-6 h-6 md:w-8 md:h-8 text-white" /> : 
+      <Users className="w-6 h-6 md:w-8 md:h-8 text-white" />
   }
 
   const getRankingTypeColor = () => {
@@ -357,9 +357,9 @@ return (
     
     {/* Background gradient overlay */}
     
-    <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+    <div className="relative z-10 max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-8">
       {/* Enhanced Page Header */}
-      <div className="mb-6 sm:mb-8">
+      <div className="mb-6 md:mb-8">
         <div className="flex items-center gap-4 mb-4">
           <div className="relative">
             <div className={`absolute inset-0 bg-gradient-to-r ${getRankingTypeColor().replace('to-', 'to-').replace('from-', 'from-')}/20 rounded-xl blur-lg`} />
@@ -368,8 +368,8 @@ return (
             </div>
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">{getRankingTypeTitle()}</h1>
-            <p className="text-sm sm:text-base text-stone-300 mt-1">{getRankingTypeDescription()}</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">{getRankingTypeTitle()}</h1>
+            <p className="text-sm md:text-base text-stone-300 mt-1">{getRankingTypeDescription()}</p>
           </div>
         </div>
 
@@ -401,7 +401,7 @@ return (
       </div>
 
       {/* Enhanced Desktop Filters */}
-      <div className="hidden sm:block mb-6">
+      <div className="hidden md:block mb-6">
         <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
@@ -472,7 +472,7 @@ return (
       </div>
 
       {/* Enhanced Mobile Search & Filters */}
-      <div className="mb-4 sm:hidden">
+      <div className="mb-4 md:hidden">
         <div className="flex gap-2 mb-3">
           {/* <div className="flex-1 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-400/10 rounded-lg blur-sm" />
@@ -573,7 +573,7 @@ return (
       {!loading && (
         <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
           {/* Enhanced Desktop Header */}
-          <div className="hidden sm:block bg-gradient-to-r from-black/40 to-stone-500/10 border-b border-white/10 px-6 py-4">
+          <div className="hidden md:block bg-gradient-to-r from-black/40 to-stone-500/10 border-b border-white/10 px-6 py-4">
             <div className="grid grid-cols-12 gap-4 items-center text-sm font-bold text-stone-300">
               <div className="col-span-1 flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-400" />
@@ -617,7 +617,7 @@ return (
                 <div key={book.openLibraryId} className={`hover:bg-gradient-to-r hover:from-stone-500/10 hover:to-stone-400/5 transition-all duration-200`}>
                   
                   {/* Enhanced Mobile Layout */}
-                  <div className="sm:hidden px-4 py-4">
+                  <div className="md:hidden px-4 py-4">
                     <div className="flex gap-3">
                       {/* Enhanced Rank Badge */}
                       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm border 'bg-amber-500/20 border-amber-400/30`}>
@@ -696,7 +696,7 @@ return (
                   </div>
 
                   {/* Enhanced Desktop Layout */}
-                  <div className="hidden sm:block px-6 py-4">
+                  <div className="hidden md:block px-6 py-4">
                     <div className="grid grid-cols-12 gap-4 items-center">
                       {/* Enhanced Rank */}
                       <div className="col-span-1 flex items-center justify-center">

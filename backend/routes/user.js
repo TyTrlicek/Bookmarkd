@@ -199,16 +199,15 @@ router.get('/me', authenticateUser, async (req, res) => {
       });
 
       if (!user) {
-          const username = email ? email.split('@')[0] : 'user';
+            const username = req.user.email ? req.user.email.split('@')[0] : 'user';
 
-            const newUser = await prisma.user.create({
+             await prisma.user.create({
                 data: {
                     id: userId,
                     email: req.user?.email,
                     username: username
                 },
             });
-          if (!newUser) return res.status(404).json({ error: 'User not found' });
         }
   
 

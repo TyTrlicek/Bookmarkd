@@ -30,7 +30,7 @@ import Footer from '../components/Footer'
 export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [authMode, setAuthMode] = useState('login') // or 'signup'
+  const [authMode, setAuthMode] = useState('signup') // or 'signup'
   const [resetEmail, setResetEmail] = useState('')
   const [resetSent, setResetSent] = useState(false)
   const [message, setMessage] = useState('')
@@ -231,9 +231,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
   const features = [
-    { icon: BookOpen, text: "Track your reading progress" },
+    { icon: BookOpen, text: "Track All Of Your Books" },
     { icon: Users, text: "Get Personalized Recommendations" },
-    { icon: Star, text: "Rate and review books" },
+    { icon: Star, text: "See What Others Rate Your Favorite Books" },
     { icon: Heart, text: "Discover your next favorite read" },
   ]
 
@@ -268,8 +268,8 @@ const handleSubmit = async (e: React.FormEvent) => {
               </h2>
               <p className="text-lg text-stone-300">
                 {authMode === 'login' 
-                  ? 'Continue tracking your amazing reading progress and connect with fellow readers.'
-                  : 'Join a community of readers who are discovering, tracking, and sharing their favorite books.'
+                  ? 'Continue tracking your book collection and connect with fellow readers.'
+                  : 'Join a community of readers who are discovering, tracking, and rating their favorite books.'
                 }
               </p>
             </div>
@@ -305,9 +305,9 @@ const handleSubmit = async (e: React.FormEvent) => {
             <div className="text-center mb-8">
               <div className="relative mx-auto mb-4">
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-amber-500/30 rounded-xl blur-2xl" />
-                <div className="relative w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 border border-amber-400/30">
+                {/* <div className="relative w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 border border-amber-400/30">
                   <Sparkles className="w-8 h-8 text-white" />
-                </div>
+                </div> */}
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">
                 {authMode === 'login' ? 'Sign In' : 'Create Account'}

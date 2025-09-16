@@ -779,9 +779,6 @@ allowedGenres.forEach((genre) => {
                   Username
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <UserIcon className="h-6 w-6 text-stone-500" />
-                  </div>
                   <input
                     id="editUsername"
                     type="text"
@@ -789,11 +786,11 @@ allowedGenres.forEach((genre) => {
                     value={editForm.username}
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                     maxLength={20}
-                    className="w-full pl-12 pr-4 py-4 bg-black/30 border border-white/20 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-white backdrop-blur-sm"
+                    className="w-full px-4 py-4 bg-black/30 border border-white/20 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-white backdrop-blur-sm"
                   />
                   <p className="text-xs text-stone-500 mt-2">
-                  {editForm.username.length}/20 characters
-                </p>
+                    {editForm.username.length}/20 characters
+                  </p>
                 </div>
               </div>
 

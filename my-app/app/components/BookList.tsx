@@ -70,7 +70,7 @@ const BookList = ({ trendingData }: BookListProps): React.JSX.Element => {
         }
       `}</style>
 
-      <div className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-blackrounded-lg shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br from-stone-900 via-stone-800 to-blackrounded-lg shadow-2xl rounded-md">
         {/* Cinematic Background Effects */}
         <div className="absolute inset-0">
           {/* Dark overlay gradient */}

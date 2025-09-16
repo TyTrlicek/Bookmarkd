@@ -292,12 +292,12 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/50 z-10" />
           <div className="absolute inset-0 opacity-30 mix-blend-overlay"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            }}
+            // style={{
+            //   backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+            // }}
           />
           {/* Floating Book Silhouettes */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
@@ -311,7 +311,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
                 <BookOpen className="w-16 h-16 text-white" />
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
 
         <div className="relative z-20 max-w-7xl mx-auto px-6 py-20 flex items-center min-h-screen">
@@ -392,7 +392,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-left">
                     {[
                       { icon: Search, text: "Search millions of books" },
-                      { icon: Heart, text: "Build your favorites list" },
+                      { icon: Heart, text: "Build your book collection" },
                       { icon: Star, text: "Rate and review books" },
                       { icon: TrendingUp, text: "Get personalized recommendations" }
                     ].map((feature, index) => (

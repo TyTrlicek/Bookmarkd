@@ -1,7 +1,7 @@
 "use client"
 import { supabase } from '@/lib/supabaseClient';
 import axios from 'axios';
-import { Heart, MessageCircle, Plus, ChevronDown, ChevronUp, Send, MoreHorizontal, Edit3, Trash2, Check, X } from 'lucide-react'
+import { Heart, MessageCircle, Plus, ChevronDown, ChevronUp, Send, MoreHorizontal, Edit3, Trash2, Check, X, Flag } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -184,6 +184,11 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
         }
         setShowDropdowns(newDropdowns);
     };
+
+    const reportContent = (itemType: 'review' | 'reply', itemId: string) => {
+        console.log(`Report ${itemType} with ID: ${itemId}`);
+    }
+
 
     // Start editing review
     const startEditingReview = (review: ReviewData) => {
@@ -827,8 +832,8 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                             </div>
                                         </div>
 
-                                        {/* Dropdown Menu for Review Owner */}
-                                        {userOwnsReview(review) && !isEditing && (
+                                        {/* Dropdown Menu - Always visible */}
+                                        {!isEditing && (
                                             <div className="relative flex-shrink-0">
                                                 <button
                                                     onClick={() => toggleDropdown(reviewId)}
@@ -839,21 +844,33 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                 </button>
                                                 {showDropdown && (
                                                     <div className="absolute right-0 top-full mt-1 bg-black/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg z-10 min-w-[120px]">
-                                                        <button
-                                                            onClick={() => startEditingReview(review)}
-                                                            className="w-full text-left px-3 py-2 text-sm text-stone-300 hover:text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
-                                                        >
-                                                            <Edit3 className="w-3 h-3" />
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => deleteReview(reviewId)}
-                                                            disabled={isDeleting}
-                                                            className="w-full text-left px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 flex items-center gap-2 transition-colors disabled:opacity-50"
-                                                        >
-                                                            <Trash2 className="w-3 h-3" />
-                                                            {isDeleting ? 'Deleting...' : 'Delete'}
-                                                        </button>
+                                                        {userOwnsReview(review) ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => startEditingReview(review)}
+                                                                    className="w-full text-left px-3 py-2 text-sm text-stone-300 hover:text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                                                >
+                                                                    <Edit3 className="w-3 h-3" />
+                                                                    Edit
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => deleteReview(reviewId)}
+                                                                    disabled={isDeleting}
+                                                                    className="w-full text-left px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 flex items-center gap-2 transition-colors disabled:opacity-50"
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                    {isDeleting ? 'Deleting...' : 'Delete'}
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => reportContent('review' ,reviewId)}
+                                                                className="w-full text-left px-3 py-2 text-sm text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 flex items-center gap-2 transition-colors"
+                                                            >
+                                                                <Flag className="w-3 h-3" />
+                                                                Report
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
@@ -1071,8 +1088,8 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                                         </div>
                                                                     </div>
 
-                                                                    {/* Dropdown for Reply Owner */}
-                                                                    {userOwnsReply(reply) && !isEditingReply && (
+                                                                    {/* Dropdown - Always visible */}
+                                                                    {!isEditingReply && (
                                                                         <div className="relative flex-shrink-0">
                                                                             <button
                                                                                 onClick={() => toggleDropdown(reply.id)}
@@ -1083,21 +1100,33 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                                                                             </button>
                                                                             {showReplyDropdown && (
                                                                                 <div className="absolute right-0 top-full mt-1 bg-black/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg z-10 min-w-[120px]">
-                                                                                    <button
-                                                                                        onClick={() => startEditingReply(reply)}
-                                                                                        className="w-full text-left px-3 py-2 text-sm text-stone-300 hover:text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
-                                                                                    >
-                                                                                        <Edit3 className="w-3 h-3" />
-                                                                                        Edit
-                                                                                    </button>
-                                                                                    <button
-                                                                                        onClick={() => deleteReply(reply.id)}
-                                                                                        disabled={isDeletingReply}
-                                                                                        className="w-full text-left px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 flex items-center gap-2 transition-colors disabled:opacity-50"
-                                                                                    >
-                                                                                        <Trash2 className="w-3 h-3" />
-                                                                                        {isDeletingReply ? 'Deleting...' : 'Delete'}
-                                                                                    </button>
+                                                                                    {userOwnsReply(reply) ? (
+                                                                                        <>
+                                                                                            <button
+                                                                                                onClick={() => startEditingReply(reply)}
+                                                                                                className="w-full text-left px-3 py-2 text-sm text-stone-300 hover:text-white hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                                                                            >
+                                                                                                <Edit3 className="w-3 h-3" />
+                                                                                                Edit
+                                                                                            </button>
+                                                                                            <button
+                                                                                                onClick={() => deleteReply(reply.id)}
+                                                                                                disabled={isDeletingReply}
+                                                                                                className="w-full text-left px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 flex items-center gap-2 transition-colors disabled:opacity-50"
+                                                                                            >
+                                                                                                <Trash2 className="w-3 h-3" />
+                                                                                                {isDeletingReply ? 'Deleting...' : 'Delete'}
+                                                                                            </button>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <button
+                                                                                            onClick={() => reportContent( 'reply', reply.id)}
+                                                                                            className="w-full text-left px-3 py-2 text-sm text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 flex items-center gap-2 transition-colors"
+                                                                                        >
+                                                                                            <Flag className="w-3 h-3" />
+                                                                                            Report
+                                                                                        </button>
+                                                                                    )}
                                                                                 </div>
                                                                             )}
                                                                         </div>

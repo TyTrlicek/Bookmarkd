@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const authenticateUser = require('../middleware/authenticateUser')
+const authenticateUser = require('../middleware/authenticateUser');
+const { checkAndUnlockAchievements } = require('../utils');
 
 const router = express.Router();
 
@@ -36,7 +37,16 @@ router.post('/create-review', authenticateUser, async (req, res) => {
       },
     });
 
-    return res.status(201).json(review);
+    const achievementContext = {            
+        };
+        
+      const unlockedAchievements = await checkAndUnlockAchievements(userId, achievementContext);
+
+    return res.status(201).json({ 
+                  // message: 'Book added to user list', 
+                  review, 
+                  unlockedAchievements
+              });
 
   } catch (error) {
     console.error(error);

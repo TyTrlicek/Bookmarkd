@@ -59,11 +59,11 @@ export const metadata: Metadata = {
     description:
       "Bookmarkd is a personal book tracking/rating app. Track books you’ve read, organize your collection, rate and review titles, and explore global rankings powered by a community of readers.",
     images: ["/brand-image.png"],
-    creator: "@Bookmarkd", // optional Twitter handle
+    // creator: "@Bookmarkd", // optional Twitter handle
   },
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
+    icon: "/brand-logo.png",
+    shortcut: "/brand-logo.png",
     apple: "https://bookmarkd.fun/brand-logo.png",
   },
 };

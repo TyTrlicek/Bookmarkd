@@ -497,11 +497,14 @@ app.post('/api/user/booklist', authenticateUser, async (req, res) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
+
+
+
     try {
         // Ensure user exists in database
         let user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
-          const username = email ? email.split('@')[0] : 'user';
+            const username = req.user.email ? req.user.email.split('@')[0] : 'user';
 
             user = await prisma.user.create({
                 data: {
@@ -511,7 +514,6 @@ app.post('/api/user/booklist', authenticateUser, async (req, res) => {
                 },
             });
         }
-
         const {
             openLibraryId,
             rating,

@@ -27,7 +27,8 @@ import {
   ArrowRight,
   BookMarked,
   Sparkles,
-  Zap
+  Zap,
+  Link
 } from 'lucide-react'
 import BookList from './components/BookList'
 import Header from './components/Header'
@@ -46,7 +47,7 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [image, setImage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [trendingData, setTrendingData] = useState();
+  const [trendingData, setTrendingData] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [reccomendationData, setReccomendationData] = useState<any[]>([]);
   const router = useRouter();
@@ -188,6 +189,29 @@ const HomePage = () => {
     </section>
   )
 
+  // Fixed Height Book Section Component
+  const FixedHeightBookSection = ({ 
+    data, 
+    isEmpty = false, 
+    emptyStateContent 
+  }: { 
+    data: any, 
+    isEmpty?: boolean, 
+    emptyStateContent?: React.ReactNode 
+  }) => (
+    <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+      <div className="h-108 relative">
+        {!isEmpty ? (
+          <BookList trendingData={data} />
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            {emptyStateContent}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -200,7 +224,7 @@ const HomePage = () => {
       <div className="relative">
         {/* Background gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
 
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
@@ -218,10 +242,24 @@ const HomePage = () => {
               </div>
             </div>
             
-            {/* Book List Container with dark styling */}
-            <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <BookList trendingData={trendingData}/>
-            </div>
+            {/* Fixed Height Book List Container */}
+            <FixedHeightBookSection 
+              data={trendingData}
+              isEmpty={!trendingData || (Array.isArray(trendingData) && trendingData.length === 0)}
+              emptyStateContent={
+                <div className="flex flex-col items-center justify-center px-4 text-center max-w-md">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mb-6 border border-amber-500/30">
+                    <TrendingUp className="w-8 h-8 text-amber-400" />
+                  </div>
+                  <h3 className="text-2xl font-semibold text-white mb-3">
+                    No Trending Books Yet
+                  </h3>
+                  <p className="text-stone-300 text-lg">
+                    Check back soon for the latest trending books!
+                  </p>
+                </div>
+              }
+            />
           </section>
 
           {/* Recommended Section */}
@@ -237,10 +275,68 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-            
-            <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-              <BookList trendingData={reccomendationData}/>
-            </div>
+
+            {/* Fixed Height Book List Container */}
+            <FixedHeightBookSection 
+              data={reccomendationData}
+              isEmpty={reccomendationData.length === 0}
+              emptyStateContent={
+                <div className="flex flex-col items-center justify-center px-4 text-center max-w-md">
+                  {/* Decorative icon */}
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-full flex items-center justify-center mb-6 border border-emerald-500/30">
+                    <Award className="w-8 h-8 text-emerald-400" />
+                  </div>
+
+                  {/* Conditional messaging */}
+                  <h3 className="text-2xl font-semibold text-white mb-3">
+                    Want recommended books?
+                  </h3>
+                  
+                  <p className="text-stone-300 text-lg mb-8">
+                    {!session 
+                      ? "Sign in to get personalized book recommendations tailored just for you."
+                      : "Add books to your collection so we can suggest similar books you'll love."
+                    }
+                  </p>
+
+                  {/* Conditional button */}
+                  {!session ? (
+                    <button 
+                      onClick={() => router.push('/auth/signin')}
+                      className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                      </svg>
+                      Sign In
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => router.push('/browse')}
+                      className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      Browse Books
+                    </button>
+                  )}
+
+                  {/* Optional secondary action for signed-in users */}
+                  {session && (
+                    <p className="text-stone-400 text-sm mt-4">
+                      Or explore our{' '}
+                      <span 
+                        className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                      >
+                        trending books
+                      </span>{' '}
+                      to get started
+                    </p>
+                  )}
+                </div>
+              }
+            />
           </section>
 
           {/* Coming Soon Sections */}
@@ -265,7 +361,7 @@ const HomePage = () => {
           </div>
 
           {/* Recent Activity */}
-          <section className="mb-16">
+          {/* <section className="mb-16">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Clock className="w-6 h-6 text-white" />
@@ -300,7 +396,7 @@ const HomePage = () => {
                 ))}
               </div>
             </div>
-          </section>
+          </section> */}
         </div>
         <Footer />
       </div>
