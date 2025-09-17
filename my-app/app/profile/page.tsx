@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
-import { Achievement, User, UserActivity } from '../types/types'
+import { Achievement, BookData, User, UserActivity } from '../types/types'
 import { 
   BookOpen, 
   Star, 
@@ -33,6 +33,7 @@ import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
 import Footer from '../components/Footer'
 import { set } from 'lodash'
+import FavoritesList from '../components/FavoritesList'
 
 export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -56,8 +57,96 @@ export default function AccountPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
+  const [favoriteBooks, setFavoriteBooks] = useState<BookData[]>([]);
+const [favoritesLoading, setFavoritesLoading] = useState(true);
 
   const router = useRouter()
+
+  const fetchFavoriteBooks = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    setFavoriteBooks([]);
+    return [];
+  }
+
+  try {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/favorites`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data.map((fav: any) => ({
+      id: fav.book.id,
+      title: fav.book.title,
+      author: fav.book.author,
+      image: fav.book.image,
+      publishedDate: fav.book.publishedDate, 
+      rating: 5,
+      averageRating: fav.book.averageRating || 0,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch favorite books:', error);
+    return [];
+  }
+};
+
+const handleRemoveFavoriteBook = async (bookId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    throw new Error('No access token available');
+  }
+
+  try {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/favorites/${bookId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    setFavoriteBooks(prev => prev.filter(book => String(book.id) !== bookId));
+  } catch (error) {
+    console.error('Failed to remove book from favorites:', error);
+    throw error;
+  }
+};
+
+const handleAddFavoriteBook = async (selectedBook: BookData) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    router.push('/auth');
+    return;
+  }    
+
+  try {
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/favorites`,
+      { bookId: selectedBook.id },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    setFavoriteBooks(prev => [...prev, selectedBook]);
+  } catch (error) {
+    console.error('Failed to add book to favorites:', error);
+    throw error;
+  }
+};
 
 useEffect(() => {
   const fetchUserData = async () => {
@@ -84,7 +173,6 @@ useEffect(() => {
       setAverageRating(statsData.avgRating.toFixed(2));
       setBooksInCollection(statsData.booksInCollection);
       setBookRatedThisYear(statsData.booksRatedThisYear);
-      console.log('User Stats:', statsData);
 
       setEditForm({
         username: statsData.username || '',
@@ -93,7 +181,6 @@ useEffect(() => {
       });
     } catch (error) {
       console.error('Failed to fetch user stats:', error);
-      // router.push('/auth');
     }
 
     try {
@@ -106,7 +193,6 @@ useEffect(() => {
       });
 
       setRecentActivity(activityResponse.data);
-      console.log('Recent Activity:', activityResponse.data);
     } catch (error) {
       console.error('Error getting user activity:', error);
     }
@@ -121,21 +207,28 @@ useEffect(() => {
       });
 
       const userAchievements = achievementsResponse.data.achievements || [];
-
       setAchievementCount(userAchievements.length);
 
       const combinedAchievements = allAchievements.map((ach: Achievement) => ({
-    ...ach,
-    earned: !!userAchievements.find((ua: Achievement) => ua.id === ach.id),
-    }));
-
-    console.log('Combined Achievements:', combinedAchievements);
+        ...ach,
+        earned: !!userAchievements.find((ua: Achievement) => ua.id === ach.id),
+      }));
 
       setAchievements(combinedAchievements);
-      console.log('User Achievements:', achievementsResponse.data.achievements);
     } catch (error) {
       console.error('Error fetching achievements:', error);
+    }
+
+    try {
+      // Fetch favorite books
+      setFavoritesLoading(true);
+      const books = await fetchFavoriteBooks();
+      setFavoriteBooks(books);
+    } catch (error) {
+      console.error('Failed to fetch favorite books:', error);
+      setFavoriteBooks([]);
     } finally {
+      setFavoritesLoading(false);
       setIsLoading(false);
     }
   };
@@ -555,6 +648,81 @@ allowedGenres.forEach((genre) => {
             ))}
           </div>
         </section>
+
+        // Add this section after your Stats Grid and before the grid with Achievements/Recent Activity
+// Place it right after the userStats.map section
+
+{/* Favorite Books Section */}
+<section className="mt-16 mb-16">
+  <div className="flex items-center justify-between mb-8">
+    <div className="flex items-center gap-3">
+      <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+        <BookMarked className="w-6 h-6 text-white" />
+      </div>
+      <div>
+        <h2 className="text-3xl font-bold text-white">Favorite Books</h2>
+        <p className="text-stone-300">Your curated collection</p>
+      </div>
+    </div>
+    
+    {/* Show book count */}
+    <div className="text-right">
+      <div className="text-2xl font-bold text-white">{favoriteBooks.length}</div>
+      <div className="text-sm text-stone-400">books</div>
+    </div>
+  </div>
+
+  {/* Desktop: Grid Layout */}
+  <div className="hidden md:block">
+    <FavoritesList
+      books={favoriteBooks}
+      loading={favoritesLoading}
+      onRemoveBook={handleRemoveFavoriteBook}
+      onAddBook={handleAddFavoriteBook}
+      showAddSlots={true}
+      maxSlots={6}
+      layout="grid"
+      showStats={false}
+      className="mb-8"
+    />
+  </div>
+
+  {/* Mobile: Horizontal Scroll */}
+  <div className="md:hidden">
+    <FavoritesList
+      books={favoriteBooks}
+      loading={favoritesLoading}
+      onRemoveBook={handleRemoveFavoriteBook}
+      onAddBook={handleAddFavoriteBook}
+      showAddSlots={true}
+      maxSlots={6}
+      layout="horizontal"
+      showStats={false}
+      className="mb-8"
+    />
+  </div>
+
+  {/* Empty State */}
+  {!favoritesLoading && favoriteBooks.length === 0 && (
+    <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/10">
+      <div className="w-20 h-20 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20">
+        <BookMarked className="w-10 h-10 text-amber-400" />
+      </div>
+      <h3 className="text-2xl font-bold text-white mb-4">No Favorites Yet</h3>
+      <p className="text-stone-400 mb-6 max-w-md mx-auto">
+        Start building your collection by adding books you love to your favorites. 
+        These will be your go-to recommendations for other readers!
+      </p>
+      <button 
+        onClick={() => router.push('/search')} // Adjust this route as needed
+        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-amber-500/25"
+      >
+        <BookOpen className="w-5 h-5" />
+        Discover Books
+      </button>
+    </div>
+  )}
+</section>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Achievements Section */}

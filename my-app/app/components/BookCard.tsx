@@ -155,12 +155,12 @@ const BookCard = ({ book, id }: BookCardProps ) => {
         </div> */}
 
         {/* Reading Progress Indicator */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
+        {/* <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
           <div 
             className="h-full bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-700 group-hover:from-amber-300 group-hover:to-amber-500"
             style={{ width: `${Math.abs((book.title || '').length * 7) % 100}%` }}
           ></div>
-        </div>
+        </div> */}
 
         {/* Hover overlay with additional info */}
         <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end transition-opacity duration-300 ${

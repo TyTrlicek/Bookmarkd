@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { 
   BookOpen, 
@@ -19,6 +19,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Footer from '../components/Footer'
+import MobileAuthPage from './MobileAuthPage'
 
 export default function AuthPage() {
   const [message, setMessage] = useState('')
@@ -30,6 +31,7 @@ export default function AuthPage() {
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [pendingUser, setPendingUser] = useState<any>(null)
   const router = useRouter()
+  const [isMobile, setIsMobile] = useState(false)
 
   // Google Sign In Handler
   const handleGoogleSignIn = async () => {
@@ -175,10 +177,26 @@ export default function AuthPage() {
     { value: "24/7", label: "Book Discovery" }
   ]
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800">
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
+
+        {isMobile && 
+        <MobileAuthPage />
+        }
+
         {/* Left Side - Branding & Features */}
+        {!isMobile && <>
         <div className="bg-gradient-to-br from-black/40 via-stone-800/60 to-black/30 p-8 lg:p-12 flex flex-col justify-center backdrop-blur-sm border-r border-white/10">
           <div className="max-w-md mx-auto lg:mx-0">
             {/* Logo & Title */}
@@ -229,7 +247,6 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* Right Side - Auth Form */}
         <div className="p-8 lg:p-12 flex flex-col justify-center bg-gradient-to-br from-stone-800/80 to-stone-900/90 backdrop-blur-md">
           <div className="max-w-md mx-auto w-full">
             {!showProfileSetup ? (
@@ -247,7 +264,7 @@ export default function AuthPage() {
                     Get Started in Seconds
                   </h3>
                   <p className="text-stone-300">
-                    Sign in with your Google account to join thousands of book lovers
+                    Sign in with your Google account to join our growing community of readers
                   </p>
                 </div>
 
@@ -450,7 +467,7 @@ export default function AuthPage() {
               </div>
             )}
           </div>
-        </div>
+        </div></>}
       </div>
     </div>
   )
