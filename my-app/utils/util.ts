@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import useAuthStore from "@/store/authStore";
 import axios from "axios"
 
-export const getBookData = async (id: string): Promise<BookData | null> => {
+export const getBookData = async (id: string, searchAuthor?: string): Promise<BookData | null> => {
 
   const {
     data: { session }
@@ -21,7 +21,7 @@ export const getBookData = async (id: string): Promise<BookData | null> => {
 
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/bookdata`, {
-        params: { id: id },
+        params: { id: id, searchAuthor: searchAuthor },
         headers
       }, )
       console.log('book data:', res.data)

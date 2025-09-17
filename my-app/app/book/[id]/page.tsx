@@ -2,7 +2,7 @@
 
 import { getBookData } from '../../../utils/util'
 import Header from '@/app/components/Header'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 
@@ -32,7 +32,13 @@ import Footer from '@/app/components/Footer'
 
 const BookPage = () => {
   const params = useParams()
+  const searchParams = useSearchParams();
   const id = decodeURIComponent(params.id as string)
+const searchAuthor = searchParams.get('author') 
+    ? decodeURIComponent(searchParams.get('author') as string) 
+    : 'Unknown Author';
+    console.log('search author', searchAuthor)
+  console.log("Book ID", id);
 
   const router = useRouter()
   
@@ -63,7 +69,7 @@ const BookPage = () => {
   useEffect(() => {
     const fetchCover = async () => {
       try {
-        const data = await getBookData(id)
+        const data = await getBookData(id, searchAuthor)
         const img = data?.image || null
         const userStatus = data?.userStatus || null
         const title = data?.title || ''

@@ -27,7 +27,8 @@ import {
   Award,
   TrendingUp,
   Sparkles,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react'
 import Header from '../components/Header'
 import BookCard from '../components/BookCard'
@@ -35,8 +36,7 @@ import { getSearchData } from '@/utils/util'
 import { BookData } from '../types/types'
 import debounce from 'lodash/debounce';
 import Footer from '../components/Footer'
-
-
+import MobileBookListItem from '../components/MobileBookListItem'
 
 const BrowseClient = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -51,17 +51,41 @@ const BrowseClient = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [booksPerPage] = useState(24)
   const [books, setBooks] = useState<BookData[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth < 768)
+  }
+  
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  return () => window.removeEventListener('resize', checkMobile)
+}, [])
 
   const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setBooks([])
+      setIsLoading(false)
+      setHasSearched(false)
+      return
+    }
+
+    setIsLoading(true)
     try {
       const response = await getSearchData(query);
       setBooks(response ?? []);
+      setHasSearched(true)
     } catch (error) {
       console.error('Error fetching books:', error);
       setBooks([]);
+      setHasSearched(true)
+    } finally {
+      setIsLoading(false)
     }
   };
-  
 
   const debouncedSearch = useCallback(
     debounce((query: string) => {
@@ -75,12 +99,23 @@ const BrowseClient = () => {
       debouncedSearch(searchQuery);
     } else {
       setBooks([]);
+      setIsLoading(false)
+      setHasSearched(false)
     }
 
     return () => {
-      debouncedSearch.cancel(); // Cancel debounce on unmount or query change
+      debouncedSearch.cancel();
     };
   }, [searchQuery]);
+
+  // Check for URL parameters on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const searchParam = urlParams.get('search')
+    if (searchParam) {
+      setSearchQuery(searchParam)
+    }
+  }, [])
 
   const genres = [
     "Contemporary Fiction", "Science Fiction", "Fantasy", "Thriller", "Mystery",
@@ -95,7 +130,6 @@ const BrowseClient = () => {
     { value: 'title', label: 'Title' },
     { value: 'authors', label: 'Author' },
     { value: 'publishedDate', label: 'Publication Year' },
-    { value: 'pageCount', label: 'Page Count' }
   ]
 
   const searchTypes = [
@@ -154,7 +188,52 @@ const BrowseClient = () => {
   const startIndex = (currentPage - 1) * booksPerPage
   const displayedBooks = sortedBooks.slice(startIndex, startIndex + booksPerPage)
 
-  
+  const LoadingSpinner = () => (
+    <div className="text-center py-20">
+      <div className="relative mb-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-full blur-3xl opacity-60" />
+        <div className="relative w-24 h-24 bg-gradient-to-r from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto shadow-lg border border-amber-400/20 backdrop-blur-sm">
+          <Loader2 className="w-12 h-12 text-amber-400 animate-spin" />
+        </div>
+      </div>
+      <h3 className="text-3xl font-bold text-white mb-4">Searching for books...</h3>
+      <p className="text-stone-300 text-lg max-w-md mx-auto leading-relaxed">
+        Please wait while we find the best books for you
+      </p>
+    </div>
+  )
+
+  const EmptyState = () => (
+    <div className="text-center py-20">
+      <div className="relative mb-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-full blur-3xl opacity-60" />
+        <div className="relative w-24 h-24 bg-gradient-to-r from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto shadow-lg border border-amber-400/20 backdrop-blur-sm">
+          <BookOpen className="w-12 h-12 text-amber-400" />
+        </div>
+      </div>
+      <h3 className="text-3xl font-bold text-white mb-4">
+        {hasSearched ? 'No books found' : 'Start searching for books'}
+      </h3>
+      <p className="text-stone-300 text-lg max-w-md mx-auto leading-relaxed">
+        {hasSearched 
+          ? 'Try adjusting your search terms or filters to find what you\'re looking for' 
+          : 'Enter a search term above to discover amazing books from our collection'
+        }
+      </p>
+      {hasSearched && (
+        <button
+          onClick={() => {
+            setSearchQuery('')
+            setHasSearched(false)
+            clearFilters()
+          }}
+          className="mt-6 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg"
+        >
+          Clear search and start over
+        </button>
+      )}
+    </div>
+  )
 
   return (
     <div className="min-h-screen">
@@ -184,9 +263,14 @@ const BrowseClient = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
+                  {isLoading && (
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                      <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
+                    </div>
+                  )}
                 </div>
               </div>
-              <select
+              {/* <select
                 className="px-4 py-3 bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-white font-medium"
                 value={searchType}
                 onChange={(e) => setSearchType(e.target.value)}
@@ -194,80 +278,82 @@ const BrowseClient = () => {
                 {searchTypes.map(type => (
                   <option key={type.value} value={type.value} className="bg-stone-800">{type.label}</option>
                 ))}
-              </select>
+              </select> */}
             </div>
           </div>
 
-          {/* Enhanced Controls Bar */}
-          <div className="bg-black/30 backdrop-blur-sm rounded-3xl border border-white/10 shadow-lg p-6 mb-8 md:block hidden">
-            <div className="md:flex hidden items-center justify-between">
-              <div className="flex items-center gap-6">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl hover:from-amber-700 hover:to-amber-800 transition-all duration-200 shadow-lg font-medium"
-                >
-                  <Sliders className="w-4 h-4" />
-                  Filters
-                  {(selectedGenres.length > 0 || selectedYears.length > 0 || selectedRating) && (
-                    <span className="bg-white/25 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-semibold">
-                      {selectedGenres.length + selectedYears.length + (selectedRating ? 1 : 0)}
-                    </span>
-                  )}
-                </button>
-                
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-semibold text-stone-300">Sort by:</span>
-                  <select
-                    className="px-4 py-2.5 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-white font-medium"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                  >
-                    {sortOptions.map(option => (
-                      <option key={option.value} value={option.value} className="bg-stone-800">{option.label}</option>
-                    ))}
-                  </select>
+          {/* Enhanced Controls Bar - Only show when we have results */}
+          {!isLoading && books.length > 0 && (
+            <div className="bg-black/30 backdrop-blur-sm rounded-3xl border border-white/10 shadow-lg p-6 mb-8 md:block hidden">
+              <div className="md:flex hidden items-center justify-between">
+                <div className="flex items-center gap-6">
                   <button
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                    className="p-2.5 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-200"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl hover:from-amber-700 hover:to-amber-800 transition-all duration-200 shadow-lg font-medium"
                   >
-                    {sortOrder === 'asc' ? <SortAsc className="w-4 h-4 text-stone-300" /> : <SortDesc className="w-4 h-4 text-stone-300" />}
+                    <Sliders className="w-4 h-4" />
+                    Filters
+                    {(selectedGenres.length > 0 || selectedYears.length > 0 || selectedRating) && (
+                      <span className="bg-white/25 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-semibold">
+                        {selectedGenres.length + selectedYears.length + (selectedRating ? 1 : 0)}
+                      </span>
+                    )}
                   </button>
+                  
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-semibold text-stone-300">Sort by:</span>
+                    <select
+                      className="px-4 py-2.5 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-white font-medium"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                    >
+                      {sortOptions.map(option => (
+                        <option key={option.value} value={option.value} className="bg-stone-800">{option.label}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="p-2.5 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-200"
+                    >
+                      {sortOrder === 'asc' ? <SortAsc className="w-4 h-4 text-stone-300" /> : <SortDesc className="w-4 h-4 text-stone-300" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3 px-4 py-2.5 bg-amber-500/20 backdrop-blur-sm rounded-xl border border-amber-400/20">
-                  <TrendingUp className="w-4 h-4 text-amber-400" />
-                  <span className="text-sm font-semibold text-amber-300">{books.length} results</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-3 rounded-xl transition-all duration-200 ${
-                      viewMode === 'grid' 
-                        ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg' 
-                        : 'bg-black/20 backdrop-blur-sm border border-white/10 text-stone-300 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    <Grid className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`p-3 rounded-xl transition-all duration-200 ${
-                      viewMode === 'list' 
-                        ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg' 
-                        : 'bg-black/20 backdrop-blur-sm border border-white/10 text-stone-300 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-3 px-4 py-2.5 bg-amber-500/20 backdrop-blur-sm rounded-xl border border-amber-400/20">
+                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-semibold text-amber-300">{books.length} results</span>
+                  </div>
+                  {/* <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-3 rounded-xl transition-all duration-200 ${
+                        viewMode === 'grid' 
+                          ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg' 
+                          : 'bg-black/20 backdrop-blur-sm border border-white/10 text-stone-300 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      <Grid className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-3 rounded-xl transition-all duration-200 ${
+                        viewMode === 'list' 
+                          ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg' 
+                          : 'bg-black/20 backdrop-blur-sm border border-white/10 text-stone-300 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div> */}
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Enhanced Filters Panel */}
-          {showFilters && (
+          {/* Enhanced Filters Panel - Only show when we have results and filters are open */}
+          {!isLoading && books.length > 0 && showFilters && (
             <div className="bg-black/30 backdrop-blur-sm rounded-3xl border border-white/10 shadow-xl p-8 mb-8">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
@@ -355,8 +441,8 @@ const BrowseClient = () => {
             </div>
           )}
 
-          {/* Enhanced Active Filters */}
-          {(selectedGenres.length > 0 || selectedYears.length > 0 || selectedRating) && (
+          {/* Enhanced Active Filters - Only show when we have results */}
+          {!isLoading && books.length > 0 && (selectedGenres.length > 0 || selectedYears.length > 0 || selectedRating) && (
             <div className="flex items-center gap-4 mb-8 p-5 bg-amber-500/10 backdrop-blur-sm rounded-2xl border border-amber-400/20 shadow-sm">
               <span className="text-sm font-bold text-amber-300">Active filters:</span>
               <div className="flex flex-wrap gap-2">
@@ -394,13 +480,24 @@ const BrowseClient = () => {
           )}
 
           {/* Results */}
-          {displayedBooks.length > 0 ? (
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : displayedBooks.length > 0 ? (
             <>
+              {/* Mobile: List view, Desktop: Grid view */}
+              {isMobile ? (
+                <div className="space-y-3 mb-12">
+                  {displayedBooks.map((book, index) => (
+                    <MobileBookListItem key={book.openLibraryId || String(index)} book={book} />
+                  ))}
+                </div>
+              ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
                   {displayedBooks.map((book, index) => (
                     <BookCard key={book.openLibraryId || String(index)} book={book}/>
                   ))}
                 </div>
+              )}
               {/* Enhanced Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-3 p-6 bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg">
@@ -435,20 +532,7 @@ const BrowseClient = () => {
               )}
             </>
           ) : (
-            <div className="text-center py-20">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-full blur-3xl opacity-60" />
-                <div className="relative w-24 h-24 bg-gradient-to-r from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto shadow-lg border border-amber-400/20 backdrop-blur-sm">
-                  <BookOpen className="w-12 h-12 text-amber-400" />
-                </div>
-              </div>
-              <h3 className="text-3xl font-bold text-white mb-4">
-                {searchQuery ? 'No books found' : 'Start searching for books'}
-              </h3>
-              <p className="text-stone-300 text-lg max-w-md mx-auto leading-relaxed">
-                {searchQuery ? 'Try adjusting your search terms or filters to find what you\'re looking for' : 'Enter a search term above to discover amazing books from our collection'}
-              </p>
-            </div>
+            <EmptyState />
           )}
         </div>
         <Footer />
@@ -468,6 +552,12 @@ const BrowseClient = () => {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(251, 191, 36, 0.6);
+        }
+          .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
       `}</style>
     </div>

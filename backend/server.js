@@ -90,10 +90,10 @@ app.get('/api/search', async (req, res) => {
       // Sort by score (descending), then alphabetically
       scored.sort((a, b) => b._score - a._score || a.title.localeCompare(b.title));
 
-      console.log('scored', scored)
 
-      return res.json(scored.slice(0, 20));
+      return res.json(scored.slice(0, 50));
     }
+
 
     // Fallback to OpenLibrary
     const response = await openLibraryAPI.get('/search.json', {
@@ -113,6 +113,7 @@ app.get('/api/search', async (req, res) => {
         book.key
         && book.title !== 'Study Guide'
       )
+
       .map(book => {
         let score = 0;
         const title = book.title.toLowerCase();
@@ -149,13 +150,13 @@ app.get('/api/search', async (req, res) => {
         };
       })
       .sort((a, b) => b._score - a._score)
-      .slice(0, 20);
+      .slice(0, 50);
+
+
 
     if (!filteredBooks.length) {
       return res.status(404).json({ error: 'No books found' });
     }
-
-    console.log('filtered books', filteredBooks)
 
     res.json(filteredBooks);
   } catch (err) {
@@ -222,7 +223,10 @@ await redis.set(
 
 app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
   const id = req.query.id;
+  const searchAuthor = req.query.searchAuthor;
   const userId = req.userId || null;
+
+  console.log('search author', searchAuthor)
 
   if (!id) {
     return res.status(400).json({ error: 'Missing parameter `id`' });
@@ -366,8 +370,6 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
       },
     });
     userStatus = userBook?.status ?? null;
-    console.log('user', userId)
-    console.log('userStatus', userStatus);
   }
       return res.json({
         ...existingBook,
@@ -378,20 +380,24 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
     }
 
     // Fetch from Open Library if not in DB
-    const response = await axios.openLibraryAPI(`/works/${id}.json`);
+    const response = await openLibraryAPI.get(`/works/${id}.json`);
     const book = response.data;
 
     // Fetch author names from author keys
     let authorNames = [];
 
-    if (book.authors && Array.isArray(book.authors)) {
+    console.log('search author:', searchAuthor)
+
+    if (book.authors && Array.isArray(book.authors) && !searchAuthor) {
+      console.log('no search author...')
       authorNames = await Promise.all(
         book.authors.map(async (a) => {
           try {
             const authorKey = a.author?.key;
             if (!authorKey) return 'Unknown Author';
 
-            const authorRes = await axios.openLibraryAPI(`/${authorKey}.json`);
+            const authorRes = await openLibraryAPI.get(`/${authorKey}.json`);
+            console.log(authorRes.data?.name)
             return authorRes.data?.name || 'Unknown Author';
           } catch (err) {
             console.error('Error fetching author:', err.message);
@@ -406,13 +412,22 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
 
 if (!coverId) {
   try {
-    const editionsRes = await axios.openLibraryAPI(`/${id}/editions.json?limit=10`);
+    const editionsRes = await openLibraryAPI.get(`/works/${id}/editions.json?limit=10`);
     const editions = editionsRes.data.entries;
 
     for (const ed of editions) {
       if (ed.covers?.length) {
         coverId = ed.covers[0];
-        isbn = ed.isbn_10 ?? null;
+
+        // Prefer ISBN-10, fallback to ISBN-13
+        if (ed.isbn_10?.length) {
+          isbn = ed.isbn_10[0];
+        } else if (ed.isbn_13?.length) {
+          isbn = ed.isbn_13[0];
+        } else {
+          isbn = null;
+        }
+
         break;
       }
     }
@@ -421,21 +436,27 @@ if (!coverId) {
   }
 }
 
-if(!isbn) {
+// If cover was already found but ISBN is still null, try again without cover constraint
+if (!isbn) {
   try {
-    const editionsRes = await axios.openLibraryAPI(`/${id}/editions.json?limit=10`);
+    const editionsRes = await openLibraryAPI.get(`/works/${id}/editions.json?limit=10`);
     const editions = editionsRes.data.entries;
 
     for (const ed of editions) {
-      if (ed.isbn_10) {
-        isbn = ed.isbn_10 ?? null;
+      // Prefer ISBN-10, fallback to ISBN-13
+      if (ed.isbn_10?.length) {
+        isbn = ed.isbn_10[0];
+        break;
+      } else if (ed.isbn_13?.length) {
+        isbn = ed.isbn_13[0];
         break;
       }
     }
   } catch (editionErr) {
-    console.warn(`Could not fetch edition covers for ${id}:`, editionErr.message);
+    console.warn(`Could not fetch ISBNs for ${id}:`, editionErr.message);
   }
 }
+
 
 
 const coverImage = coverId
@@ -467,7 +488,7 @@ const coverImage = coverId
     const savedBook = await prisma.book.create({
       data: {
         title: bookData.title,
-        author: bookData.authors[0],
+        author: searchAuthor || bookData.authors[0],
         description: bookData.description,
         image: bookData.image,
         pageCount: bookData.pageCount,
@@ -521,7 +542,6 @@ app.post('/api/user/booklist', authenticateUser, async (req, res) => {
             status,
         } = req.body;
 
-        console.log("id", openLibraryId);
 
         if (!openLibraryId) {
             return res.status(400).json({ error: 'Missing required book fields' });

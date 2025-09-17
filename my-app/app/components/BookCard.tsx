@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 
-// Mock BookData interface for demo
 interface BookData {
   openLibraryId?: string
   title: string
@@ -38,24 +37,10 @@ const BookCard = ({ book, id }: BookCardProps ) => {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   
-  const handleImageClick = (id: string) => {
-    router.push(`/book/${encodeURIComponent(id)}`)
-  }
-
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsLiked(!isLiked)
-  }
-
-  const handleBookmark = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsBookmarked(!isBookmarked)
-  }
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    // Share functionality would go here
-  }
+  const handleImageClick = (id: string, author?: string) => {
+  router.push(
+    `/book/${encodeURIComponent(id)}?author=${encodeURIComponent(author ?? '')}`
+  );  }
 
   // Function to get score color based on value
   const getScoreColor = (score: number) => {
@@ -112,7 +97,7 @@ const BookCard = ({ book, id }: BookCardProps ) => {
       className="group cursor-pointer relative bg-stone-800/40 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden hover:border-amber-500/40 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10 min-h-96 min-w-48 max-w-[190px] max-h-[388px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => handleImageClick(book.openLibraryId ?? '')}
+      onClick={() => handleImageClick((book.openLibraryId ?? ''), book.author)}
     >
       {/* Book Cover */}
       <div className="aspect-[3/4] max-w-[190] max-h-[253] bg-stone-700/30 relative overflow-hidden">

@@ -302,7 +302,7 @@ const HomePage = () => {
                   {/* Conditional button */}
                   {!session ? (
                     <button 
-                      onClick={() => router.push('/auth/signin')}
+                      onClick={() => router.push('/auth')}
                       className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

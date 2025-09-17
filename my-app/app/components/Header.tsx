@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useState, useRef } from 'react'
-import { Bell, Coffee, Search, User, Menu, X, Share2, Bookmark, Heart, Clock, CheckCircle, BookOpen, BookMarked } from "lucide-react";
+import { Bell, Coffee, Search, User, Menu, X, Share2, Bookmark, Heart, Clock, CheckCircle, BookOpen, BookMarked, Loader2 } from "lucide-react";
 import Link from 'next/link';
 import { BookData } from '../types/types';
 import { debounce } from 'lodash';
@@ -28,6 +28,7 @@ const Header = () => {
   const [books, setBooks] = useState<BookData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(false); // New loading state for search
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState<UserActivity[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
@@ -127,6 +128,14 @@ const Header = () => {
   }, []);
 
   const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setBooks([]);
+      setShowSearchResults(false);
+      setIsSearchLoading(false);
+      return;
+    }
+
+    setIsSearchLoading(true); // Start loading
     try {
       const response = await getSearchData(query);
       setBooks(response ?? []);
@@ -135,6 +144,8 @@ const Header = () => {
       console.error('Error fetching books:', error);
       setBooks([]);
       setShowSearchResults(false);
+    } finally {
+      setIsSearchLoading(false); // End loading
     }
   };
   
@@ -151,6 +162,7 @@ const Header = () => {
     } else {
       setBooks([]);
       setShowSearchResults(false);
+      setIsSearchLoading(false);
     }
 
     return () => {
@@ -187,14 +199,16 @@ const Header = () => {
     setSearchQuery(e.target.value);
   };
 
-  const handleSearchItemClick = (id: string) => {
-    router.push(`/book/${encodeURIComponent(id)}`)
+  const handleSearchItemClick = (id: string, author?: string) => {
+      router.push(
+    `/book/${encodeURIComponent(id)}?author=${encodeURIComponent(author ?? '')}`
+  );
   };
 
   const BookListItem = ({ book }: { book: BookData }) => (
     <div 
       className="p-3 hover:bg-stone-600 cursor-pointer border-b border-stone-500 bg-stone-700 last:border-b-0"
-      onClick={() => handleSearchItemClick(book.openLibraryId ?? '')}
+      onClick={() => handleSearchItemClick((book.openLibraryId ?? ''), book.author)}
     >
       <div className="flex gap-3">
         <div className="w-12 h-16 bg-stone-100 rounded overflow-hidden flex-shrink-0">
@@ -219,6 +233,23 @@ const Header = () => {
           </p>
         </div>
       </div>
+    </div>
+  );
+
+  const SearchLoadingItem = () => (
+    <div className="p-4 text-center">
+      <div className="flex items-center justify-center gap-2">
+        <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+        <span className="text-stone-400 text-sm">Searching books...</span>
+      </div>
+    </div>
+  );
+
+  const SearchEmptyState = () => (
+    <div className="p-4 text-center">
+      <BookOpen className="w-8 h-8 text-stone-500 mx-auto mb-2" />
+      <p className="text-stone-400 text-sm">No books found</p>
+      <p className="text-stone-500 text-xs">Try a different search term</p>
     </div>
   );
 
@@ -272,26 +303,51 @@ return (
           <div className="hidden md:flex items-center gap-4">
             <div className="relative" ref={searchRef}>
               <div className="relative">
-                <Search className="w-5 h-5 text-stone-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Search className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors ${
+                  isSearchLoading ? 'text-amber-400' : 'text-stone-400'
+                }`} />
+                {/* Show loading spinner when searching */}
+                {isSearchLoading && (
+                  <Loader2 className="w-4 h-4 text-amber-400 absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
+                )}
                 <input
                   type="text"
                   placeholder="Search books, authors..."
                   value={searchQuery}
                   onChange={handleSearchInputChange}
-                  className="pl-10 pr-4 py-2 bg-stone-800 text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 w-64"
+                  className={`pl-10 py-2 bg-stone-800 text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 w-64 transition-all ${
+                    isSearchLoading ? 'pr-10' : 'pr-4'
+                  }`}
                 />
               </div>
               
               {/* Desktop Search Results Dropdown */}
-              {showSearchResults && books.length > 0 && (
+              {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-96 overflow-y-auto z-50">
-                  {books.slice(0, 5).map((book, index) => (
-                    <BookListItem key={book.openLibraryId || index} book={book} />
-                  ))}
-                  {books.length > 5 && (
-                    <div className="p-2 text-center text-xs text-stone-400 border-t border-stone-600">
-                      Showing 5 of {books.length} results
-                    </div>
+                  {isSearchLoading ? (
+                    <SearchLoadingItem />
+                  ) : books.length > 0 ? (
+                    <>
+                      {books.slice(0, 5).map((book, index) => (
+                        <BookListItem key={book.openLibraryId || index} book={book} />
+                      ))}
+                      {books.length > 5 && (
+                        <div className="p-2 flex items-center justify-between text-xs border-t border-stone-600">
+                          <span className="text-stone-400">
+                            Showing 5 of {books.length} results
+                          </span>
+                          <Link 
+                            href={`/browse?search=${encodeURIComponent(searchQuery)}`}
+                            className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                            onClick={() => setShowSearchResults(false)}
+                          >
+                            View all
+                          </Link>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <SearchEmptyState />
                   )}
                 </div>
               )}
@@ -346,18 +402,6 @@ return (
                       </div>
                     )}
                   </div>
-                  
-                  {/* {notifications.length > 0 && (
-                    <div className="p-3 border-t border-stone-600 bg-stone-900">
-                      <Link 
-                        href="/notifications" 
-                        className="text-xs text-amber-400 hover:text-amber-300 font-medium block text-center transition-colors"
-                        onClick={() => setIsNotificationsOpen(false)}
-                      >
-                        View all notifications
-                      </Link>
-                    </div>
-                  )} */}
                 </div>
               )}
             </div>
@@ -403,27 +447,55 @@ return (
           <div className="md:hidden mt-3 pb-1" ref={mobileSearchRef}>
             <div className="relative">
               <div className="relative">
-                <Search className="w-5 h-5 text-stone-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <Search className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors ${
+                  isSearchLoading ? 'text-amber-400' : 'text-stone-400'
+                }`} />
+                {/* Show loading spinner when searching */}
+                {isSearchLoading && (
+                  <Loader2 className="w-4 h-4 text-amber-400 absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
+                )}
                 <input
                   type="text"
                   placeholder="Search books, authors..."
                   value={searchQuery}
                   onChange={handleSearchInputChange}
-                  className="w-full pl-10 pr-4 py-2 bg-stone-800 text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className={`w-full pl-10 py-2 bg-stone-800 text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all ${
+                    isSearchLoading ? 'pr-10' : 'pr-4'
+                  }`}
                   autoFocus
                 />
               </div>
               
               {/* Mobile Search Results Dropdown */}
-              {showSearchResults && books.length > 0 && (
+              {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-80 overflow-y-auto z-50">
-                  {books.slice(0, 4).map((book, index) => (
-                    <BookListItem key={book.openLibraryId || index} book={book} />
-                  ))}
-                  {books.length > 4 && (
-                    <div className="p-2 text-center text-xs text-stone-400 border-t border-stone-600">
-                      Showing 4 of {books.length} results
-                    </div>
+                  {isSearchLoading ? (
+                    <SearchLoadingItem />
+                  ) : books.length > 0 ? (
+                    <>
+                      {books.slice(0, 4).map((book, index) => (
+                        <BookListItem key={book.openLibraryId || index} book={book} />
+                      ))}
+                      {books.length > 4 && (
+                        <div className="p-2 flex items-center justify-between text-xs border-t border-stone-600">
+                          <span className="text-stone-400">
+                            Showing 4 of {books.length} results
+                          </span>
+                          <Link 
+                            href={`/browse?search=${encodeURIComponent(searchQuery)}`}
+                            className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                            onClick={() => {
+                              setShowSearchResults(false);
+                              setIsSearchOpen(false);
+                            }}
+                          >
+                            View all
+                          </Link>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <SearchEmptyState />
                   )}
                 </div>
               )}
@@ -467,18 +539,6 @@ return (
                   </div>
                 )}
               </div>
-              
-              {/* {notifications.length > 0 && (
-                <div className="p-3 border-t border-stone-600 bg-stone-900">
-                  <Link 
-                    href="/notifications" 
-                    className="text-xs text-amber-400 hover:text-amber-300 font-medium block text-center transition-colors"
-                    onClick={() => setIsNotificationsOpen(false)}
-                  >
-                    View all notifications
-                  </Link>
-                </div>
-              )} */}
             </div>
           </div>
         )}

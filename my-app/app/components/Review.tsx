@@ -702,8 +702,8 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                             : 'text-stone-400 hover:text-white hover:bg-white/10'
                     }`}
                 >
-                    <span className="hidden sm:inline">All Reviews</span>
-                    <span className="sm:hidden">All</span>
+                    <span className="hidden md:inline">All Reviews</span>
+                    <span className="md:hidden">All</span>
                     <span className="ml-1">({reviews.length})</span>
                 </button>
                 <button
