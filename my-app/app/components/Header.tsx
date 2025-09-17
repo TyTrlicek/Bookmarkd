@@ -52,7 +52,13 @@ const Header = () => {
     if (!isNotificationsOpen) {
       await fetchNotifications();
     }
-    setIsNotificationsOpen(!isNotificationsOpen);
+    if(isNotificationsOpen){
+    setIsNotificationsOpen(false);
+    }
+    else{
+      setIsNotificationsOpen(true);
+    }
+      setSearchQuery('');
   };
 
   const fetchNotifications = async () => {
@@ -321,7 +327,7 @@ return (
               
               {/* Desktop Search Results Dropdown */}
               {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-96 overflow-y-auto z-50">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-96 overflow-y-auto z-55">
                   {isSearchLoading ? (
                     <SearchLoadingItem />
                   ) : books.length > 0 ? (
@@ -367,7 +373,7 @@ return (
 
               {/* Notifications Dropdown */}
               {isNotificationsOpen && (
-                <div className="absolute right-0 top-full mt-1 w-80 bg-stone-800 border border-stone-600 rounded-lg shadow-xl z-50">
+                <div className="absolute right-0 top-full mt-1 w-80 bg-stone-800 border border-stone-600 rounded-lg shadow-xl z-55">
                   <div className="p-4 border-b border-stone-600 bg-stone-900">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-stone-100">Notifications</h3>
@@ -466,7 +472,7 @@ return (
               
               {/* Mobile Search Results Dropdown */}
               {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-80 overflow-y-auto z-50">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-80 overflow-y-auto z-55">
                   {isSearchLoading ? (
                     <SearchLoadingItem />
                   ) : books.length > 0 ? (
