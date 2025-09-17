@@ -26,7 +26,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
   
   const router = useRouter();
   const searchRef = useRef(null);
-  const modalRef = useRef(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const { session } = useAuthStore()
 
   // Mock fetch function to simulate API call
@@ -115,24 +115,40 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !(modalRef.current as Node).contains(event.target as Node)) {
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+    // Check if it's a touch event or mouse event
+    const isTouch = event.type === 'touchstart';
+    
+    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      // Add small delay for touch events to prevent conflicts
+      if (isTouch) {
+        setTimeout(() => {
+          setShowSearchModal(false);
+          setSearchQuery('');
+          setSearchResults([]);
+          setShowSearchResults(false);
+        }, 100);
+      } else {
         setShowSearchModal(false);
         setSearchQuery('');
         setSearchResults([]);
         setShowSearchResults(false);
       }
-    };
-
-    if (showSearchModal) {
-      document.addEventListener('mousedown', handleClickOutside);
     }
+  };
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showSearchModal]);
+  if (showSearchModal) {
+    // Listen for both mouse and touch events
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+  }
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+    document.removeEventListener('touchstart', handleClickOutside);
+  };
+}, [showSearchModal]);
 
   useEffect(() => {
     const loadFavoriteBooks = async () => {
@@ -176,50 +192,72 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
     setFavoriteBooks(prev => prev.filter(book => String(book.id) !== bookId));
   };
 
-  const handleAddBookFromSearch = async (selectedBook: BookData) => {
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
+  const handleAddBookFromSearch = async (selectedBook: BookData | any) => {
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
 
-    console.log('selectedbookId', selectedBook.id);
+  console.log('selectedbookId', selectedBook.id);
 
-    const accessToken = session?.access_token;
+  const accessToken = session?.access_token;
 
-    if (!accessToken) {
-      router.push('/auth');
-      return;
-    }    
+  if (!accessToken) {
+    router.push('/auth');
+    return;
+  }    
 
-    try {
-      // Add to backend
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/favorites`,
-        { bookId: selectedBook.id },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+  try {
+    // Add to backend
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/favorites`,
+      { bookId: selectedBook.id },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-      // Add to local state
-      setFavoriteBooks(prev => [...prev, selectedBook]);
-      
-      // Close modal and reset search
-      setShowSearchModal(false);
-      setSearchQuery('');
-      setSearchResults([]);
-      setShowSearchResults(false);
-    } catch (error) {
-      console.error('Failed to add book to favorites:', error);
-    }
-  };
+    // Add to local state
+    setFavoriteBooks(prev => [...prev, selectedBook]);
+    
+  } catch (error) {
+    console.error('Failed to add book to favorites:', error);
+    // Show some user feedback here
+  }
+};
 
   // Open search modal
   const handleOpenSearch = () => {
     setShowSearchModal(true);
   };
+
+  const mobileStyles = `
+  /* Ensure touch targets are at least 44px */
+  @media (max-width: 768px) {
+    .search-result-item {
+      min-height: 44px;
+      padding: 16px;
+    }
+    
+    /* Prevent text selection on touch */
+    .search-result-item * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* Better visual feedback for touch */
+    .search-result-item:active {
+      transform: scale(0.98);
+      background-color: rgb(68 64 60); /* stone-600 */
+    }
+  }
+`;
 
   // Close search modal
   const handleCloseSearch = () => {
@@ -230,10 +268,41 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
   };
 
   // Search result item component
-  const SearchResultItem = ({ book }: any) => (
+  const SearchResultItem = ({ book }: { book: BookData }) => {
+  const handleBookSelect = async (e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.TouchEvent<HTMLDivElement>) => {
+    // Prevent event bubbling
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      // Add haptic feedback for mobile
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
+      // Close modal immediately to prevent flickering
+      setShowSearchModal(false);
+      setSearchQuery('');
+      setSearchResults([]);
+      setShowSearchResults(false);
+      
+      // Then handle the add operation
+      await handleAddBookFromSearch(book);
+    } catch (error) {
+      console.error('Failed to add book:', error);
+      // Reopen modal if there was an error
+      setShowSearchModal(true);
+    }
+  };
+
+  return (
     <div 
-      className="p-4 hover:bg-stone-700 cursor-pointer border-b border-stone-600 last:border-b-0"
-      onClick={() => handleAddBookFromSearch(book)}
+      className="p-4 hover:bg-stone-700 active:bg-stone-600 cursor-pointer border-b border-stone-600 last:border-b-0 transition-colors duration-150"
+      onClick={handleBookSelect}
+      // Add touch handling for better mobile response
+      onTouchStart={() => {}}
+      role="button"
+      tabIndex={0}
     >
       <div className="flex gap-4">
         <div className="w-20 h-28 bg-stone-600 rounded overflow-hidden flex-shrink-0 shadow-lg">
@@ -271,6 +340,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
       </div>
     </div>
   );
+};
 
   // Create empty slots to fill up to 6 books
   const displayBooks = [...favoriteBooks];
