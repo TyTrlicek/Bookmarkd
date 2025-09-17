@@ -15,6 +15,11 @@
     "prisma": "^6.11.1"
   },
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed:demo": "node scripts/seed-books.js --mode=popular --limit=25",
+    "seed:small": "node scripts/seed-books.js --mode=popular --limit=100",
+    "seed:medium": "node scripts/seed-books.js --mode=genres --limit=1000",
+    "seed:large": "node scripts/seed-books.js --mode=genres --limit=5000",
+    "seed:custom": "node scripts/seed-books.js --mode=custom"
   }
 }
