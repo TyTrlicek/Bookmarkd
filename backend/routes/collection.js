@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
+const { cache, TTL } = require('../lib/cache')
+const prisma = require('../lib/prisma')
 
 const router = express.Router();
 
@@ -14,12 +16,28 @@ router.get('/collection', authenticateUser, async (req, res) => {
       }
 
       try {
+        const cacheKey = cache.generateKey('userCollection', userId);
+
+        // Try cache first
+        const cachedCollection = await cache.get(cacheKey);
+        if (cachedCollection) {
+          console.log(`[Collection] Served from cache for user ${userId}`);
+          return res.json(cachedCollection);
+        }
+
+        console.log(`[Collection] Cache miss for user ${userId}, fetching from DB...`);
+
         const userBooks = await prisma.userBook.findMany({
           where: { userId },
           include: {
             book: true,
           },
-        });  
+        });
+
+        // Cache the collection
+        await cache.set(cacheKey, userBooks, TTL.USER_COLLECTION);
+        console.log(`[Collection] Cached collection for user ${userId} (TTL=${TTL.USER_COLLECTION}s)`);
+
         res.json(userBooks);
       } catch (error) {
         console.error('Error fetching user collection:', error);
@@ -79,6 +97,12 @@ router.get('/collection', authenticateUser, async (req, res) => {
         }
       }
     });
+
+    // Invalidate user-related caches
+    await cache.invalidateUser(userId);
+    await cache.invalidateBook(existingEntry.bookId);
+    await cache.invalidateGlobal();
+    console.log(`[Collection] Invalidated caches after book removal for user ${userId}`);
 
     return res.status(200).json({
       message: 'Book removed from collection successfully',
@@ -145,6 +169,10 @@ router.put('/collection/status', authenticateUser, async (req, res) => {
       }
     });
 
+    // Invalidate user-related caches
+    await cache.invalidateUser(userId);
+    console.log(`[Collection] Invalidated user caches after status update for user ${userId}`);
+
     return res.status(200).json({ message: 'Status updated', status });
   } catch (err) {
     console.error('JWT or DB error:', err);
@@ -196,6 +224,12 @@ router.put('/collection/status', authenticateUser, async (req, res) => {
         }
       }
     });
+
+    // Invalidate user and book-related caches (rating affects rankings)
+    await cache.invalidateUser(userId);
+    await cache.invalidateBook(updated.bookId);
+    await cache.invalidateGlobal();
+    console.log(`[Collection] Invalidated caches after rating update for user ${userId}`);
 
     return res.status(200).json({ message: 'Rating updated', rating });
   } catch (err) {

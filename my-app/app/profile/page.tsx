@@ -636,7 +636,7 @@ allowedGenres.forEach((genre) => {
 )}
 
 {/* Favorite Books Section */}
-<section className="mt-16 mb-16">
+<section className="mt-16 mb-16 bg-stone-900 px-6 py-4 rounded-3xl border border-white/10 shadow-2xl">
   <div className="flex items-center justify-between mb-8">
     <div className="flex items-center gap-3">
       <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -649,10 +649,10 @@ allowedGenres.forEach((genre) => {
     </div>
     
     {/* Show book count */}
-    <div className="text-right">
+    {/* <div className="text-right">
       <div className="text-2xl font-bold text-white">{favoriteBooks.length}</div>
       <div className="text-sm text-stone-400">books</div>
-    </div>
+    </div> */}
   </div>
 
   {/* Desktop: Grid Layout */}

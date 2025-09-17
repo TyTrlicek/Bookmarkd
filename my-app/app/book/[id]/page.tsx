@@ -64,6 +64,7 @@ const searchAuthor = searchParams.get('author')
   const [userRecommendation, setUserRecommendation] = useState('');
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
 
   useEffect(() => {
@@ -274,9 +275,31 @@ return (
                 <div className="p-6">
                   <h2 className="text-lg font-semibold text-white mb-4">Description</h2>
                   <div className="prose prose-stone max-w-none">
-                      <p className="text-stone-300 leading-relaxed">
-                          {description || 'No description available.'}
-                      </p>
+                      {(() => {
+                        const desc = description || 'No description available.';
+                        const isLongDescription = desc.length > 300;
+                        const shouldShowButton = isLongDescription;
+                        const displayText = shouldShowButton && !isDescriptionExpanded
+                          ? desc.substring(0, 300) + '...'
+                          : desc;
+
+                        return (
+                          <div>
+                            <p className="text-stone-300 leading-relaxed">
+                              {displayText}
+                            </p>
+                            {shouldShowButton && (
+                              <button
+                                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                                className="mt-3 text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1"
+                              >
+                                {isDescriptionExpanded ? 'Show Less' : 'Show More'}
+                                <ChevronRight className={`w-4 h-4 transition-transform ${isDescriptionExpanded ? 'rotate-90' : ''}`} />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
                   </div>
 
                   {/* Tags */}

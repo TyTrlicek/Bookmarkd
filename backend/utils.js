@@ -1,3 +1,6 @@
+const { cache, TTL } = require('./lib/cache');
+const prisma = require('./lib/prisma');
+
 async function checkAndUnlockAchievements(userId, context = {}) {
   const unlocked = await prisma.userAchievement.findMany({
     where: { userId },
@@ -79,6 +82,17 @@ async function checkAndUnlockAchievements(userId, context = {}) {
 }
 
 async function calculateUserStats(userId) {
+  const cacheKey = cache.generateKey('achievementStats', userId);
+
+  // Try to get cached achievement stats first
+  const cachedStats = await cache.get(cacheKey);
+  if (cachedStats) {
+    console.log(`[AchievementStats] Served from cache for user ${userId}`);
+    return cachedStats;
+  }
+
+  console.log(`[AchievementStats] Cache miss for user ${userId}, calculating stats...`);
+
   // Get all user data in parallel
   const [userBooks, reviews] = await Promise.all([
     prisma.userBook.findMany({
@@ -114,8 +128,8 @@ async function calculateUserStats(userId) {
     .filter(rating => rating !== null);
   
   const uniqueRatings = new Set(ratingsGiven);
-  
-  return {
+
+  const stats = {
     completedBooks: completedBooks.length,
     uniqueAuthors: uniqueAuthors.size,
     uniqueGenres: allGenres.size,
@@ -124,6 +138,12 @@ async function calculateUserStats(userId) {
     oneStarRatings: ratingsGiven.filter(rating => rating === 1).length,
     hasAllRatingLevels: [1,2,3,4,5,6,7,8,9,10].every(rating => uniqueRatings.has(rating))
   };
+
+  // Cache the achievement stats for 30 minutes
+  await cache.set(cacheKey, stats, TTL.USER_STATS);
+  console.log(`[AchievementStats] Cached stats for user ${userId} (TTL=${TTL.USER_STATS}s)`);
+
+  return stats;
 }
 
 module.exports = { checkAndUnlockAchievements }

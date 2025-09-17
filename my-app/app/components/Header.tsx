@@ -172,7 +172,6 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Fix notifications logic - check BOTH desktop and mobile notification elements
       const isInsideDesktopNotifications = notificationsRef.current && notificationsRef.current.contains(event.target as Node);
       const isInsideMobileNotifications = mobileNotificationsRef.current && mobileNotificationsRef.current.contains(event.target as Node);
       
@@ -180,7 +179,6 @@ const Header = () => {
         setIsNotificationsOpen(false);
       }
       
-      // Fix search logic - close if clicking outside any search elements
       const isInsideDesktopSearch = searchRef.current && searchRef.current.contains(event.target as Node);
       const isInsideMobileSearch = mobileSearchRef.current && mobileSearchRef.current.contains(event.target as Node);
       

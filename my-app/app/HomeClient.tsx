@@ -91,7 +91,7 @@ const HomePage = () => {
       console.error(error);
     }
   }
-  fetchRecentActivity();
+  // fetchRecentActivity();
 
   const fetchReccomendationData = async () => {
     try{

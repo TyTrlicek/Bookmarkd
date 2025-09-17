@@ -3,6 +3,7 @@ const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
 const { createClient } = require('@supabase/supabase-js');
+const { cache, TTL } = require('../lib/cache');
 
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
@@ -13,8 +14,17 @@ const router = express.Router();
 
 router.get('/me', authenticateUser, async (req, res) => {
     try {
-  
-      console.log("TRIGGERED")
+      const userId = req.userId;
+      const cacheKey = cache.generateKey('userProfile', userId);
+
+      // Try cache first
+      const cachedUser = await cache.get(cacheKey);
+      if (cachedUser) {
+        console.log(`[UserProfile] Served from cache for user ${userId}`);
+        return res.json(cachedUser);
+      }
+
+      console.log(`[UserProfile] Cache miss for user ${userId}, fetching from DB...`);
       const user = await prisma.user.findUnique({
         where: { id: req.userId },
         select: {
@@ -25,9 +35,13 @@ router.get('/me', authenticateUser, async (req, res) => {
           avatar_url: true,
         },
       });
-  
+
       if (!user) return res.status(404).json({ error: 'User not found' });
-  
+
+      // Cache the user profile
+      await cache.set(cacheKey, user, TTL.USER_PROFILE);
+      console.log(`[UserProfile] Cached user profile for ${userId} (TTL=${TTL.USER_PROFILE}s)`);
+
       res.json(user);
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -182,34 +196,43 @@ router.get('/me', authenticateUser, async (req, res) => {
   router.get('/stats', authenticateUser, async (req, res) => {
   const userId = req.userId;
   try {
+    const cacheKey = cache.generateKey('userStats', userId);
+
+    // Try to get cached stats first
+    
+    const cachedStats = await cache.get(cacheKey);
+    if (cachedStats) {
+      console.log(`[UserStats] Served from cache for user ${userId}`);
+      return res.json(cachedStats);
+    }
+
+    console.log(`[UserStats] Cache miss for user ${userId}, calculating stats...`);
+
     // current year start date
     const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        createdAt: true,
+        avatar_url: true,
+      },
+    });
 
-    console.log("TRIGGERED")
-      const user = await prisma.user.findUnique({
-        where: { id: req.userId },
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          createdAt: true,
-          avatar_url: true,
+    if (!user) {
+      const username = req.user.email ? req.user.email.split('@')[0] : 'user';
+
+      await prisma.user.create({
+        data: {
+          id: userId,
+          email: req.user?.email,
+          username: username
         },
       });
-
-      if (!user) {
-            const username = req.user.email ? req.user.email.split('@')[0] : 'user';
-
-             await prisma.user.create({
-                data: {
-                    id: userId,
-                    email: req.user?.email,
-                    username: username
-                },
-            });
-        }
-  
+    }
 
     // Use Prisma transactions to run multiple aggregates in one round-trip
     const [collectionCount, avgRatingAgg, ratedThisYearCount] = await prisma.$transaction([
@@ -234,12 +257,18 @@ router.get('/me', authenticateUser, async (req, res) => {
       })
     ]);
 
-    res.json({
+    const stats = {
       booksInCollection: collectionCount,
       avgRating: avgRatingAgg._avg.rating || 0,
       booksRatedThisYear: ratedThisYearCount,
       user
-    });
+    };
+
+    // Cache the results
+    await cache.set(cacheKey, stats, TTL.USER_STATS);
+    console.log(`[UserStats] Cached stats for user ${userId} (TTL=${TTL.USER_STATS}s)`);
+
+    res.json(stats);
 
   } catch (error) {
     console.error('Error fetching user stats:', error);

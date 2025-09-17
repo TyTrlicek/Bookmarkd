@@ -15,6 +15,7 @@ const activityRoute = require('./routes/activity')
 const favoriteRoute = require('./routes/favorite')
 const recomendationRoute = require('./routes/reccomendation')
 const redis = require ('./lib/redis');
+const { cache, TTL } = require('./lib/cache');
 const { checkAndUnlockAchievements } = require('./utils');
 
 const openLibraryAPI = axios.create({
@@ -59,6 +60,18 @@ app.get('/api/search', async (req, res) => {
   }
 
   try {
+    // Create cache key for this search query
+    const searchCacheKey = cache.generateKey('search', 'local', query.toLowerCase().trim());
+
+    // Try to get cached search results first
+    const cachedResults = await cache.get(searchCacheKey);
+    if (cachedResults) {
+      console.log(`[Search] Served local results from cache for query: "${query}"`);
+      return res.json(cachedResults);
+    }
+
+    console.log(`[Search] Cache miss for local search: "${query}", querying database...`);
+
     // Fetch local results
     const localResults = await prisma.book.findMany({
       where: {
@@ -67,7 +80,7 @@ app.get('/api/search', async (req, res) => {
           { author: { contains: query, mode: 'insensitive' } },
         ],
       },
-      take: 50, // get more, we’ll re-rank below
+      take: 50, // get more, we'll re-rank below
     });
 
     if (localResults.length > 0) {
@@ -90,12 +103,27 @@ app.get('/api/search', async (req, res) => {
       // Sort by score (descending), then alphabetically
       scored.sort((a, b) => b._score - a._score || a.title.localeCompare(b.title));
 
+      const results = scored.slice(0, 50);
 
-      return res.json(scored.slice(0, 50));
+      // Cache the local search results
+      await cache.set(searchCacheKey, results, TTL.SEARCH_RESULTS);
+      console.log(`[Search] Cached local search results for "${query}" (TTL=${TTL.SEARCH_RESULTS}s)`);
+
+      return res.json(results);
     }
 
 
-    // Fallback to OpenLibrary
+    // Fallback to OpenLibrary - check cache first
+    const openLibraryCacheKey = cache.generateKey('search', 'openlibrary', query.toLowerCase().trim());
+
+    let cachedOpenLibraryResults = await cache.get(openLibraryCacheKey);
+    if (cachedOpenLibraryResults) {
+      console.log(`[Search] Served OpenLibrary results from cache for query: "${query}"`);
+      return res.json(cachedOpenLibraryResults);
+    }
+
+    console.log(`[Search] Cache miss for OpenLibrary search: "${query}", calling API...`);
+
     const response = await openLibraryAPI.get('/search.json', {
       params: {
         q: query,
@@ -157,6 +185,10 @@ app.get('/api/search', async (req, res) => {
     if (!filteredBooks.length) {
       return res.status(404).json({ error: 'No books found' });
     }
+
+    // Cache the OpenLibrary search results for longer since external API is slower
+    await cache.set(openLibraryCacheKey, filteredBooks, TTL.OPENLIBRARY_API);
+    console.log(`[Search] Cached OpenLibrary search results for "${query}" (TTL=${TTL.OPENLIBRARY_API}s)`);
 
     res.json(filteredBooks);
   } catch (err) {
@@ -329,10 +361,14 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
     });
 
     if (existingBook) {
-      let ratingRank = null;
-      let popularityRank = null;
+      // Cache key for book rankings
+      const rankingCacheKey = cache.generateKey('bookRankings', existingBook.id);
 
-      if (existingBook.totalRatings && existingBook.totalRatings > 0) {
+      let rankings = await cache.get(rankingCacheKey);
+
+      if (!rankings && existingBook.totalRatings && existingBook.totalRatings > 0) {
+        console.log(`[BookData] Computing rankings for book ${existingBook.id}...`);
+
         // Rank by average rating
         const ratingSorted = await prisma.book.findMany({
           where: { totalRatings: { gt: 0 } },
@@ -353,9 +389,20 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
           select: { id: true },
         });
 
-        ratingRank = ratingSorted.findIndex(b => b.id === existingBook.id) + 1;
-        popularityRank = popularitySorted.findIndex(b => b.id === existingBook.id) + 1;
+        rankings = {
+          ratingRank: ratingSorted.findIndex(b => b.id === existingBook.id) + 1,
+          popularityRank: popularitySorted.findIndex(b => b.id === existingBook.id) + 1
+        };
+
+        // Cache rankings for 1 hour
+        await cache.set(rankingCacheKey, rankings, TTL.BOOK_RANKINGS);
+        console.log(`[BookData] Cached rankings for book ${existingBook.id} (TTL=${TTL.BOOK_RANKINGS}s)`);
+      } else if (rankings) {
+        console.log(`[BookData] Served rankings from cache for book ${existingBook.id}`);
       }
+
+      let ratingRank = rankings?.ratingRank || null;
+      let popularityRank = rankings?.popularityRank || null;
 
       let userStatus = null;
 
@@ -601,6 +648,12 @@ app.post('/api/user/booklist', authenticateUser, async (req, res) => {
                 }
             }
         });
+
+        // Invalidate user-related caches
+        await cache.invalidateUser(userId);
+        await cache.invalidateBook(book.id);
+        await cache.invalidateGlobal();
+        console.log(`[BookList] Invalidated caches after book addition for user ${userId}`);;
 
         const result = await prisma.userBook.aggregate({
         where: {

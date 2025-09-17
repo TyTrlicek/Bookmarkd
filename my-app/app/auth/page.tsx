@@ -33,6 +33,87 @@ export default function AuthPage() {
   const router = useRouter()
   const [isMobile, setIsMobile] = useState(false)
 
+  // Development login state
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isDevLoginLoading, setIsDevLoginLoading] = useState(false)
+  const [showDevLogin, setShowDevLogin] = useState(false)
+
+  const isDevelopment = process.env.NODE_ENV === 'development'
+
+  // Development Email/Password Sign In Handler
+  const handleDevEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsDevLoginLoading(true)
+    setMessage('')
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      })
+
+      if (error) {
+        setMessage(error.message)
+        return
+      }
+
+      if (data.user) {
+        // Check if user profile exists in our database
+        try {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${data.user.id}`)
+
+          if (response.data) {
+            // User exists, initialize session and redirect
+            await useAuthStore.getState().initSession()
+            router.push('/')
+          } else {
+            // User doesn't exist in our db, show profile setup
+            setPendingUser(data.user)
+            setShowProfileSetup(true)
+          }
+        } catch (err) {
+          // User doesn't exist in our db, show profile setup
+          setPendingUser(data.user)
+          setShowProfileSetup(true)
+        }
+      }
+    } catch (error) {
+      setMessage('Failed to sign in. Please try again.')
+      console.error('Dev sign in error:', error)
+    } finally {
+      setIsDevLoginLoading(false)
+    }
+  }
+
+  // Development Sign Up Handler
+  const handleDevEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsDevLoginLoading(true)
+    setMessage('')
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+      })
+
+      if (error) {
+        setMessage(error.message)
+        return
+      }
+
+      if (data.user) {
+        setMessage('Account created! Please check your email to verify your account, then sign in.')
+      }
+    } catch (error) {
+      setMessage('Failed to create account. Please try again.')
+      console.error('Dev sign up error:', error)
+    } finally {
+      setIsDevLoginLoading(false)
+    }
+  }
+
   // Google Sign In Handler
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true)
@@ -298,8 +379,89 @@ export default function AuthPage() {
         Continue with Google
       </span> 
     </> 
-  )} 
+  )}
 </button>
+
+                {/* Development Email/Password Login */}
+                {isDevelopment && (
+                  <div className="mb-6">
+                    <div className="flex items-center my-4">
+                      <div className="flex-1 border-t border-white/20"></div>
+                      <span className="px-3 text-xs text-stone-400 bg-stone-800/50 rounded-full">DEV MODE</span>
+                      <div className="flex-1 border-t border-white/20"></div>
+                    </div>
+
+                    <button
+                      onClick={() => setShowDevLogin(!showDevLogin)}
+                      className="w-full mb-4 bg-stone-700/30 hover:bg-stone-700/50 text-stone-200 font-medium py-3 px-4 rounded-lg border border-stone-600/30 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      {showDevLogin ? 'Hide' : 'Show'} Email/Password Login
+                    </button>
+
+                    {showDevLogin && (
+                      <div className="bg-stone-900/50 backdrop-blur-sm rounded-lg p-4 border border-stone-600/30">
+                        <form onSubmit={handleDevEmailSignIn} className="space-y-4">
+                          <div>
+                            <label htmlFor="dev-email" className="block text-sm font-medium text-stone-200 mb-1">
+                              Email
+                            </label>
+                            <input
+                              id="dev-email"
+                              type="email"
+                              placeholder="Enter your email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              required
+                              className="w-full px-3 py-2 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-white text-sm"
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="dev-password" className="block text-sm font-medium text-stone-200 mb-1">
+                              Password
+                            </label>
+                            <input
+                              id="dev-password"
+                              type="password"
+                              placeholder="Enter your password"
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              required
+                              className="w-full px-3 py-2 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-white text-sm"
+                            />
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              disabled={isDevLoginLoading || !email.trim() || !password.trim()}
+                              className="flex-1 bg-amber-600/80 hover:bg-amber-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                              {isDevLoginLoading ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+                              ) : (
+                                'Sign In'
+                              )}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleDevEmailSignUp}
+                              disabled={isDevLoginLoading || !email.trim() || !password.trim()}
+                              className="flex-1 bg-stone-600/80 hover:bg-stone-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                              Sign Up
+                            </button>
+                          </div>
+                        </form>
+
+                        <p className="text-xs text-stone-500 mt-2 text-center">
+                          Development only - not available in production
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Benefits */}
                 <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
