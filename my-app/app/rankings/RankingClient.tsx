@@ -35,6 +35,7 @@ import axios from 'axios'
 import RankingAddToCollectionPopup from '../components/RankingAddToCollectionPopup'
 import Image from 'next/image'
 import Footer from '../components/Footer'
+import { toAmericanDate } from '@/utils/util'
 
 
 
@@ -99,7 +100,6 @@ const [pagination, setPagination] = useState({
       
       const accessToken = session?.access_token;
 
-      console.log('selected genre', selectedGenre);
 
       // Build query parameters including pagination
       const params = new URLSearchParams({
@@ -121,8 +121,6 @@ const [pagination, setPagination] = useState({
       if (response.data?.books) {
         setBooks(response.data.books);
         setPagination(response.data.pagination);
-        console.log('Books fetched:', response.data.books);
-        console.log('Pagination:', response.data.pagination);
       } else {
         console.warn('No books returned');
       }
@@ -204,7 +202,6 @@ const [pagination, setPagination] = useState({
 };
 
   const getRankIcon = (rank: any) => {
-    console.log('rank', rank);
     if (rank === 1) return <Trophy className="w-5 h-5 text-yellow-500" />
     if (rank === 2) return <Medal className="w-5 h-5 text-gray-400" />
     if (rank === 3) return <Award className="w-5 h-5 text-amber-600" />
@@ -627,10 +624,10 @@ return (
                       </div>
                       
                       {/* Enhanced Book Cover */}
-                      <div className="w-18 h-24 bg-gradient-to-br from-stone-700 to-stone-800 rounded-lg overflow-hidden flex-shrink-0 shadow-sm border border-white/20">
+                      <div className="w-20 h-28 bg-gradient-to-br from-stone-700 to-stone-800 rounded-lg overflow-hidden flex-shrink-0 shadow-sm border border-white/20">
                         <Image 
-                        width={72}
-                        height={96}
+                        width={80}
+                        height={112}
                           src={book.image} 
                           alt={book.title}
                           className="w-full h-full object-cover"
@@ -639,14 +636,16 @@ return (
                       
                       {/* Book Info */}
                       <div className="flex-1 min-w-0">
+                        <div className="h-12 mb-2">
                         <Link href={`book/${book.openLibraryId ?? ''}`}>
-                          <h3 className="font-semibold text-white mb-1 text-sm line-clamp-2 leading-tight hover:text-amber-400 transition-colors">
-                            {book.title}
+                          <h3 className="font-semibold text-white text-sm leading-tight hover:text-amber-400 transition-colors">
+                            {book.title.length > 45 ? `${book.title.slice(0, 45)}...` : book.title}
                           </h3>
                         </Link>
-                        <p className="text-stone-400 text-xs mb-2 line-clamp-1">
+                        <p className="text-stone-400 text-xs line-clamp-1">
                           by {book.author}
                         </p>
+                      </div>
                         
                         {/* Enhanced Rating & Stats Row */}
                         <div className="flex items-center justify-between">
@@ -664,9 +663,17 @@ return (
                                 </>
                               )}
                             </div>
-                            <span className="text-xs text-stone-500">
-                              {rankingType === 'rating' ? `${book.totalRatings?.toLocaleString()} votes` : 'reads'}
-                            </span>
+                          <div className={`flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-sm border ${rankingType === 'popularity' ? 'bg-amber-500/20 border-amber-400/30' : 'bg-blue-500/20 border-blue-400/30'}`}>
+
+                          {rankingType === "popularity" ? 
+                          (<div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 text-amber-400 fill-current" />
+                            <span className="text-xs font-semibold text-amber-200">{book.averageRating?.toFixed(2)}</span>
+                          </div>) : (<>
+                                  <Users className="w-3 h-3 text-blue-400" />
+                                  <span className="text-xs font-semibold text-blue-200">{book.totalRatings}</span>
+                                </>)}
+                          </div>
                           </div>
                           
                           {/* User Rating & Action */}
@@ -689,7 +696,7 @@ return (
                         {/* Published Date */}
                         <div className="flex items-center gap-2 mt-2 text-xs text-stone-500">
                           <Calendar className="w-3 h-3" />
-                          <span>{book.publishedDate}</span>
+                          <span>{toAmericanDate(book.publishedDate)}</span>
                         </div>
                       </div>
                     </div>

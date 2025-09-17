@@ -499,17 +499,17 @@ const BookListItem = ({ book }: {book: BookInList}) => {
         <div className="md:hidden flex gap-2 h-36 -m-4">
           {/* Book Cover - Fixed dimensions, no spacing on top/left/bottom */}
           <div className="flex-shrink-0">
-            <div className="relative overflow-hidden rounded-l-xl w-20 h-36">
-              <Image 
-                src={book.book.image || '/placeholder-book-cover.png'}
-                alt={book.book.title}
-                width={80}
-                height={144}
-                className="w-full h-full object-cover"
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
+          <div className="relative overflow-hidden rounded-l-xl w-24 h-36">
+            <Image 
+              src={book.book.image || '/placeholder-book-cover.png'}
+              alt={book.book.title}
+              width={96}
+              height={144}
+              className="w-full h-full object-cover"
+              style={{ objectFit: 'cover' }}
+            />
           </div>
+        </div>
 
           {/* Content - Compact layout */}
           <div className="flex-1 min-w-0 flex flex-col justify-between py-5 pr-4">
@@ -773,7 +773,7 @@ return (
 
             {/* Status Filter Tabs */}
             <div className="border-b border-white/10">
-              <nav className="flex space-x-2 lg:space-x-8 justify-start">
+              <nav className="flex space-x-2 lg:space-x-8 justify-center">
                 <button
                   type="button"
                   onClick={() => setStatusFilter('all')}

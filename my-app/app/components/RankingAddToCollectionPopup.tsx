@@ -234,7 +234,7 @@ export default function RankingAddToCollectionPopup({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-black/40 to-stone-500/10 p-6 rounded-t-2xl border-b border-white/10 sticky top-0 z-10 backdrop-blur-md">
+          <div className="bg-gradient-to-r from-black/40 to-stone-500/10 p-6 rounded-t-2xl border-b border-white/10 top-0 z-10 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
@@ -255,7 +255,7 @@ export default function RankingAddToCollectionPopup({
           </div>
 
           {/* Form */}
-          <div className="p-6 space-y-8">
+          <div className="sm:p-6 sm:space-y-8 p-3 space-y-4">
             {/* Rating Section */}
             <div className="space-y-4">
               <label className="text-sm font-semibold text-stone-200 mb-2 flex items-center gap-2">
@@ -369,7 +369,7 @@ export default function RankingAddToCollectionPopup({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4 pt-6">
+            <div className="flex gap-4 pt-0 sm:pt-6">
               <button
                 type="button"
                 onClick={handleClose}

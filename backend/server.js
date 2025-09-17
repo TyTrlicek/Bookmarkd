@@ -253,10 +253,10 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
     "Fantasy - Epic": "Fantasy",
     "Fantasy - Series": "Fantasy",
     "American Fantasy fiction": "Fantasy",
-    "Ficción": "Fantasy",
     "Novela": "Fantasy",
   
     "Romance": "Romance",
+    "romance": 'Romance',
     "Love": "Romance",
     "Love stories": "Romance",
     "Love, fiction": "Romance",
