@@ -132,7 +132,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
   };
 
   // Unauthenticated User Experience
-  if (session) {
+  if (!session) {
     return (
       <section className="relative overflow-hidden bg-gradient-to-t from-stone-900 via-stone-800 to-amber-900 min-h-screen">
         {/* Enhanced Background */}

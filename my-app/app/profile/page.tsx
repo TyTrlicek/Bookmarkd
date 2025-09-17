@@ -635,23 +635,6 @@ allowedGenres.forEach((genre) => {
   </div>
 )}
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {userStats.map((stat, index) => (
-              <div key={index} className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/10 hover:bg-black/40 transition-all group shadow-lg">
-                <div className={`w-16 h-16 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                  <stat.icon className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-white mb-2 group-hover:text-amber-200 transition-colors">{stat.value}</div>
-                <div className="text-sm text-stone-400">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        // Add this section after your Stats Grid and before the grid with Achievements/Recent Activity
-// Place it right after the userStats.map section
-
 {/* Favorite Books Section */}
 <section className="mt-16 mb-16">
   <div className="flex items-center justify-between mb-8">
@@ -661,7 +644,7 @@ allowedGenres.forEach((genre) => {
       </div>
       <div>
         <h2 className="text-3xl font-bold text-white">Favorite Books</h2>
-        <p className="text-stone-300">Your curated collection</p>
+        <p className="text-stone-300">Your Personal Favorites</p>
       </div>
     </div>
     
@@ -723,6 +706,22 @@ allowedGenres.forEach((genre) => {
     </div>
   )}
 </section>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {userStats.map((stat, index) => (
+              <div key={index} className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/10 hover:bg-black/40 transition-all group shadow-lg">
+                <div className={`w-16 h-16 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                  <stat.icon className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-2 group-hover:text-amber-200 transition-colors">{stat.value}</div>
+                <div className="text-sm text-stone-400">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Achievements Section */}

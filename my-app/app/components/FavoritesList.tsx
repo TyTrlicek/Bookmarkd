@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { BookData } from '../types/types';
+import { getSearchData } from '@/utils/util';
 
 interface FavoritesListProps {
   books: BookData[];
@@ -220,9 +221,8 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
 
     setIsSearching(true);
     try {
-      // Replace with your actual search function
-      // const response = await getSearchData(query);
-      // setSearchResults(response ?? []);
+       const response = await getSearchData(query);
+       setSearchResults(response ?? []);
       setShowSearchResults(true);
     } catch (error) {
       console.error('Error fetching books:', error);
