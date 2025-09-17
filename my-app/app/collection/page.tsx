@@ -499,7 +499,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
         <div className="md:hidden flex gap-2 h-36 -m-4">
           {/* Book Cover - Fixed dimensions, no spacing on top/left/bottom */}
           <div className="flex-shrink-0">
-          <div className="relative overflow-hidden rounded-l-xl w-24 h-36">
+          <div className="relative overflow-hidden rounded-l-xl rounded-r-xl w-24 h-36">
             <Image 
               src={book.book.image || '/placeholder-book-cover.png'}
               alt={book.book.title}
