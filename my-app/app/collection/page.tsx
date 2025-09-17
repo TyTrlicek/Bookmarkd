@@ -310,7 +310,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
 
   return (
     <div className="group bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-black/30 hover:border-amber-500/30 transition-all duration-300 overflow-hidden">
-      <div className="p-4 md:p-6">
+      <div className="p-2 md:p-6">
         {/* Desktop Layout (md and up) */}
         <div className="hidden md:flex gap-6">
           {/* Book Cover - Fixed dimensions */}
