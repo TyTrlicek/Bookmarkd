@@ -170,14 +170,14 @@ export default function MobileAuthPage() {
   return (
     <div className="min-h-[100dvh] bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800 p-4 flex flex-col">
       {/* Header with Logo and Title */}
-      <div className="text-center pt-6 pb-4">
-        <div className="flex items-center justify-center gap-3 mb-3">
+      <div className="pt-6 pb-4">
+        <div className="flex items-center justify-start gap-4 mb-3">
           <div className="relative">
-            <Image src="/brand-logo.png" width={48} height={48} alt="logo" className='rounded-full'/>
+            <Image src="/brand-logo.png" width={96} height={96} alt="logo" className='rounded-full'/>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">Bookmarkd</h1>
-            <p className="text-stone-300 text-xs">Keep track of your books effortlessly</p>
+          <div className="text-left">
+            <h1 className="text-3xl font-bold text-white">Bookmarkd</h1>
+            <p className="text-stone-300 text-sm">Keep track of your books effortlessly</p>
           </div>
         </div>
       </div>

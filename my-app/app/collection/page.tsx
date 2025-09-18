@@ -744,7 +744,7 @@ return (
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 bg-black/30 rounded-lg p-1 backdrop-blur-sm border border-white/10">
+                {/* <div className="flex items-center gap-1 bg-black/30 rounded-lg p-1 backdrop-blur-sm border border-white/10">
                   <button
                     type="button"
                     onClick={() => setViewMode('grid')}
@@ -767,7 +767,7 @@ return (
                   >
                     <List className="w-4 h-4" />
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
 
