@@ -115,6 +115,10 @@ const BrowseClient = () => {
     if (searchParam) {
       setSearchQuery(searchParam)
     }
+    else
+    {
+      setSearchQuery('')
+    }
   }, [])
 
   const genres = [
@@ -159,6 +163,10 @@ const BrowseClient = () => {
     setSelectedGenres([])
     setSelectedYears([])
     setSelectedRating('')
+  }
+
+  const handleSecondarySearch = (term: string) => {
+    handleSearch(`${term}.`)
   }
 
   const sortedBooks = [...books].sort((a, b) => {
@@ -490,14 +498,35 @@ const BrowseClient = () => {
                   {displayedBooks.map((book, index) => (
                     <MobileBookListItem key={book.openLibraryId || String(index)} book={book} />
                   ))}
+
+                  {/* Can't find book suggestion - Mobile */}
+                  {hasSearched && (
+                    <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg p-6 text-center">
+                      <p className="text-stone-300 text-sm mb-4">Can't find the book you're looking for?</p>
+                      <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl transition-all duration-200 shadow-lg border border-blue-500/20" onClick={() => handleSecondarySearch(searchQuery)}>
+                        Try Secondary Search
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
                   {displayedBooks.map((book, index) => (
                     <BookCard key={book.openLibraryId || String(index)} book={book}/>
                   ))}
+
+                  {/* Can't find book suggestion - Desktop Grid */}
+                  {hasSearched && (
+                    <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg p-6 text-center flex flex-col justify-center">
+                      <p className="text-stone-300 text-xs mb-3">Can't find the book you're looking for?</p>
+                      <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg border border-blue-500/20 text-sm" onClick={() => handleSecondarySearch(searchQuery)}>
+                        Try Secondary Search
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
+
               {/* Enhanced Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-3 p-6 bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg">

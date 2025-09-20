@@ -59,13 +59,9 @@ Key features:
       category: 'Getting Started',
       answer: `Getting started is simple:
 
-1. Click the "Sign Up" button in the top right corner
-2. Choose your preferred method:
-   • Create an account with email and password
-   • Sign up with Google for quick access
-3. Choose a unique username
-4. Verify your email address (if using email signup)
-5. Start adding books to your library!
+1. Click the "Sign Up" button in the top right corner\n
+2. Sign up with Google for quick access\n
+3. Start adding books to your library!\n
 
 Your account will sync across all devices once you're logged in.`
     },
@@ -76,15 +72,15 @@ Your account will sync across all devices once you're logged in.`
       category: 'Getting Started',
       answer: `Adding books to your library is easy:
 
-1. Use the search bar or navigate to the "browse" page to find your book by title or author
-2. Click on the book from search results
-3. Click the "Add to Collection" button
-3. Choose your reading status:
-   • "To be Read" - books on your wishlist
-   • "Currently Reading" - books you're reading now
-   • "Completed" - finished books you can rate and review
-4. For finished books, add your rating (1-10)
-5. Write an optional review to share your thoughts
+1. Use the search bar or navigate to the "browse" page to find your book by title or author\n
+2. Click on the book from search results\n
+3. Click the "Add to Collection" button\n
+3. Choose your reading status\n
+   \t- "To be Read" - books on your wishlist\n
+   \t- "Currently Reading" - books you're reading now\n
+   \t- "Completed" - finished books you can rate and review\n
+4. For finished books, add your rating (1-10)\n
+5. Write an optional review to share your thoughts\n
 
 Your books will appear in your collections page.`
     },
@@ -116,16 +112,15 @@ Your books will appear in your collections page.`
       answer: `Our book database is powered by OpenLibrary, which contains millions of titles. However, some books might be missing or hard to find:
 
 **If you can't find a book:**
+• Try the external secondary search feature on the browse page
 • Try different search terms (author's full name, subtitle, etc.)
 • Check for alternate spellings or translations
-• Search by ISBN if available
 
 **Request a missing book:**
 • Contact our support with book details
 • Include: title, author, ISBN (if available), publication year
 • We'll work to add it to our database
-
-**Coming soon:** Self-service book request feature in your dashboard.`
+`
     },
     {
       id: 'how-rankings-work',
@@ -151,7 +146,7 @@ Your books will appear in your collections page.`
 3. **Quality threshold:** Books need genuine ratings to appear (no zero-rating books)
 4. **Updated once a day:** Rankings are recalculated every 24 hours
 
-**Personal Recommendations (Coming Soon):**
+**Personal Recommendations:**
 • Your reading history and rating patterns
 • Books liked by users with similar tastes
 • Popular books in your favorite genres

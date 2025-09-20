@@ -40,15 +40,21 @@ const Header = () => {
   const router = useRouter()
 
   const toggleMenu = () => {
+    setIsSearchOpen(false);
+    setIsNotificationsOpen(false);
     setIsMenuOpen(!isMenuOpen);
   };
 
   const toggleSearch = () => {
+    setIsMenuOpen(false);
+    setIsNotificationsOpen(false);
     setIsSearchOpen(!isSearchOpen);
   };
 
   const toggleNotifications = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsMenuOpen(false);
+    setIsSearchOpen(false);
     if (!isNotificationsOpen) {
       await fetchNotifications();
     }
@@ -211,7 +217,7 @@ const Header = () => {
 
   const BookListItem = ({ book }: { book: BookData }) => (
     <div 
-      className="p-3 hover:bg-stone-600 cursor-pointer border-b border-stone-500 bg-stone-700 last:border-b-0"
+      className="p-3 hover:bg-stone-600 cursor-pointer border-b border-stone-500 bg-stone-800 last:border-b-0"
       onClick={() => handleSearchItemClick((book.openLibraryId ?? ''), book.author)}
     >
       <div className="flex gap-3">
@@ -335,13 +341,13 @@ return (
                       {books.slice(0, 5).map((book, index) => (
                         <BookListItem key={book.openLibraryId || index} book={book} />
                       ))}
-                      {books.length > 5 && (
+                      {books.length > 0 && (
                         <div className="p-2 flex items-center justify-between text-xs border-t border-stone-600">
                           <span className="text-stone-400">
-                            Showing 5 of {books.length} results
+                            Showing {books.slice(0,5).length} of {books.length} results
                           </span>
                           <Link 
-                            href={`/browse?search=${encodeURIComponent(searchQuery)}`}
+                            href={`/browse?search=${encodeURIComponent(searchQuery)}.`}
                             className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
                             onClick={() => setShowSearchResults(false)}
                           >
@@ -480,13 +486,13 @@ return (
                       {books.slice(0, 4).map((book, index) => (
                         <BookListItem key={book.openLibraryId || index} book={book} />
                       ))}
-                      {books.length > 4 && (
+                      {books.length > 0 && (
                         <div className="p-2 flex items-center justify-between text-xs border-t border-stone-600">
                           <span className="text-stone-400">
-                            Showing 4 of {books.length} results
+                            Showing {books.slice(0,5).length} of {books.length} results
                           </span>
                           <Link 
-                            href={`/browse?search=${encodeURIComponent(searchQuery)}`}
+                            href={`/browse?search=${encodeURIComponent(searchQuery)}.`}
                             className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
                             onClick={() => {
                               setShowSearchResults(false);

@@ -53,13 +53,23 @@ app.use(recomendationRoute)
 
 
 app.get('/api/search', async (req, res) => {
-  const query = req.query.q;
+  let query = req.query.q;
+
+  let externalSearch = false;
 
   if (!query) {
     return res.status(400).json({ error: 'Missing query parameter `q`' });
   }
 
+  if(query.endsWith('.'))
+  {
+    externalSearch = true;
+  }
+
   try {
+
+    if(!externalSearch)
+      {
     // Create cache key for this search query
     const searchCacheKey = cache.generateKey('search', 'local', query.toLowerCase().trim());
 
@@ -111,7 +121,11 @@ app.get('/api/search', async (req, res) => {
 
       return res.json(results);
     }
+  }
 
+  if(externalSearch){
+    query = query.slice(0,-1);
+  }
 
     // Fallback to OpenLibrary - check cache first
     const openLibraryCacheKey = cache.generateKey('search', 'openlibrary', query.toLowerCase().trim());
