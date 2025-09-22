@@ -27,6 +27,7 @@ import {
 import AddToCollectionPopup from '@/app/components/AddToCollectionPopup'
 import Review from '@/app/components/Review'
 import Image from 'next/image'
+import AchievementNotification from '@/app/components/AchievementNotification'
 
 interface BookClientProps {
   id: string;
@@ -58,6 +59,10 @@ const BookClient = ({id}: BookClientProps) => {
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  // Achievement states
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [achievements, setAchievements] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchCover = async () => {
@@ -315,10 +320,12 @@ return (
                     reviewContent={reviewContent} 
                     containsSpoilers={containsSpoilers} 
                     setContainsSpoilers={setContainsSpoilers} 
-                    reviewFilter={reviewFilter} 
-                    setReviewFilter={setReviewFilter} 
-                    id={id} 
+                    reviewFilter={reviewFilter}
+                    setReviewFilter={setReviewFilter}
+                    id={id}
                     setReviewContent={setReviewContent}
+                    setAchievements={setAchievements}
+                    setShowAchievements={setShowAchievements}
                   />
                 </div>
               </div>
@@ -326,7 +333,15 @@ return (
           </div>
         </div>
       </div>
-      
+
+      {/* Achievement Notification */}
+      {showAchievements && (
+        <AchievementNotification
+          achievements={achievements}
+          onClose={() => setShowAchievements(false)}
+        />
+      )}
+
     </div>
   )
 }
