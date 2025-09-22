@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
+const { writeLimiter } = require('../middleware/rateLimiting');
 const { cache, TTL } = require('../lib/cache')
 const prisma = require('../lib/prisma')
 
@@ -45,7 +46,7 @@ router.get('/collection', authenticateUser, async (req, res) => {
       }
     });
 
-    router.delete('/collection/:bookId', authenticateUser, async (req, res) => {
+    router.delete('/collection/:bookId', writeLimiter, authenticateUser, async (req, res) => {
   const userId = req.userId;
 
   if (!userId) {
@@ -124,7 +125,7 @@ router.get('/collection', authenticateUser, async (req, res) => {
 });
 
 
-router.put('/collection/status', authenticateUser, async (req, res) => {
+router.put('/collection/status', writeLimiter, authenticateUser, async (req, res) => {
   const userId = req.userId;
 
   if (!userId) {
@@ -181,7 +182,7 @@ router.put('/collection/status', authenticateUser, async (req, res) => {
 });
 
 
-      router.put('/collection/rating', authenticateUser, async (req, res) => {
+      router.put('/collection/rating', writeLimiter, authenticateUser, async (req, res) => {
   const userId = req.userId;
 
   if (!userId) {
@@ -238,7 +239,7 @@ router.put('/collection/status', authenticateUser, async (req, res) => {
   }
 });
 
-router.put('/collection/comment', authenticateUser, async (req, res) => {
+router.put('/collection/comment', writeLimiter, authenticateUser, async (req, res) => {
   try {
     const { comment, bookId } = req.body;
     const userId = req.userId;

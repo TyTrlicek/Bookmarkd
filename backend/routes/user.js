@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
+const prisma = require('../lib/prisma');
 const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
+const { authLimiter, writeLimiter } = require('../middleware/rateLimiting');
 const { createClient } = require('@supabase/supabase-js');
 const { cache, TTL } = require('../lib/cache');
 
@@ -49,7 +51,7 @@ router.get('/me', authenticateUser, async (req, res) => {
     }
   });
 
-  router.put('/update', authenticateUser, async (req, res) => {
+  router.put('/update', writeLimiter, authenticateUser, async (req, res) => {
     const { username, bio, avatar_url } = req.body;
     const userId = req.userId;
   
@@ -82,7 +84,7 @@ router.get('/me', authenticateUser, async (req, res) => {
     }
   });
 
-  router.post('/create', async (req, res) => {
+  router.post('/create', authLimiter, async (req, res) => {
     const { id, email, username, avatar_url } = req.body;
   
     if (!id || !email || !username) {
@@ -115,7 +117,7 @@ router.get('/me', authenticateUser, async (req, res) => {
     }
   });
 
-  router.delete('/delete', authenticateUser, async (req, res) => {
+  router.delete('/delete', authLimiter, authenticateUser, async (req, res) => {
   const userId = req.userId;
 
   if (!userId) {
@@ -199,7 +201,6 @@ router.get('/me', authenticateUser, async (req, res) => {
     const cacheKey = cache.generateKey('userStats', userId);
 
     // Try to get cached stats first
-    
     const cachedStats = await cache.get(cacheKey);
     if (cachedStats) {
       console.log(`[UserStats] Served from cache for user ${userId}`);
@@ -208,11 +209,9 @@ router.get('/me', authenticateUser, async (req, res) => {
 
     console.log(`[UserStats] Cache miss for user ${userId}, calculating stats...`);
 
-    // current year start date
-    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-
-    const user = await prisma.user.findUnique({
-      where: { id: req.userId },
+    // Ensure user exists in database
+    let user = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
         email: true,
@@ -225,7 +224,7 @@ router.get('/me', authenticateUser, async (req, res) => {
     if (!user) {
       const username = req.user.email ? req.user.email.split('@')[0] : 'user';
 
-      await prisma.user.create({
+      user = await prisma.user.create({
         data: {
           id: userId,
           email: req.user?.email,
@@ -234,33 +233,46 @@ router.get('/me', authenticateUser, async (req, res) => {
       });
     }
 
-    // Use Prisma transactions to run multiple aggregates in one round-trip
-    const [collectionCount, avgRatingAgg, ratedThisYearCount] = await prisma.$transaction([
+    // Get all stats in parallel
+    const [
+      booksInCollection,
+      reviewsWritten,
+      achievementsUnlocked,
+      averageRatingData
+    ] = await Promise.all([
+      // Books in Collection
       prisma.userBook.count({
         where: { userId }
       }),
 
+      // Reviews Written
+      prisma.review.count({
+        where: { userId }
+      }),
+
+      // Achievements Unlocked
+      prisma.userAchievement.count({
+        where: { userId }
+      }),
+
+      // Average Rating (excluding null and 0 ratings)
       prisma.userBook.aggregate({
         where: {
           userId,
-          rating: { not: null }
+          rating: {
+            not: null,
+            gt: 0
+          }
         },
         _avg: { rating: true }
-      }),
-
-      prisma.userBook.count({
-        where: {
-          userId,
-          rating: { not: null },
-          addedAt: { gte: startOfYear }
-        }
       })
     ]);
 
     const stats = {
-      booksInCollection: collectionCount,
-      avgRating: avgRatingAgg._avg.rating || 0,
-      booksRatedThisYear: ratedThisYearCount,
+      booksInCollection,
+      reviewsWritten,
+      achievementsUnlocked,
+      averageRating: averageRatingData._avg.rating || 0,
       user
     };
 

@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://bookmarkd.fun/brand-logo.png", 
+        url: "https://bookmarkd.fun/social-image.png",
         width: 1200,
         height: 630,
         alt: "Bookmarkd – Track and Rate Books",
@@ -57,8 +57,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Bookmarkd – Track Books & Discover New Favorites",
     description:
-      "Bookmarkd is a personal book tracking/rating app. Track books you’ve read, organize your collection, rate and review titles, and explore global rankings powered by a community of readers.",
-    images: ["/brand-image.png"],
+      "Bookmarkd is a personal book tracking/rating app. Track books you've read, organize your collection, rate and review titles, and explore global rankings powered by a community of readers.",
+    images: ["/social-image.png"],
     // creator: "@Bookmarkd", // optional Twitter handle
   },
   icons: {

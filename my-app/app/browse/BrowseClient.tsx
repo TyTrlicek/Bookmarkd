@@ -167,6 +167,8 @@ const BrowseClient = () => {
 
   const handleSecondarySearch = (term: string) => {
     handleSearch(`${term}.`)
+    // Scroll to top when secondary search is performed
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const sortedBooks = [...books].sort((a, b) => {

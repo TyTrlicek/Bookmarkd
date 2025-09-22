@@ -306,7 +306,7 @@ return (
             <a href="/browse" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Browse</a>
             <a href="/collection" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">My Collection</a>
             <a href="/rankings" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Rankings</a>
-            <a href="#" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Clubs</a>
+            {/* <a href="#" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Clubs</a> */}
           </nav>
 
           {/* Desktop Search */}
@@ -347,7 +347,7 @@ return (
                             Showing {books.slice(0,5).length} of {books.length} results
                           </span>
                           <Link 
-                            href={`/browse?search=${encodeURIComponent(searchQuery)}.`}
+                            href={`/browse?search=${encodeURIComponent(searchQuery)}`}
                             className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
                             onClick={() => setShowSearchResults(false)}
                           >
@@ -492,7 +492,7 @@ return (
                             Showing {books.slice(0,5).length} of {books.length} results
                           </span>
                           <Link 
-                            href={`/browse?search=${encodeURIComponent(searchQuery)}.`}
+                            href={`/browse?search=${encodeURIComponent(searchQuery)}`}
                             className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
                             onClick={() => {
                               setShowSearchResults(false);
@@ -578,13 +578,13 @@ return (
               >
                 My Collection
               </a>
-              <a 
+              {/* <a 
                 href="#" 
                 className="text-stone-300 hover:text-amber-400 font-medium transition-colors py-2 px-3 rounded-lg hover:bg-stone-800"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Clubs
-              </a>
+              </a> */}
               <a 
                 href="/rankings" 
                 className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-stone-800 transition-colors"

@@ -6,7 +6,7 @@ function authenticateUser(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Missing token' });
 
-  jwt.verify(token, process.env.SUPABASE_JWT_SECRET, {}, (err, decoded) => {
+  jwt.verify(token, process.env.SUPABASE_JWT_SECRET, { algorithms: ['HS256'] }, (err, decoded) => {
     if (err || !decoded) {
       console.error('JWT verification error:', err);
       return res.status(401).json({ error: 'Invalid token' });

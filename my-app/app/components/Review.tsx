@@ -21,9 +21,11 @@ interface BookCardProps {
   setReviewFilter: React.Dispatch<React.SetStateAction<string>>;
   id: string;
   setReviewContent: React.Dispatch<React.SetStateAction<string>>;
+  setAchievements: React.Dispatch<React.SetStateAction<any[]>>;
+  setShowAchievements: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserRecommendation, userRecommendation, containsSpoilers, reviewContent, setContainsSpoilers, reviewFilter, setReviewFilter, id, setReviewContent }: BookCardProps) => {
+const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserRecommendation, userRecommendation, containsSpoilers, reviewContent, setContainsSpoilers, reviewFilter, setReviewFilter, id, setReviewContent, setAchievements, setShowAchievements }: BookCardProps) => {
 
     const router = useRouter();
     const [reviews, setReviews] = useState<ReviewData[]>([]);
@@ -471,9 +473,17 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                     'Content-Type': 'application/json',
                 },
             });
-        
+
             if (response.status === 201) {
                 console.log('Review posted successfully!');
+
+                // Handle achievements
+                if (response.data.unlockedAchievements?.length > 0) {
+                    console.log('Newly unlocked achievements:', response.data.unlockedAchievements);
+                    setAchievements(response.data.unlockedAchievements);
+                    setShowAchievements(true);
+                }
+
                 setShowWriteReview(false);
                 setReviewContent('');
                 setUserRecommendation('');
@@ -748,13 +758,13 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
         </div>
 
         {/* Sort Options */}
-        <div className="flex items-center gap-4 mb-4">
+        {/* <div className="flex items-center gap-4 mb-4">
             <select className="bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white backdrop-blur-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50">
                 <option className="bg-stone-800">Most Recent</option>
                 <option className="bg-stone-800">Most Helpful</option>
                 <option className="bg-stone-800">Oldest First</option>
             </select>
-        </div>
+        </div> */}
 
         {/* Reviews List */}
         <div className="space-y-6">
@@ -1204,6 +1214,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
                 </button>
             </div>
         )} */}
+
     </div>
     );
 }

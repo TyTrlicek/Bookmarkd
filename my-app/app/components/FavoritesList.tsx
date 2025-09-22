@@ -4,6 +4,12 @@ import Image from 'next/image';
 import { BookData } from '../types/types';
 import { getSearchData } from '@/utils/util';
 
+interface UserStats {
+  booksInCollection: number;
+  reviewsWritten: number;
+  achievementsUnlocked: number;
+}
+
 interface FavoritesListProps {
   books: BookData[];
   loading?: boolean;
@@ -14,6 +20,7 @@ interface FavoritesListProps {
   layout?: 'grid' | 'horizontal'; // New prop for layout control
   className?: string;
   showStats?: boolean;
+  userStats?: UserStats | null;
 }
 
 interface SearchModalProps {
@@ -199,7 +206,8 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
   maxSlots = 6,
   layout = 'grid',
   className = '',
-  showStats = false
+  showStats = false,
+  userStats = null
 }) => {
   const [hoveredBook, setHoveredBook] = useState<number | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -336,19 +344,19 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
           {showStats && (
             <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto mt-12">
               <StatCard
-                value={books.length}
-                label="Favorites"
+                value={userStats?.booksInCollection ?? '—'}
+                label="Books in Collection"
+                color="blue"
               />
               <StatCard
-                value={books.length > 0 ? 
-                  (books.reduce((sum, book) => sum + (book.averageRating ?? 0), 0) / books.length).toFixed(1) : 
-                  '0'
-                }
-                label="Avg Rating"
+                value={userStats?.reviewsWritten ?? '—'}
+                label="Reviews Written"
+                color="green"
               />
               <StatCard
-                value="247"
-                label="Books Read"
+                value={userStats?.achievementsUnlocked ?? '—'}
+                label="Achievements"
+                color="purple"
               />
             </div>
           )}
@@ -540,17 +548,45 @@ const BookCard: React.FC<BookCardProps> = ({
             <h4 className="font-bold text-sm mb-1 line-clamp-2">{book.title}</h4>
             <p className="text-xs opacity-80 mb-2">{book.author}</p>
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className={`w-3 h-3 ${i < (book.averageRating ?? 0) ? 'text-amber-400 fill-current' : 'text-stone-500'}`}
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                ))}
-              </div>
+              {book.averageRating && book.averageRating > 0 ? (
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => {
+                    const halfStarRating = (book.averageRating ?? 0) / 2; // Convert 1-10 scale to 0.5-5 scale
+                    const isFullStar = i < Math.floor(halfStarRating);
+                    const isHalfStar = i === Math.floor(halfStarRating) && halfStarRating % 1 >= 0.5;
+
+                    return (
+                      <div key={i} className="relative w-3 h-3">
+                        {/* Background star */}
+                        <svg
+                          className="w-3 h-3 text-stone-500 absolute inset-0"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+
+                        {/* Full or half star overlay */}
+                        {(isFullStar || isHalfStar) && (
+                          <svg
+                            className="w-3 h-3 text-amber-400 fill-current absolute inset-0"
+                            viewBox="0 0 24 24"
+                            style={isHalfStar ? { clipPath: 'inset(0 50% 0 0)' } : {}}
+                          >
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <span className="text-xs ml-1 opacity-80">
+                    {(book.averageRating / 2).toFixed(1)}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <span className="text-xs text-stone-500">No rating</span>
+                </div>
+              )}
               <span className="text-xs bg-white/20 rounded-full px-2 py-1">
                 {book.publishedDate?.slice(0,4) || 'N/A'}
               </span>
@@ -596,12 +632,20 @@ const AddBookCard: React.FC<AddBookCardProps> = ({ index, onClick, isHorizontal 
 interface StatCardProps {
   value: string | number;
   label: string;
+  color?: 'blue' | 'green' | 'purple';
 }
 
-const StatCard: React.FC<StatCardProps> = ({ value, label }) => {
+const StatCard: React.FC<StatCardProps> = ({ value, label, color = 'white' }) => {
+  const colorClasses: any = {
+    blue: 'text-blue-400',
+    green: 'text-green-400',
+    purple: 'text-purple-400',
+    white: 'text-white'
+  };
+
   return (
     <div className="text-center">
-      <div className="text-3xl font-bold text-white mb-2">
+      <div className={`text-3xl font-bold mb-2 ${colorClasses[color]}`}>
         {value}
       </div>
       <div className="text-sm text-stone-400 uppercase tracking-wider">

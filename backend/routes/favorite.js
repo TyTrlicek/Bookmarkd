@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
+const { writeLimiter } = require('../middleware/rateLimiting');
+const prisma = require('../lib/prisma');
 
 const router = express.Router();
 
@@ -21,7 +23,7 @@ router.get("/api/favorites", authenticateUser, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch favorites" });
   }
 });
-router.post("/api/favorites", authenticateUser, async (req, res) => {
+router.post("/api/favorites", writeLimiter, authenticateUser, async (req, res) => {
   const { bookId } = req.body;
 
   console.log("book id", bookId);
@@ -51,7 +53,7 @@ router.post("/api/favorites", authenticateUser, async (req, res) => {
 });
 
 // DELETE /api/favorites/:bookId
-router.delete('/api/favorites/:bookId', authenticateUser, async (req, res) => {
+router.delete('/api/favorites/:bookId', writeLimiter, authenticateUser, async (req, res) => {
   const userId = req.userId; // set by authenticateUser middleware
   const { bookId } = req.params;
 

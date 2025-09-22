@@ -21,9 +21,8 @@ class CacheManager {
     // Monitor Redis memory usage every 5 minutes
     setInterval(async () => {
       try {
-        const info = await redis.memory('usage');
         const memoryInfo = await redis.info('memory');
-        console.log(`[Redis] Memory usage: ${Math.round(info / 1024 / 1024)}MB`);
+        // Remove the incorrect memory('usage') call since we get memory info from info('memory')
 
         // Extract used memory from info string
         const usedMemoryMatch = memoryInfo.match(/used_memory:(\d+)/);

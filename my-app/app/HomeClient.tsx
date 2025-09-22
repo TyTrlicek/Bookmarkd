@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
-  BookOpen, 
-  Star, 
-  Heart, 
-  Share2, 
-  Download, 
+import {
+  BookOpen,
+  Star,
+  Heart,
+  Share2,
+  Download,
   ShoppingCart,
   TrendingUp,
   Calendar,
@@ -50,6 +50,7 @@ const HomePage = () => {
   const [trendingData, setTrendingData] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [reccomendationData, setReccomendationData] = useState<any[]>([]);
+  const [userStats, setUserStats] = useState<any>(null);
   const router = useRouter();
   const { session } = useAuthStore();
 
@@ -57,7 +58,7 @@ const HomePage = () => {
     useAuthStore.getState().initSession();
   }, []);
 
-  
+
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
@@ -117,9 +118,38 @@ const HomePage = () => {
     catch (error) {
       console.error(error);
   }
+
   }
   fetchReccomendationData();
-  
+
+  const fetchUserStats = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const accessToken = session?.access_token;
+
+      if (!accessToken) {
+        setUserStats(null);
+        return;
+      }
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/stats`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      setUserStats(response.data);
+    } catch (error) {
+      console.error('Failed to fetch user stats:', error);
+      setUserStats(null);
+    }
+  };
+  fetchUserStats();
+
 }, [])
 
   const Target = ({ className }: { className: string }) => (
@@ -218,7 +248,7 @@ const HomePage = () => {
       <Header />
 
       {/* Hero Section */}
-      <EnhancedHero/>
+      <EnhancedHero userStats={userStats}/>
 
       {/* Main Content with Dark Theme */}
       <div className="relative">
@@ -291,10 +321,12 @@ const HomePage = () => {
                   <h3 className="text-2xl font-semibold text-white mb-3">
                     Want recommended books?
                   </h3>
-                  
+
                   <p className="text-stone-300 text-lg mb-8">
-                    {!session 
+                    {!session
                       ? "Sign in to get personalized book recommendations tailored just for you."
+                      : userStats && userStats.booksInCollection >= 1 && userStats.booksInCollection < 5
+                      ? `Add more books to your collection to unlock personalized recommendations.`
                       : "Add books to your collection so we can suggest similar books you'll love."
                     }
                   </p>

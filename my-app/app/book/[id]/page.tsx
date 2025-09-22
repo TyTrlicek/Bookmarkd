@@ -29,6 +29,7 @@ import AddToCollectionPopup from '@/app/components/AddToCollectionPopup'
 import Review from '@/app/components/Review'
 import Image from 'next/image'
 import Footer from '@/app/components/Footer'
+import AchievementNotification from '@/app/components/AchievementNotification'
 
 const BookPage = () => {
   const params = useParams()
@@ -65,6 +66,10 @@ const searchAuthor = searchParams.get('author')
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  // Achievement states
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [achievements, setAchievements] = useState<any[]>([]);
 
 
   useEffect(() => {
@@ -314,19 +319,21 @@ return (
                     </div>
                   </div>
 
-                  <Review 
-                    totalRatings={totalRatings} 
-                    setShowWriteReview={setShowWriteReview} 
-                    showWriteReview={showWriteReview} 
-                    setUserRecommendation={setUserRecommendation} 
-                    userRecommendation={userRecommendation} 
-                    reviewContent={reviewContent} 
-                    containsSpoilers={containsSpoilers} 
-                    setContainsSpoilers={setContainsSpoilers} 
-                    reviewFilter={reviewFilter} 
-                    setReviewFilter={setReviewFilter} 
-                    id={id} 
+                  <Review
+                    totalRatings={totalRatings}
+                    setShowWriteReview={setShowWriteReview}
+                    showWriteReview={showWriteReview}
+                    setUserRecommendation={setUserRecommendation}
+                    userRecommendation={userRecommendation}
+                    reviewContent={reviewContent}
+                    containsSpoilers={containsSpoilers}
+                    setContainsSpoilers={setContainsSpoilers}
+                    reviewFilter={reviewFilter}
+                    setReviewFilter={setReviewFilter}
+                    id={id}
                     setReviewContent={setReviewContent}
+                    setAchievements={setAchievements}
+                    setShowAchievements={setShowAchievements}
                   />
                 </div>
               </div>
@@ -335,6 +342,14 @@ return (
         </div>
         <Footer />
       </div>
+
+      {/* Achievement Notification */}
+      {showAchievements && (
+        <AchievementNotification
+          achievements={achievements}
+          onClose={() => setShowAchievements(false)}
+        />
+      )}
     </div>
   )
 }

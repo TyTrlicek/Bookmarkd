@@ -610,7 +610,7 @@ return (
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 hidden md:block">
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Reading Overview</h2>
-            <p className="text-stone-300">Track your reading Status</p>
+            <p className="text-stone-300">Track Your Reading Status</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

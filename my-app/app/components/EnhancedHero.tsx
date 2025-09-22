@@ -5,15 +5,26 @@ import { useRouter } from 'next/navigation';
 import { BookOpen, Star, Heart, Users, TrendingUp, Search } from 'lucide-react';
 import { BookData } from '../types/types';
 import useAuthStore from '@/store/authStore';
-import FavoritesList from './FavoritesList'; // Import the new component
+import FavoritesList from './FavoritesList';
+import OnboardingModal from './OnboardingModal';
+import LibraryBuildingPrompt from './LibraryBuildingPrompt';
+
+interface UserStats {
+  booksInCollection: number;
+  reviewsWritten: number;
+  achievementsUnlocked: number;
+}
 
 interface FavoriteBooksHeroProps {
   favoriteBooks?: BookData[];
+  userStats?: UserStats | null;
 }
 
-export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: FavoriteBooksHeroProps) {
+export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, userStats: propUserStats }: FavoriteBooksHeroProps) {
   const [favoriteBooks, setFavoriteBooks] = useState<BookData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userStats, setUserStats] = useState<UserStats | null>(propUserStats || null);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const router = useRouter();
   const { session } = useAuthStore();
 
@@ -42,28 +53,41 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
       title: fav.book.title,
       author: fav.book.author,
       image: fav.book.image,
-      publishedDate: fav.book.publishedDate, 
+      publishedDate: fav.book.publishedDate,
       rating: 5,
+      averageRating: fav.book.averageRating || 0,
     }));
   };
 
-  // Load favorite books on component mount
+  // Update userStats when prop changes
   useEffect(() => {
-    const loadFavoriteBooks = async () => {
+    if (propUserStats !== undefined) {
+      setUserStats(propUserStats);
+    }
+  }, [propUserStats]);
+
+  // Load favorite books and stats on component mount
+  useEffect(() => {
+    const loadData = async () => {
       try {
         setLoading(true);
         const books = propFavoriteBooks || await fetchFavoriteBooks();
         setFavoriteBooks(books);
+
+        // Show onboarding modal for new users with 0 books
+        if (session && books.length === 0) {
+          setShowOnboardingModal(true);
+        }
       } catch (error) {
-        console.error('Failed to fetch favorite books:', error);
+        console.error('Failed to fetch data:', error);
         setFavoriteBooks([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadFavoriteBooks();
-  }, [propFavoriteBooks]);
+    loadData();
+  }, [propFavoriteBooks, session]);
 
   // Handle removing a book from favorites
   const handleRemoveBook = async (bookId: string) => {
@@ -260,77 +284,122 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks }: 
         />
       </div>
 
+      {/* Onboarding Modal for new users */}
+      {/* <OnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={() => setShowOnboardingModal(false)}
+      /> */}
+
       <div className="relative z-20 max-w-7xl mx-auto px-6 py-20">
-        {/* Header Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Favorite Books
-          </h1>
-        </div>
-
-        {/* Responsive Favorites List */}
-        <div className="mb-16">
-          {/* Desktop: Grid Layout */}
-          <div className="hidden md:block">
-            <FavoritesList
-              books={favoriteBooks}
-              loading={loading}
-              onRemoveBook={handleRemoveBook}
-              onAddBook={handleAddBook}
-              showAddSlots={true}
-              maxSlots={6}
-              layout="grid"
-              showStats={true}
-              className="max-w-5xl mx-auto"
-            />
+        {loading ? (
+          // Loading state
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-white text-lg">Loading your library...</p>
+            </div>
           </div>
+        ) : favoriteBooks.length === 0 ? (
+          // New user state (0 books) - handled by modal
+          <div className="text-center min-h-[60vh] flex items-center justify-center">
+            <div className="max-w-2xl mx-auto">
+              <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                <BookOpen className="w-12 h-12 text-white" />
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">Welcome to Bookmarkd!</h1>
+              <p className="text-xl text-stone-300 mb-8">
+                Start building your personal library by adding your first book.
+              </p>
+              <button
+                onClick={() => router.push('/browse')}
+                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:-translate-y-1 transform text-lg"
+              >
+                Browse Books
+              </button>
+            </div>
+          </div>
+        ) : favoriteBooks.length >= 1 && favoriteBooks.length <= 5 ? (
+          // Library building state (1-5 books)
+          <div>
+            <LibraryBuildingPrompt bookCount={favoriteBooks.length} />
+          </div>
+        ) : (
+          // Full favorites experience (6+ books)
+          <div>
+            {/* Header Section */}
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                Favorite Books
+              </h1>
+              <p className="text-xl md:text-2xl text-stone-300 mb-4 leading-relaxed max-w-3xl mx-auto">
+                Your All Time Favorites
+              </p>
+              <div className="w-24 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full mx-auto"></div>
+            </div>
 
-          {/* Mobile: Horizontal Scroll */}
-          <div className="md:hidden">
-            <FavoritesList
-              books={favoriteBooks}
-              loading={loading}
-              onRemoveBook={handleRemoveBook}
-              onAddBook={handleAddBook}
-              showAddSlots={true}
-              maxSlots={6}
-              layout="horizontal"
-              showStats={false}
-              className="px-4"
-            />
-            
-            {/* Mobile Stats Section */}
-            <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mt-8 px-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white mb-1">
-                  {favoriteBooks.length}
-                </div>
-                <div className="text-xs text-stone-400 uppercase tracking-wider">
-                  Favorites
-                </div>
+            {/* Responsive Favorites List */}
+            <div className="mb-16">
+              {/* Desktop: Grid Layout */}
+              <div className="hidden md:block">
+                <FavoritesList
+                  books={favoriteBooks}
+                  loading={loading}
+                  onRemoveBook={handleRemoveBook}
+                  onAddBook={handleAddBook}
+                  showAddSlots={true}
+                  maxSlots={6}
+                  layout="grid"
+                  showStats={true}
+                  userStats={userStats}
+                  className="max-w-5xl mx-auto"
+                />
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white mb-1">
-                  {favoriteBooks.length > 0 ? 
-                    (favoriteBooks.reduce((sum, book) => sum + (book.averageRating ?? 0), 0) / favoriteBooks.length).toFixed(1) : 
-                    '0'
-                  }
-                </div>
-                <div className="text-xs text-stone-400 uppercase tracking-wider">
-                  Avg Rating
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white mb-1">
-                  247
-                </div>
-                <div className="text-xs text-stone-400 uppercase tracking-wider">
-                  Books Read
+
+              {/* Mobile: Horizontal Scroll */}
+              <div className="md:hidden">
+                <FavoritesList
+                  books={favoriteBooks}
+                  loading={loading}
+                  onRemoveBook={handleRemoveBook}
+                  onAddBook={handleAddBook}
+                  showAddSlots={true}
+                  maxSlots={6}
+                  layout="horizontal"
+                  showStats={false}
+                  className="px-4"
+                />
+
+                {/* Mobile Stats Section */}
+                <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mt-8 px-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-400 mb-1">
+                      {userStats?.booksInCollection ?? '—'}
+                    </div>
+                    <div className="text-xs text-stone-400 uppercase tracking-wider">
+                      Books in Collection
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-400 mb-1">
+                      {userStats?.reviewsWritten ?? '—'}
+                    </div>
+                    <div className="text-xs text-stone-400 uppercase tracking-wider">
+                      Reviews Written
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-400 mb-1">
+                      {userStats?.achievementsUnlocked ?? '—'}
+                    </div>
+                    <div className="text-xs text-stone-400 uppercase tracking-wider">
+                      Achievements
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <style jsx>{`

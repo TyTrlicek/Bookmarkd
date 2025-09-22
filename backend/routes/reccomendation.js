@@ -1,6 +1,7 @@
 const express = require('express')
 const authenticateUser = require('../middleware/authenticateUser')
 const redis = require ('../lib/redis');
+const prisma = require('../lib/prisma');
 
 
 const router = express.Router();
@@ -26,8 +27,8 @@ router.get('/api/recommendations', authenticateUser, async (req, res) => {
       include: { book: true },
     });
 
-    // 🔑 If the user has no books, return an empty array immediately
-    if (!userBooks.length) {
+    // 🔑 If the user has less than 5 books, return an empty array immediately
+    if (userBooks.length < 5) {
       return res.json([]);
     }
 

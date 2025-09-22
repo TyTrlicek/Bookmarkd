@@ -421,7 +421,7 @@ setUser((prevUser) => ({
   const userStats = [
     { label: "Books in Collection", value: booksInCollection, icon: BookMarked, color: "from-blue-500 to-blue-600" },
     { label: "Books Rated This Year", value: booksRatedThisYear, icon: BookOpen, color: "from-amber-500 to-amber-600" },
-    { label: "Average Book Rating", value: averageRating, icon: Star, color: "from-emerald-500 to-emerald-600" },
+    { label: "Average Book Rating", value: (averageRating || 0), icon: Star, color: "from-emerald-500 to-emerald-600" },
     { label: "Achievements Unlocked", value: achievementCount, icon: Award, color: "from-purple-500 to-purple-600" }
   ]
 
@@ -686,7 +686,7 @@ allowedGenres.forEach((genre) => {
   </div>
 
   {/* Empty State */}
-  {!favoritesLoading && favoriteBooks.length === 0 && (
+  {/* {!favoritesLoading && favoriteBooks.length === 0 && (
     <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/10">
       <div className="w-20 h-20 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20">
         <BookMarked className="w-10 h-10 text-amber-400" />
@@ -697,14 +697,14 @@ allowedGenres.forEach((genre) => {
         These will be your go-to recommendations for other readers!
       </p>
       <button 
-        onClick={() => router.push('/search')} // Adjust this route as needed
+        onClick={() => router.push('/browse')} 
         className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-amber-500/25"
       >
         <BookOpen className="w-5 h-5" />
         Discover Books
       </button>
     </div>
-  )}
+  )} */}
 </section>
 
           {/* Stats Grid */}

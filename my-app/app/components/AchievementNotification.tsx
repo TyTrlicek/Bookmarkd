@@ -52,7 +52,7 @@ const AchievementNotification = ({ achievements, onClose }: any) => {
   const colors = getAchievementColors(currentAchievement.tier);
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-100 p-4">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-500 p-4">
       <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all duration-300 ${
         isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
       }`}>
@@ -70,7 +70,7 @@ const AchievementNotification = ({ achievements, onClose }: any) => {
           {/* Close button */}
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition-colors duration-200 z-10"
+            className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition-colors duration-200 z-1000"
           >
             <X size={20} />
           </button>

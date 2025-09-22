@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser');
+const { reviewLimiter, voteLimiter, writeLimiter } = require('../middleware/rateLimiting');
 const { checkAndUnlockAchievements } = require('../utils');
+const prisma = require('../lib/prisma');
 
 const router = express.Router();
 
-router.post('/create-review', authenticateUser, async (req, res) => { 
+router.post('/create-review', reviewLimiter, authenticateUser, async (req, res) => { 
   const userId = req.userId;
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -60,7 +62,7 @@ router.post('/create-review', authenticateUser, async (req, res) => {
 });
 
 
-router.post('/create-reply', authenticateUser, async (req, res) => {
+router.post('/create-reply', reviewLimiter, authenticateUser, async (req, res) => {
     const userId = req.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -247,7 +249,7 @@ router.get('/reviews/:openLibraryId', async (req, res) => {
     }
   });
 
-router.post('/reviews/:reviewId/vote', authenticateUser, async (req, res) => {
+router.post('/reviews/:reviewId/vote', voteLimiter, authenticateUser, async (req, res) => {
   try {
     const { reviewId } = req.params;
     const userId = req.userId; // authenticated voter
@@ -358,7 +360,7 @@ router.get('/reviews/:reviewId/vote-status', authenticateUser, async (req, res) 
   }
 });
 
-router.post('/replies/:replyId/vote', authenticateUser, async (req, res) => {
+router.post('/replies/:replyId/vote', voteLimiter, authenticateUser, async (req, res) => {
   try {
     const { replyId } = req.params;
     const userId = req.userId;
@@ -414,7 +416,7 @@ router.post('/replies/:replyId/vote', authenticateUser, async (req, res) => {
 // Add these routes to your existing routes.js file
 
 // Edit Review
-router.put('/reviews/:reviewId', authenticateUser, async (req, res) => {
+router.put('/reviews/:reviewId', writeLimiter, authenticateUser, async (req, res) => {
   try {
     const { reviewId } = req.params;
     const userId = req.userId;
@@ -474,7 +476,7 @@ router.put('/reviews/:reviewId', authenticateUser, async (req, res) => {
 });
 
 // Delete Review
-router.delete('/reviews/:reviewId', authenticateUser, async (req, res) => {
+router.delete('/reviews/:reviewId', writeLimiter, authenticateUser, async (req, res) => {
   try {
     const { reviewId } = req.params;
     const userId = req.userId;
@@ -516,7 +518,7 @@ await prisma.reviewReply.deleteMany({
 });
 
 // Edit Reply
-router.put('/replies/:replyId', authenticateUser, async (req, res) => {
+router.put('/replies/:replyId', writeLimiter, authenticateUser, async (req, res) => {
   try {
     const { replyId } = req.params;
     const userId = req.userId;
@@ -577,7 +579,7 @@ router.put('/replies/:replyId', authenticateUser, async (req, res) => {
 });
 
 // Delete Reply
-router.delete('/replies/:replyId', authenticateUser, async (req, res) => {
+router.delete('/replies/:replyId', writeLimiter, authenticateUser, async (req, res) => {
   try {
     const { replyId } = req.params;
     const userId = req.userId;

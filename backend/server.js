@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('./lib/prisma');
 const authenticateUser = require('./middleware/authenticateUser')
 const attachIfUserExists = require('./middleware/attachIfUserExists')
+const { generalLimiter, searchLimiter, writeLimiter } = require('./middleware/rateLimiting');
 const collectionRoute = require('./routes/collection')
 const rankingRoute = require('./routes/ranking')
 const replyRoute = require('./routes/reply')
@@ -21,7 +22,7 @@ const { checkAndUnlockAchievements } = require('./utils');
 const openLibraryAPI = axios.create({
   baseURL: 'https://openlibrary.org',
   headers: {
-    'User-Agent': 'BookMarkd/1.0 (bookmarkd.fun@gmail.com)',
+    'User-Agent': 'Bookmarkd/1.0 (bookmarkd.fun@gmail.com)',
     'Accept': 'application/json',
   },
 });
@@ -43,6 +44,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
+
+// Apply general rate limiting to all routes
+app.use(generalLimiter);
+
 app.use(collectionRoute);
 app.use(rankingRoute)
 app.use(replyRoute)
@@ -451,21 +456,20 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
 
     if (book.authors && Array.isArray(book.authors) && !searchAuthor) {
       console.log('no search author...')
-      authorNames = await Promise.all(
-        book.authors.map(async (a) => {
-          try {
-            const authorKey = a.author?.key;
-            if (!authorKey) return 'Unknown Author';
-
-            const authorRes = await openLibraryAPI.get(`/${authorKey}.json`);
-            console.log(authorRes.data?.name)
-            return authorRes.data?.name || 'Unknown Author';
-          } catch (err) {
-            console.error('Error fetching author:', err.message);
-            return 'Unknown Author';
-          }
-        })
-      );
+      // Only fetch the first author to avoid N+1 problem
+      const firstAuthor = book.authors[0];
+      if (firstAuthor?.author?.key) {
+        try {
+          const authorRes = await openLibraryAPI.get(`/${firstAuthor.author.key}.json`);
+          console.log(authorRes.data?.name)
+          authorNames = [authorRes.data?.name || 'Unknown Author'];
+        } catch (err) {
+          console.error('Error fetching author:', err.message);
+          authorNames = ['Unknown Author'];
+        }
+      } else {
+        authorNames = ['Unknown Author'];
+      }
     }
 
     let coverId = book.covers?.[0] || null;
@@ -570,7 +574,7 @@ const coverImage = coverId
   }
 });
 
-app.post('/api/user/booklist', authenticateUser, async (req, res) => {
+app.post('/api/user/booklist', writeLimiter, authenticateUser, async (req, res) => {
     
     const userId = req.userId;
     const user = req.user;
@@ -578,8 +582,6 @@ app.post('/api/user/booklist', authenticateUser, async (req, res) => {
     if (!userId) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
-
-
 
 
     try {

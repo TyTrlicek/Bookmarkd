@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const openLibraryAPI = axios.create({
   baseURL: 'https://openlibrary.org',
   headers: {
-    'User-Agent': 'BookMarkd/1.0 (bookmarkd.fun@gmail.com)',
+    'User-Agent': 'Bookmarkd/1.0 (bookmarkd.fun@gmail.com)',
     'Accept': 'application/json',
   },
 });

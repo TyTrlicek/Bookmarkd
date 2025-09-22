@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser')
 const attachIfUserExists = require('../middleware/attachIfUserExists')
+const { writeLimiter } = require('../middleware/rateLimiting');
 const { cache, TTL } = require('../lib/cache')
 const prisma = require('../lib/prisma')
 
@@ -9,8 +10,17 @@ const router = express.Router();
 
 router.get('/unread', authenticateUser, async (req, res) => {
     const userId = req.userId;
-  
+    const cacheKey = cache.generateKey('notifications', userId);
+
     try {
+      // Check cache first
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        console.log(`[Notifications] Served from cache for user ${userId}`);
+        return res.json(cached);
+      }
+
+      console.log(`[Notifications] Cache miss for user ${userId}, fetching from database...`);
       const activities = await prisma.userActivity.findMany({
         where: {
           userId,
@@ -22,7 +32,11 @@ router.get('/unread', authenticateUser, async (req, res) => {
         },
         take: 10
       });
-      console.log('activities', activities)
+
+      // Cache for 5 minutes - notifications don't change frequently
+      await cache.set(cacheKey, activities, TTL.MEDIUM);
+      console.log(`[Notifications] Cached notifications for user ${userId} (TTL=${TTL.MEDIUM}s)`);
+
       res.json(activities);
     } catch (error) {
       console.error('Failed to fetch activity', error);
@@ -30,7 +44,7 @@ router.get('/unread', authenticateUser, async (req, res) => {
     }
   });
 
-  router.post('/mark-read', authenticateUser, async (req, res) => {
+  router.post('/mark-read', writeLimiter, authenticateUser, async (req, res) => {
     const userId = req.userId;
 
     try {
@@ -39,10 +53,12 @@ router.get('/unread', authenticateUser, async (req, res) => {
         data: { read: true },
       });
 
-      // Invalidate user activity caches
+      // Invalidate user activity and notifications caches
       const activityCacheKey = cache.generateKey('userActivity', userId);
+      const notificationsCacheKey = cache.generateKey('notifications', userId);
       await cache.del(activityCacheKey);
-      console.log(`[Activity] Invalidated activity cache after mark-read for user ${userId}`);
+      await cache.del(notificationsCacheKey);
+      console.log(`[Activity] Invalidated activity and notifications cache after mark-read for user ${userId}`);
 
       res.status(200).json({ message: 'Marked as read' });
     } catch (err) {

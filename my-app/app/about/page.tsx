@@ -27,13 +27,13 @@ const AboutPage = () => {
       id: 'mission',
       title: 'Our Mission',
       icon: Target,
-      content: `BookMarkd is a lightweight, focused platform for tracking and rating books. Built by a single passionate reader, it's designed as a simpler, faster alternative to bloated reading platforms, helping readers catalog their books, rate favorites, and discover new ones.
+      content: `Bookmarkd is a user focused platform for tracking and rating books. Built by a single passionate reader, it's designed as a simpler, faster alternative to bloated reading platforms, helping readers catalog their books, rate favorites, and discover new ones.
 
 Inspired by the clean, community-driven experience of Letterboxd, Bookmarkd takes the best parts, ranking systems, structured ratings, and a clear interface and applies them to the world of books.`
     },
     {
       id: 'why',
-      title: 'Why BookMarkd?',
+      title: 'Why Bookmarkd?',
       icon: Lightbulb,
       content: `• Focused and simple: No distractions, no clutter, just a place to log, rate, and rank books.
 • Rankings that matter: See which books rise to the top and explore personal and global favorites.
@@ -51,7 +51,7 @@ Inspired by the clean, community-driven experience of Letterboxd, Bookmarkd take
       id: 'future',
       title: 'Looking Ahead',
       icon: TrendingUp,
-      content: `BookMarkd is just getting started. Future updates will introduce community-driven features like book clubs, discussion posts, and shared rankings so that readers can not only track their books, but also connect, compete, and share their love for reading.`
+      content: `Bookmarkd is just getting started. Future updates will introduce community-driven features like book clubs, discussion posts, and shared rankings so that readers can not only track their books, but also connect, compete, and share their love for reading.`
     },
     {
       id: 'tech',
@@ -91,7 +91,7 @@ Your feedback shapes the future of Bookmarkd. Whether you've found a bug, have a
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            About BookMarkd
+            About Bookmarkd
           </h1>
           
           <p className="text-xl text-stone-300 mb-8 leading-relaxed max-w-2xl mx-auto">

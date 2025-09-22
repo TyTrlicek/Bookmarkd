@@ -58,6 +58,14 @@ model Book {
   favorites     Favorite[]
   reviews       Review[]
   userBooks     UserBook[]
+
+  // Production performance indexes
+  @@index([averageRating, totalRatings]) // For rankings by rating
+  @@index([totalRatings, averageRating]) // For rankings by popularity
+  @@index([title]) // For search by title
+  @@index([author]) // For search by author
+  @@index([categories]) // For filtering by genre
+  @@index([publishedDate]) // For filtering by year
 }
 
 model UserBook {
@@ -72,6 +80,10 @@ model UserBook {
   user    User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, bookId])
+  @@index([userId]) // For user collections
+  @@index([bookId]) // For book statistics
+  @@index([addedAt]) // For trending calculations
+  @@index([userId, rating]) // For user stats
 }
 
 model Review {
@@ -150,6 +162,11 @@ model UserActivity {
   read      Boolean  @default(false)
   actor     User?    @relation("ActivityActor", fields: [actorId], references: [id])
   user      User     @relation("ActivityTarget", fields: [userId], references: [id])
+
+  @@index([userId, createdAt]) // For user activity feeds
+  @@index([userId, read]) // For unread notifications
+  @@index([type, createdAt]) // For global activity by type
+  @@index([createdAt]) // For recent activity
 }
 
 model Achievement {

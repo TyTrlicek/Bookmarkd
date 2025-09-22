@@ -154,12 +154,15 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
       In Collection       
     </button>
   ) : (
-    <button          
-      className="w-full font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-[1.02] bg-gradient-to-r from-stone-100 to-stone-200 hover:from-stone-200 hover:to-stone-300 text-stone-800 border-2 border-stone-300 shadow-md hover:shadow-lg"         
-      onClick={() => setIsOpen(true)}       
-    >         
-      <Plus className="w-4 h-4" />         
-      Add to Collection       
+    <button
+      className="w-full font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-105 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl hover:shadow-amber-500/25 border-2 border-amber-400/50 hover:border-amber-300 relative overflow-hidden group"
+      onClick={() => setIsOpen(true)}
+    >
+      {/* Shimmer effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+
+      <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+      Add to Collection
     </button>
   )
 )}        

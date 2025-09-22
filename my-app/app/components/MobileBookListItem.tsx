@@ -66,13 +66,13 @@ const MobileBookListItem = ({ book }: { book: BookData }) => {
             </div>
           )}
 
-          {book.averageRating && book.averageRating > 0 && (
+          {/* {book.averageRating && book.averageRating > 0 && (
             <div className="absolute top-1 right-1 bg-black/70 backdrop-blur-sm rounded px-1.5 py-0.5">
               <span className={`text-xs font-bold ${getScoreColor(book.averageRating)}`}>
                 {book.averageRating.toFixed(1)}
               </span>
             </div>
-          )}
+          )} */}
 
           {/* User Status Badge */}
           {book.userStatus && (
@@ -106,9 +106,9 @@ const MobileBookListItem = ({ book }: { book: BookData }) => {
           {book.categories && book.categories.length > 0 && (
             <div className="flex gap-1 flex-wrap">
               {book.categories.slice(0, 2).map((category, index) => (
-                <span 
+                <span
                   key={index}
-                  className="text-xs bg-stone-700/50 text-stone-300 px-2 py-0.5 rounded-full"
+                  className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/20"
                 >
                   {category}
                 </span>
