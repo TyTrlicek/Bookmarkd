@@ -318,7 +318,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
               </button>
             </div>
           </div>
-        ) : favoriteBooks.length >= 1 && favoriteBooks.length <= 5 ? (
+        ) : (userStats?.booksInCollection ?? 0) >= 1 && userStats?.booksInCollection || 0 <= 5 ? (
           // Library building state (1-5 books)
           <div>
             <LibraryBuildingPrompt bookCount={favoriteBooks.length} />
