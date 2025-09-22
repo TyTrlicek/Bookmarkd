@@ -50,7 +50,7 @@ export default function AccountPage() {
   const [editMessage, setEditMessage] = useState('')
   const [averageRating, setAverageRating] = useState();
   const [booksInCollection, setBooksInCollection] = useState(0);
-  const [booksRatedThisYear, setBookRatedThisYear] = useState(0);
+  const [reviewsWritten, setReviewsWritten] = useState(0);
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [achievementCount, setAchievementCount] = useState(0);
@@ -169,10 +169,11 @@ useEffect(() => {
 
       const statsData = statsResponse.data;
 
+
       setUser(statsData.user);
-      setAverageRating(statsData.avgRating.toFixed(2));
+      setAverageRating(statsData.averageRating.toFixed(2));
       setBooksInCollection(statsData.booksInCollection);
-      setBookRatedThisYear(statsData.booksRatedThisYear);
+      setReviewsWritten(statsData.reviewsWritten);
 
       setEditForm({
         username: statsData.username || '',
@@ -420,7 +421,7 @@ setUser((prevUser) => ({
 
   const userStats = [
     { label: "Books in Collection", value: booksInCollection, icon: BookMarked, color: "from-blue-500 to-blue-600" },
-    { label: "Books Rated This Year", value: booksRatedThisYear, icon: BookOpen, color: "from-amber-500 to-amber-600" },
+    { label: "Books Rated This Year", value: reviewsWritten || 0, icon: BookOpen, color: "from-amber-500 to-amber-600" },
     { label: "Average Book Rating", value: (averageRating || 0), icon: Star, color: "from-emerald-500 to-emerald-600" },
     { label: "Achievements Unlocked", value: achievementCount, icon: Award, color: "from-purple-500 to-purple-600" }
   ]

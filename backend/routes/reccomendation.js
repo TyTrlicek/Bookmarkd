@@ -28,7 +28,7 @@ router.get('/api/recommendations', authenticateUser, async (req, res) => {
     });
 
     // 🔑 If the user has less than 5 books, return an empty array immediately
-    if (userBooks.length < 5) {
+    if (userBooks.length <= 5) {
       return res.json([]);
     }
 

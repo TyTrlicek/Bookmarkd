@@ -118,7 +118,7 @@ const MyCollectionPage = () => {
         },
       })
   
-      response.data && setBooks(response.data)
+      response.data && setBooks([])
   
       console.log('Books fetched:', response.data)
     } catch (error) {
@@ -853,7 +853,7 @@ return (
                 ))}
               </div>
 
-              {filteredAndSortedBooks.length === 0 && (
+              {filteredAndSortedBooks.length === 0 && statusFilter !== "all" &&  (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
                     <BookOpen className="w-8 h-8 text-stone-400" />
@@ -865,6 +865,22 @@ return (
                     className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg font-medium"
                   >
                     Clear Filters
+                  </button>
+                </div>
+              )}
+              {filteredAndSortedBooks.length === 0 && statusFilter === "all" &&  (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                    <BookOpen className="w-8 h-8 text-stone-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">No books found</h3>
+                  <p className="text-stone-300 mb-4">Try adding some books to your collection!</p>
+                  <button 
+                    type='button' 
+                    onClick={() => router.push('/browse')}
+                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg font-medium"
+                  >
+                    Browse
                   </button>
                 </div>
               )}

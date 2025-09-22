@@ -299,7 +299,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
               <p className="text-white text-lg">Loading your library...</p>
             </div>
           </div>
-        ) : favoriteBooks.length === 0 ? (
+        ) : userStats?.booksInCollection === 0 ? (
           // New user state (0 books) - handled by modal
           <div className="text-center min-h-[60vh] flex items-center justify-center">
             <div className="max-w-2xl mx-auto">
@@ -321,7 +321,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
         ) : (userStats?.booksInCollection ?? 0) >= 1 && userStats?.booksInCollection || 0 <= 5 ? (
           // Library building state (1-5 books)
           <div>
-            <LibraryBuildingPrompt bookCount={favoriteBooks.length} />
+            <LibraryBuildingPrompt bookCount={userStats?.booksInCollection || 0} />
           </div>
         ) : (
           // Full favorites experience (6+ books)

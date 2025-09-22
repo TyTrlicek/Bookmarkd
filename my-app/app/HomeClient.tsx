@@ -152,21 +152,6 @@ const HomePage = () => {
 
 }, [])
 
-  const Target = ({ className }: { className: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10"/>
-      <circle cx="12" cy="12" r="6"/>
-      <circle cx="12" cy="12" r="2"/>
-    </svg>
-  )
-
-  const stats = [
-    { label: "Books Read This Year", value: "47", icon: BookOpen, color: "bg-amber-600" },
-    { label: "Reading Goal Progress", value: "94%", icon: Target, color: "bg-emerald-600" },
-    { label: "Books in Collection", value: "312", icon: BookMarked, color: "bg-blue-600" },
-    { label: "Reviews Written", value: "28", icon: Star, color: "bg-purple-600" }
-  ]
-
   // Coming Soon Component
   const ComingSoonSection = ({ icon: Icon, iconColor, title, subtitle, description }: {
     icon: React.ElementType,

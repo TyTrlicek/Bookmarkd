@@ -65,7 +65,7 @@ const LibraryBuildingPrompt: React.FC<LibraryBuildingPromptProps> = ({ bookCount
             ></div>
           </div>
           <p className="text-stone-400 text-sm">
-            {6 - bookCount} more books until you unlock the full favorites experience!
+            {6 - bookCount} more books until you unlock personal recommendations!
           </p>
         </div>
       </div>
