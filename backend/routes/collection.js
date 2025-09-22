@@ -262,14 +262,18 @@ router.put('/collection/comment', writeLimiter, authenticateUser, async (req, re
       }
     });
 
+    // Invalidate user-related caches
+    await cache.invalidateUser(userId);
+    console.log(`[Collection] Invalidated user caches after comment update for user ${userId}`);
+
     res.json(updatedUserBook);
   } catch (error) {
     console.error('Error updating comment:', error);
-    
+
     if (error.code === 'P2025') {
       return res.status(404).json({ message: 'Book not found in your collection' });
     }
-    
+
     res.status(500).json({ message: 'Internal server error' });
   }
 });

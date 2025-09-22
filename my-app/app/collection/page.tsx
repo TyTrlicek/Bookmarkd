@@ -118,7 +118,7 @@ const MyCollectionPage = () => {
         },
       })
   
-      response.data && setBooks([])
+      response.data && setBooks(response.data)
   
       console.log('Books fetched:', response.data)
     } catch (error) {
