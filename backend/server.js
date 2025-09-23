@@ -17,6 +17,7 @@ const favoriteRoute = require('./routes/favorite')
 const recomendationRoute = require('./routes/reccomendation')
 const redis = require ('./lib/redis');
 const { cache, TTL } = require('./lib/cache');
+const rankingCache = require('./lib/rankingCache');
 const { checkAndUnlockAchievements } = require('./utils');
 
 const openLibraryAPI = axios.create({

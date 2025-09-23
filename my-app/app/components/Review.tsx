@@ -189,6 +189,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, setUserReco
 
     const reportContent = (itemType: 'review' | 'reply', itemId: string) => {
         console.log(`Report ${itemType} with ID: ${itemId}`);
+        alert('Thank you for reporting this content. We will review it shortly.');
     }
 
 

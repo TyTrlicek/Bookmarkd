@@ -318,13 +318,12 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
               </button>
             </div>
           </div>
-        ) : (userStats?.booksInCollection ?? 0) >= 1 && userStats?.booksInCollection || 0 <= 5 ? (
+        ) : ((userStats?.booksInCollection ?? 0) >= 1) && ((userStats?.booksInCollection || 0) <= 5) ? (
           // Library building state (1-5 books)
           <div>
             <LibraryBuildingPrompt bookCount={userStats?.booksInCollection || 0} />
           </div>
         ) : (
-          // Full favorites experience (6+ books)
           <div>
             {/* Header Section */}
             <div className="text-center mb-16">
