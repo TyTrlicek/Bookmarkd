@@ -5,6 +5,7 @@ import useAuthStore from '@/store/authStore';
 import { supabase } from '@/lib/supabaseClient';
 import AchievementNotification from './AchievementNotification';
 import { useRouter } from 'next/navigation';
+import LoginModal from './LoginModal';
 
 
 interface AddToCollectionPopupProps {
@@ -22,6 +23,8 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInCollection, setIsInCollection] = useState(false);
   const [showRatingDropdown, setShowRatingDropdown] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [bookTitle, setBookTitle] = useState<string>('');
 
   const router = useRouter();
 
@@ -81,9 +84,10 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
       if (!accessToken) {
         console.error('User not authenticated');
-        router.push('/auth');
+        setShowLoginModal(true);
         setIsSubmitting(false);
-        
+        setIsOpen(false);
+
         return;
       }
       const res = await axios.post(
@@ -357,6 +361,16 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
           onClose={() => setShowAchievements(false)}
           />
             )}
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => {
+          setShowLoginModal(false);
+          setIsOpen(true); // Reopen the add to collection popup after login
+        }}
+        bookTitle={bookTitle}
+      />
     </div>
   );
 }
