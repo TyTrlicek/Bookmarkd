@@ -34,9 +34,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  alternates: {
-    canonical: "https://bookmarkd.fun",
-  },
   openGraph: {
     title: "Bookmarkd – Track Your Books and Discover New Reads",
     description:

@@ -310,6 +310,7 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
     "Romance": "Romance",
     "romance": 'Romance',
     "Love": "Romance",
+    'Love & Romance': 'Romance',
     "Love stories": "Romance",
     "Love, fiction": "Romance",
     "Man-woman relationships": "Romance",
