@@ -12,9 +12,10 @@ interface AddToCollectionPopupProps {
   openLibraryId: string
   buttonType?: string
   userStatus?: string | null;
+  bookData?: any; // Add book data prop
 }
 
-export default function AddToCollectionPopup({ openLibraryId, buttonType, userStatus }: AddToCollectionPopupProps): React.JSX.Element {
+export default function AddToCollectionPopup({ openLibraryId, buttonType, userStatus, bookData }: AddToCollectionPopupProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [achievements, setAchievements] = useState([]);
@@ -84,6 +85,17 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
       if (!accessToken) {
         console.error('User not authenticated');
+
+        // Store book addition data in localStorage
+        const pendingBookAddition = {
+          openLibraryId,
+          rating,
+          status,
+          bookData: bookData || { title: 'Book', author: 'Unknown' },
+          timestamp: Date.now()
+        };
+        localStorage.setItem('pendingBookAddition', JSON.stringify(pendingBookAddition));
+
         setShowLoginModal(true);
         setIsSubmitting(false);
         setIsOpen(false);

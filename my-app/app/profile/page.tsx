@@ -239,6 +239,7 @@ useEffect(() => {
 
 
   const handleLogout = async () => {
+    console.log('Logging out user...')
     await supabase.auth.signOut()
     useAuthStore.getState().clearSession()
     router.push('/auth')

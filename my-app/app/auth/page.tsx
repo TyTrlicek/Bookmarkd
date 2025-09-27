@@ -383,11 +383,11 @@ export default function AuthPage() {
 </button>
 
                 {/* Development Email/Password Login */}
-                {isDevelopment && (
+                {true && (
                   <div className="mb-6">
                     <div className="flex items-center my-4">
                       <div className="flex-1 border-t border-white/20"></div>
-                      <span className="px-3 text-xs text-stone-400 bg-stone-800/50 rounded-full">DEV MODE</span>
+                      <span className="px-3 text-xs text-stone-400 bg-stone-800/50 rounded-full">No Google?</span>
                       <div className="flex-1 border-t border-white/20"></div>
                     </div>
 
@@ -456,7 +456,7 @@ export default function AuthPage() {
                         </form>
 
                         <p className="text-xs text-stone-500 mt-2 text-center">
-                          Development only - not available in production
+                          Email Will be sent to your inbox for verification.
                         </p>
                       </div>
                     )}
@@ -464,7 +464,7 @@ export default function AuthPage() {
                 )}
 
                 {/* Benefits */}
-                <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+                {/* <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
                   <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-400" />
                     Why use Google Sign-In?
@@ -487,7 +487,7 @@ export default function AuthPage() {
                       Get started reading in under 30 seconds
                     </li>
                   </ul>
-                </div>
+                </div> */}
 
                 {/* Privacy Note */}
                 <div className="mt-6 text-center">

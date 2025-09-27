@@ -18,21 +18,27 @@ export default function LoginModal({ isOpen, onClose, onSuccess, bookTitle }: Lo
   const handleGoogleLogin = async () => {
     setIsLoading(true)
     try {
+      // Store the current URL in localStorage before redirect
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('loginRedirectUrl', window.location.href)
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}${window.location.pathname}${window.location.search}`
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       })
 
       if (error) {
         console.error('Login error:', error)
         alert('Login failed. Please try again.')
+        setIsLoading(false)
       }
+      // Don't set loading to false here - user will be redirected
     } catch (error) {
       console.error('Login error:', error)
       alert('Login failed. Please try again.')
-    } finally {
       setIsLoading(false)
     }
   }

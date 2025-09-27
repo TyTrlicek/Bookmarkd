@@ -166,7 +166,12 @@ return (
                     Buy Now - $12.99
                   </button> */}
                   
-                  <AddToCollectionPopup openLibraryId = {openLibraryId || ''} buttonType='book-page' userStatus={userStatus}/>
+                  <AddToCollectionPopup
+                    openLibraryId={openLibraryId || ''}
+                    buttonType='book-page'
+                    userStatus={userStatus}
+                    bookData={{ title, author, image }}
+                  />
                 </div>
 
                 {/* Metadata */}

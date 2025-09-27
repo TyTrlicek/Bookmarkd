@@ -1,100 +1,108 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import useAuthStore from '@/store/authStore'
-import axios from 'axios'
+import { addPendingBookToCollection, getPendingBookData } from '@/utils/pendingBookUtils'
 
 export default function AuthCallback() {
   const router = useRouter()
+  const [status, setStatus] = useState('Completing sign in...')
+  const [bookTitle, setBookTitle] = useState<string | null>(null)
 
   useEffect(() => {
-    const handleAuthCallback = async (session: any) => {
-      if (!session?.user) {
-        router.push('/auth')
-        return
-      }
-
+    const handleAuthCallback = async () => {
       try {
-        const user = session.user
-        const accessToken = session.access_token
+        // Handle the OAuth callback
+        const { data, error } = await supabase.auth.getSession()
 
-        // Check if this is a new Google user and create profile in your database
-        try {
-          // First check if user exists in your database
-          const checkResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
-                  headers: {
-                      Authorization: `Bearer ${accessToken}`,
-                      'Content-Type': 'application/json',
-                  },
-              });
-
-          // If user doesn't exist (404), create them
-          if (checkResponse.status === 404) {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/users/create`, {
-              id: user.id,
-              email: user.email,
-              username: user.user_metadata?.full_name || user.email?.split('@')[0] || 'user',
-              avatar_url: user.user_metadata?.avatar_url || null,
-            })
-          }
-        } catch (dbError: any) {
-          // If error is 404, user doesn't exist, so create them
-          if (dbError.response?.status === 404) {
-            try {
-              await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/users/create`, {
-                id: user.id,
-                email: user.email,
-                username: user.user_metadata?.full_name || user.email?.split('@')[0] || 'user',
-                avatar_url: user.user_metadata?.avatar_url || null,
-              })
-            } catch (createError) {
-              console.error('Failed to create user in database:', createError)
-            }
-          } else {
-            console.error('Database error:', dbError)
-          }
+        if (error) {
+          console.error('Auth callback error:', error)
+          router.push('/auth?error=callback_failed')
+          return
         }
 
-        // Initialize the auth store
-        await useAuthStore.getState().initSession()
+        if (data.session) {
+          // Update auth store
+          useAuthStore.getState().setSession(data.session)
 
-        // Clear the URL hash to remove tokens from URL
-        window.history.replaceState({}, document.title, window.location.pathname)
+          // Check for pending book addition
+          const pendingBook = getPendingBookData()
 
-        // Redirect to home page
-        router.push('/')
+          if (pendingBook) {
+            setBookTitle(pendingBook.bookData.title)
+            setStatus(`Adding "${pendingBook.bookData.title}" to your collection...`)
+
+            // Add the pending book
+            const result = await addPendingBookToCollection()
+
+            if (result.success) {
+              setStatus(`Successfully added "${pendingBook.bookData.title}"!`)
+              // Wait a bit to show success message
+              setTimeout(() => {
+                // Redirect back to the book page or home
+                const redirectUrl = localStorage.getItem('loginRedirectUrl')
+                localStorage.removeItem('loginRedirectUrl')
+
+                if (redirectUrl) {
+                  window.location.href = redirectUrl
+                } else {
+                  router.push('/')
+                }
+              }, 2000)
+            } else {
+              console.error('Failed to add pending book:', result.error)
+              setStatus('Sign in complete! Redirecting...')
+              // Still redirect even if book addition fails
+              setTimeout(() => {
+                const redirectUrl = localStorage.getItem('loginRedirectUrl')
+                localStorage.removeItem('loginRedirectUrl')
+
+                if (redirectUrl) {
+                  window.location.href = redirectUrl
+                } else {
+                  router.push('/')
+                }
+              }, 1500)
+            }
+          } else {
+            // No pending book, normal redirect
+            const redirectUrl = localStorage.getItem('loginRedirectUrl')
+            localStorage.removeItem('loginRedirectUrl')
+
+            if (redirectUrl) {
+              window.location.href = redirectUrl
+            } else {
+              router.push('/')
+            }
+          }
+        } else {
+          // No session, redirect to auth page
+          router.push('/auth')
+        }
       } catch (error) {
-        console.error('Callback handling error:', error)
-        router.push('/auth?error=callback_error')
+        console.error('Auth callback error:', error)
+        router.push('/auth?error=callback_failed')
       }
     }
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        await handleAuthCallback(session)
-      } else if (event === 'SIGNED_OUT') {
-        router.push('/auth')
-      }
-    })
-
-    // Also check current session immediately
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        handleAuthCallback(session)
-      }
-    })
-
-    return () => subscription?.unsubscribe()
+    handleAuthCallback()
   }, [router])
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-stone-600">Completing sign in...</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-stone-900 to-black flex items-center justify-center">
+      <div className="text-center max-w-md mx-auto px-6">
+        <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+        <p className="text-white text-xl font-semibold mb-2">{status}</p>
+        {bookTitle && (
+          <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl p-4 mt-4 border border-amber-500/30">
+            <p className="text-amber-300 text-sm">
+              📚 {bookTitle}
+            </p>
+          </div>
+        )}
+        <p className="text-stone-400 text-sm mt-4">Please wait while we complete the process.</p>
       </div>
     </div>
   )
