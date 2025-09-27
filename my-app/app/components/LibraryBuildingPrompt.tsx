@@ -78,7 +78,7 @@ const LibraryBuildingPrompt: React.FC<LibraryBuildingPromptProps> = ({ bookCount
             <button
               key={index}
               onClick={suggestion.action}
-              className="group bg-stone-800/40 backdrop-blur-sm rounded-2xl p-6 border border-stone-700/40 hover:border-amber-500/40 transition-all duration-300 hover:bg-stone-800/60 text-left"
+              className="group bg-stone-800 backdrop-blur-sm rounded-2xl p-6 border border-stone-700/40 hover:border-amber-500/40 transition-all duration-300 hover:bg-stone-800/60 text-left"
             >
               <div className={`w-12 h-12 bg-gradient-to-r ${suggestion.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                 <Icon className="w-6 h-6 text-white" />
