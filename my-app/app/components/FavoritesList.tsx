@@ -7,7 +7,6 @@ import { getSearchData } from '@/utils/util';
 interface UserStats {
   booksInCollection: number;
   reviewsWritten: number;
-  achievementsUnlocked: number;
 }
 
 interface FavoritesListProps {
@@ -93,12 +92,12 @@ const SearchModal: React.FC<SearchModalProps> = ({
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div
         ref={modalRef}
-        className="bg-stone-800 border border-stone-600 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+        className="bg-[#2C3440] border border-stone-600 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
       >
         {/* Modal Header */}
-        <div className="p-6 border-b border-stone-600 bg-stone-900">
+        <div className="p-6 border-b border-stone-600 bg-[#14181C]">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Add Favorite Book</h2>
+            <h2 className="text-xl font-bold text-stone-50">Add Favorite Book</h2>
             <button
               onClick={onClose}
               className="p-2 text-stone-400 hover:text-white transition-colors rounded-lg hover:bg-stone-700"
@@ -115,7 +114,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
                 placeholder="Search for books to add to favorites..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-stone-700 text-white placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-full pl-10 pr-4 py-3 bg-stone-700 text-stone-50 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 autoFocus
               />
             </div>
@@ -147,7 +146,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
 
           {!isSearching && showSearchResults && searchResults.length > 0 && (
             <div>
-              <div className="p-4 bg-stone-900 border-b border-stone-600">
+              <div className="p-4 bg-[#14181C] border-b border-stone-600">
                 <p className="text-stone-300 text-sm">
                   Found {searchResults.length} books • Click to add to favorites
                 </p>
@@ -173,7 +172,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-white text-sm mb-1 line-clamp-2">
+                      <h3 className="font-medium text-stone-50 text-sm mb-1 line-clamp-2">
                         {book.title}
                       </h3>
                       <p className="text-stone-300 text-xs mb-2">
@@ -203,7 +202,7 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
   onRemoveBook,
   onAddBook,
   showAddSlots = true,
-  maxSlots = 6,
+  maxSlots = 4,
   layout = 'grid',
   className = '',
   showStats = false,
@@ -320,7 +319,7 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
     return (
       <>
         <div className={`${className}`}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {displayBooks.map((book, index) => (
               <BookCard
                 key={book.id}
@@ -353,11 +352,6 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
                 label="Reviews Written"
                 color="green"
               />
-              <StatCard
-                value={userStats?.achievementsUnlocked ?? '—'}
-                label="Achievements"
-                color="purple"
-              />
             </div>
           )}
         </div>
@@ -384,7 +378,7 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm transition-all duration-200"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#2C3440] hover:bg-[#14181C]/70 text-stone-50 p-2 rounded-full backdrop-blur-sm transition-all duration-200"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -393,7 +387,7 @@ const FavoritesList: React.FC<FavoritesListProps> = ({
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm transition-all duration-200"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#2C3440] hover:bg-[#14181C]/70 text-stone-50 p-2 rounded-full backdrop-blur-sm transition-all duration-200"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -540,11 +534,11 @@ const BookCard: React.FC<BookCardProps> = ({
         </div>
 
         <div className={`
-          absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent
+          absolute inset-0 bg-gradient-to-t from-[#14181C]/80 via-black/20 to-transparent
           flex items-end transition-opacity duration-300
           ${hoveredBook === index ? 'opacity-100' : 'opacity-0'}
         `}>
-          <div className="p-4 text-white w-full">
+          <div className="p-4 text-stone-50 w-full">
             <h4 className="font-bold text-sm mb-1 line-clamp-2">{book.title}</h4>
             <p className="text-xs opacity-80 mb-2">{book.author}</p>
             <div className="flex items-center justify-between">
@@ -594,7 +588,7 @@ const BookCard: React.FC<BookCardProps> = ({
           </div>
         </div>
 
-        <div className="absolute inset-0 border border-white/10 rounded-lg group-hover:border-amber-400/30 transition-colors duration-500" />
+        <div className="absolute inset-0 border border-[#3D4451] rounded-lg group-hover:border-amber-400/30 transition-colors duration-500" />
       </div>
     </div>
   );
@@ -616,7 +610,7 @@ const AddBookCard: React.FC<AddBookCardProps> = ({ index, onClick, isHorizontal 
         animation: `fadeInUp 0.8s ease-out ${index * 0.15}s both`
       }}
     >
-      <div className={`relative ${isHorizontal ? 'aspect-[2/3]' : 'aspect-[2/3]'} overflow-hidden rounded-lg border-2 border-dashed border-stone-500 hover:border-amber-400 transition-all duration-500 bg-stone-800/50 hover:bg-stone-700/50`}>
+      <div className={`relative ${isHorizontal ? 'aspect-[2/3]' : 'aspect-[2/3]'} overflow-hidden rounded-lg border-2 border-dashed border-stone-500 hover:border-amber-400 transition-all duration-500 bg-[#2C3440] hover:bg-stone-700/50`}>
         <div className="flex flex-col items-center justify-center h-full text-stone-400 group-hover:text-amber-400 transition-colors duration-300">
           <Search className="w-8 h-8 mb-2" />
           <span className={`${isHorizontal ? 'text-xs' : 'text-sm'} font-medium text-center px-4`}>

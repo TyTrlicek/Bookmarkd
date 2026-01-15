@@ -58,10 +58,15 @@ export default function AuthPage() {
         return
       }
 
-      if (data.user) {
+      if (data.user && data.session) {
         // Check if user profile exists in our database
         try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${data.user.id}`)
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
+            headers: {
+              Authorization: `Bearer ${data.session.access_token}`,
+              'Content-Type': 'application/json',
+            },
+          })
 
           if (response.data) {
             // User exists, initialize session and redirect
@@ -72,10 +77,16 @@ export default function AuthPage() {
             setPendingUser(data.user)
             setShowProfileSetup(true)
           }
-        } catch (err) {
-          // User doesn't exist in our db, show profile setup
-          setPendingUser(data.user)
-          setShowProfileSetup(true)
+        } catch (err: any) {
+          // 404 means user doesn't exist in our db, show profile setup
+          // Any other error is a server issue
+          if (err.response?.status === 404) {
+            setPendingUser(data.user)
+            setShowProfileSetup(true)
+          } else {
+            console.error('Error checking user profile:', err)
+            setMessage('An error occurred. Please try again.')
+          }
         }
       }
     } catch (error) {
@@ -254,7 +265,7 @@ export default function AuthPage() {
   const stats = [
     { value: "2M+", label: "Books Available" },
     { value: "500K+", label: "Authors" },
-    { value: "50+", label: "Achievements" },
+    { value: "10K+", label: "Active Readers" },
     { value: "24/7", label: "Book Discovery" }
   ]
 
@@ -269,7 +280,7 @@ export default function AuthPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800">
+    <div className="min-h-screen bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]">
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
 
         {isMobile && 
@@ -278,7 +289,7 @@ export default function AuthPage() {
 
         {/* Left Side - Branding & Features */}
         {!isMobile && <>
-        <div className="bg-gradient-to-br from-black/40 via-stone-800/60 to-black/30 p-8 lg:p-12 flex flex-col justify-center backdrop-blur-sm border-r border-white/10">
+        <div className="bg-gradient-to-br from-[#2C3440]/80 via-[#14181C]/60 to-[#2C3440]/80 p-8 lg:p-12 flex flex-col justify-center backdrop-blur-sm border-r border-[#3D4451]">
           <div className="max-w-md mx-auto lg:mx-0">
             {/* Logo & Title */}
             <div className="flex items-center gap-3 mb-8">
@@ -286,14 +297,14 @@ export default function AuthPage() {
                 <Image src="/brand-logo.png" width={64} height={64} alt="logo" className='rounded-full'/>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Bookmarkd</h1>
+                <h1 className="text-2xl font-bold text-stone-50">Bookmarkd</h1>
                 <p className="text-stone-300 text-sm">Keep track of your books effortlessly</p>
               </div>
             </div>
 
             {/* Main Heading */}
             <div className="mb-10">
-              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              <h2 className="text-3xl lg:text-4xl font-bold text-stone-50 mb-4">
                 {showProfileSetup ? 'Complete Your Profile' : 'Join Bookmarkd Today!'}
               </h2>
               <p className="text-lg text-stone-300">
@@ -308,7 +319,7 @@ export default function AuthPage() {
             <div className="space-y-4 mb-10">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-black/30 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-sm border border-white/20">
+                  <div className="w-8 h-8 bg-[#2C3440] backdrop-blur-sm rounded-lg flex items-center justify-center shadow-sm border border-[#3D4451]">
                     <feature.icon className="w-4 h-4 text-amber-400" />
                   </div>
                   <span className="text-stone-200">{feature.text}</span>
@@ -319,8 +330,8 @@ export default function AuthPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 gap-6">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center p-4 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10">
-                  <div className="text-2xl font-bold text-white">{stat.value}</div>
+                <div key={index} className="text-center p-4 bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451]">
+                  <div className="text-2xl font-bold text-stone-50">{stat.value}</div>
                   <div className="text-sm text-stone-300">{stat.label}</div>
                 </div>
               ))}
@@ -328,7 +339,7 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <div className="p-8 lg:p-12 flex flex-col justify-center bg-gradient-to-br from-stone-800/80 to-stone-900/90 backdrop-blur-md">
+        <div className="p-8 lg:p-12 flex flex-col justify-center bg-gradient-to-br from-[#14181C]/80 to-[#14181C]/90 backdrop-blur-md">
           <div className="max-w-md mx-auto w-full">
             {!showProfileSetup ? (
               /* Google Sign In Section */
@@ -341,7 +352,7 @@ export default function AuthPage() {
                       <BookOpen className="w-10 h-10 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h3 className="text-2xl font-bold text-stone-50 mb-2">
                     Get Started in Seconds
                   </h3>
                   <p className="text-stone-300">
@@ -386,9 +397,9 @@ export default function AuthPage() {
                 {true && (
                   <div className="mb-6">
                     <div className="flex items-center my-4">
-                      <div className="flex-1 border-t border-white/20"></div>
-                      <span className="px-3 text-xs text-stone-400 bg-stone-800/50 rounded-full">No Google?</span>
-                      <div className="flex-1 border-t border-white/20"></div>
+                      <div className="flex-1 border-t border-[#3D4451]"></div>
+                      <span className="px-3 text-xs text-stone-400 bg-[#2C3440] rounded-full">No Google?</span>
+                      <div className="flex-1 border-t border-[#3D4451]"></div>
                     </div>
 
                     <button
@@ -399,7 +410,7 @@ export default function AuthPage() {
                     </button>
 
                     {showDevLogin && (
-                      <div className="bg-stone-900/50 backdrop-blur-sm rounded-lg p-4 border border-stone-600/30">
+                      <div className="bg-[#2C3440] backdrop-blur-sm rounded-lg p-4 border border-stone-600/30">
                         <form onSubmit={handleDevEmailSignIn} className="space-y-4">
                           <div>
                             <label htmlFor="dev-email" className="block text-sm font-medium text-stone-200 mb-1">
@@ -412,7 +423,7 @@ export default function AuthPage() {
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
                               required
-                              className="w-full px-3 py-2 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-white text-sm"
+                              className="w-full px-3 py-2 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 text-sm"
                             />
                           </div>
 
@@ -427,7 +438,7 @@ export default function AuthPage() {
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               required
-                              className="w-full px-3 py-2 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-white text-sm"
+                              className="w-full px-3 py-2 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 text-sm"
                             />
                           </div>
 
@@ -435,7 +446,7 @@ export default function AuthPage() {
                             <button
                               type="submit"
                               disabled={isDevLoginLoading || !email.trim() || !password.trim()}
-                              className="flex-1 bg-amber-600/80 hover:bg-amber-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                              className="flex-1 bg-amber-600/80 hover:bg-amber-600 text-stone-50 font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                             >
                               {isDevLoginLoading ? (
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
@@ -448,7 +459,7 @@ export default function AuthPage() {
                               type="button"
                               onClick={handleDevEmailSignUp}
                               disabled={isDevLoginLoading || !email.trim() || !password.trim()}
-                              className="flex-1 bg-stone-600/80 hover:bg-stone-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                              className="flex-1 bg-stone-600/80 hover:bg-stone-600 text-stone-50 font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                             >
                               Sign Up
                             </button>
@@ -464,8 +475,8 @@ export default function AuthPage() {
                 )}
 
                 {/* Benefits */}
-                {/* <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
-                  <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                {/* <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-lg p-6 border border-[#3D4451]">
+                  <h4 className="font-semibold text-stone-50 mb-3 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-400" />
                     Why use Google Sign-In?
                   </h4>
@@ -507,7 +518,7 @@ export default function AuthPage() {
                       <User className="w-10 h-10 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h3 className="text-2xl font-bold text-stone-50 mb-2">
                     Complete Your Profile
                   </h3>
                   <p className="text-stone-300">
@@ -524,7 +535,7 @@ export default function AuthPage() {
                     <div className="flex items-center gap-4">
                       {/* Profile Picture Preview */}
                       <div className="relative">
-                        <div className="w-16 h-16 rounded-full bg-black/30 backdrop-blur-sm border-2 border-white/20 flex items-center justify-center overflow-hidden">
+                        <div className="w-16 h-16 rounded-full bg-[#2C3440] backdrop-blur-sm border-2 border-[#3D4451] flex items-center justify-center overflow-hidden">
                           {profileImagePreview ? (
                             <Image 
                               src={profileImagePreview} 
@@ -540,7 +551,7 @@ export default function AuthPage() {
                           <button
                             type="button"
                             onClick={removeImage}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-stone-50 rounded-full flex items-center justify-center transition-colors"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -551,7 +562,7 @@ export default function AuthPage() {
                       <div className="flex-1">
                         <label
                           htmlFor="profileImage"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/10 cursor-pointer transition-colors text-sm text-stone-200"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg hover:bg-white/10 cursor-pointer transition-colors text-sm text-stone-200"
                         >
                           <Upload className="w-4 h-4 text-amber-400" />
                           {profileImage ? 'Change Photo' : 'Upload Photo'}
@@ -586,7 +597,7 @@ export default function AuthPage() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                        className="w-full pl-10 pr-4 py-3 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-white"
+                        className="w-full pl-10 pr-4 py-3 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50"
                       />
                     </div>
                     <p className="text-xs text-stone-400 mt-1">
@@ -598,7 +609,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={isUploadingImage || !username.trim()}
-                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/30 border border-amber-400/30"
+                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-50 font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/30 border border-amber-400/30"
                   >
                     {isUploadingImage ? (
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

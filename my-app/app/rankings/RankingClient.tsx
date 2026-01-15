@@ -210,8 +210,8 @@ const [pagination, setPagination] = useState({
 
   const getRankingTypeIcon = () => {
     return rankingType === 'rating' ? 
-      <Star className="w-6 h-6 md:w-8 md:h-8 text-white" /> : 
-      <Users className="w-6 h-6 md:w-8 md:h-8 text-white" />
+      <Star className="w-6 h-6 md:w-8 md:h-8 text-stone-50" /> : 
+      <Users className="w-6 h-6 md:w-8 md:h-8 text-stone-50" />
   }
 
   const getRankingTypeColor = () => {
@@ -261,7 +261,7 @@ const [pagination, setPagination] = useState({
     };
   
     return (
-      <div className="bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800 backdrop-blur-md rounded-2xl shadow-lg shadow-amber-100/20 border p-6 mt-6">
+      <div className="bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C] backdrop-blur-md rounded-2xl shadow-lg shadow-amber-100/20 border p-6 mt-6">
   {/* Pagination Info */}
   <div className="text-center mb-4">
     <p className="text-stone-200">
@@ -280,7 +280,7 @@ const [pagination, setPagination] = useState({
       className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
         pagination.hasPreviousPage
           ? 'bg-stone-700 hover:bg-stone-600 text-stone-200 border border-stone-600/50'
-          : 'bg-stone-800 text-stone-500 cursor-not-allowed border border-stone-700'
+          : 'bg-[#2C3440] text-stone-500 cursor-not-allowed border border-stone-700'
       }`}
     >
       Previous
@@ -336,7 +336,7 @@ const [pagination, setPagination] = useState({
       className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
         pagination.hasNextPage
           ? 'bg-stone-700 hover:bg-stone-600 text-stone-200 border border-stone-600/50'
-          : 'bg-stone-800 text-stone-500 cursor-not-allowed border border-stone-700'
+          : 'bg-[#2C3440] text-stone-500 cursor-not-allowed border border-stone-700'
       }`}
     >
       Next
@@ -348,7 +348,7 @@ const [pagination, setPagination] = useState({
   };
 
 return (
-  <div className="min-h-screen bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800">
+  <div className="min-h-screen bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]">
     {/* Header */}
     <Header />
     
@@ -365,7 +365,7 @@ return (
             </div>
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">{getRankingTypeTitle()}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-stone-50">{getRankingTypeTitle()}</h1>
             <p className="text-sm md:text-base text-stone-300 mt-1">{getRankingTypeDescription()}</p>
           </div>
         </div>
@@ -377,7 +377,7 @@ return (
             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 backdrop-blur-sm ${
               rankingType === 'rating'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/40'
-                : 'bg-black/20 text-stone-300 hover:bg-amber-500/10 border border-amber-500/30 hover:text-amber-300'
+                : 'bg-[#2C3440]/60 text-stone-300 hover:bg-amber-500/10 border border-amber-500/30 hover:text-amber-300'
             }`}
           >
             <Star className="w-4 h-4" />
@@ -388,7 +388,7 @@ return (
             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 backdrop-blur-sm ${
               rankingType === 'popularity'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/40'
-                : 'bg-black/20 text-stone-300 hover:bg-blue-500/10 border border-blue-500/30 hover:text-blue-300'
+                : 'bg-[#2C3440]/60 text-stone-300 hover:bg-blue-500/10 border border-blue-500/30 hover:text-blue-300'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -399,20 +399,20 @@ return (
 
       {/* Enhanced Desktop Filters */}
       <div className="hidden md:block mb-6">
-        <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
+        <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl border border-[#3D4451] p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             {/* <div className="md:col-span-1">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-400/10 rounded-lg blur-sm" />
-                <div className="relative bg-black/30 backdrop-blur-sm rounded-lg border border-white/20">
+                <div className="relative bg-[#2C3440]/80 backdrop-blur-sm rounded-lg border border-[#3D4451]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-400 w-4 h-4" />
                   <input
                     type="text"
                     placeholder="Search books..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-transparent rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm text-white placeholder-stone-400"
+                    className="w-full pl-10 pr-4 py-2 bg-transparent rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm text-stone-50 placeholder-stone-400"
                   />
                 </div>
               </div>
@@ -423,10 +423,10 @@ return (
               <select
                 value={selectedGenre}
                 onChange={(e) => setSelectedGenre(e.target.value)}
-                className="w-full px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg border border-white/20 focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm appearance-none cursor-pointer text-white"
+                className="w-full px-4 py-2 bg-[#2C3440]/80 backdrop-blur-sm rounded-lg border border-[#3D4451] focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm appearance-none cursor-pointer text-stone-50"
               >
                 {genres.map(genre => (
-                  <option key={genre.value} value={genre.value} className="bg-stone-900 text-white">
+                  <option key={genre.value} value={genre.value} className="bg-[#14181C] text-stone-50">
                     {genre.label}
                   </option>
                 ))}
@@ -439,10 +439,10 @@ return (
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-full px-4 py-2 bg-black/30 backdrop-blur-sm rounded-lg border border-white/20 focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm appearance-none cursor-pointer text-white"
+                className="w-full px-4 py-2 bg-[#2C3440]/80 backdrop-blur-sm rounded-lg border border-[#3D4451] focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm appearance-none cursor-pointer text-stone-50"
               >
                 {yearOptions.map(year => (
-                  <option key={year.value} value={year.value} className="bg-stone-900 text-white">
+                  <option key={year.value} value={year.value} className="bg-[#14181C] text-stone-50">
                     {year.label}
                   </option>
                 ))}
@@ -458,7 +458,7 @@ return (
                   setSelectedYear('all')
                   setSearchQuery('')
                 }}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-stone-300 text-sm font-medium transition-all duration-200 backdrop-blur-sm border border-white/10"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-stone-300 text-sm font-medium transition-all duration-200 backdrop-blur-sm border border-[#3D4451]"
               >
                 <X className="w-4 h-4" />
                 Clear Filters
@@ -473,21 +473,21 @@ return (
         <div className="flex gap-2 mb-3">
           {/* <div className="flex-1 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-400/10 rounded-lg blur-sm" />
-            <div className="relative bg-black/30 backdrop-blur-sm rounded-lg border border-white/20">
+            <div className="relative bg-[#2C3440]/80 backdrop-blur-sm rounded-lg border border-[#3D4451]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search books..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-transparent rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm text-white placeholder-stone-400"
+                className="w-full pl-10 pr-4 py-2 bg-transparent rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-transparent text-sm text-stone-50 placeholder-stone-400"
               />
             </div>
           </div> */}
           <button
             type="button"
             onClick={() => setShowFilters(!showFilters)}
-            className="px-3 py-2 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-amber-500/10 transition-all duration-200"
+            className="px-3 py-2 bg-[#2C3440]/80 backdrop-blur-sm border border-[#3D4451] rounded-lg hover:bg-amber-500/10 transition-all duration-200"
           >
             <Filter className="w-4 h-4 text-amber-400" />
           </button>
@@ -495,17 +495,17 @@ return (
 
         {/* Mobile Filters Dropdown */}
         {showFilters && (
-          <div className="bg-black/30 backdrop-blur-sm rounded-xl border border-white/20 p-4 mb-4">
+          <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-xl border border-[#3D4451] p-4 mb-4">
             <div className="space-y-3">
               <div className="relative">
                 <label className="block text-sm font-medium text-stone-300 mb-1">Genre</label>
                 <select
                   value={selectedGenre}
                   onChange={(e) => setSelectedGenre(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/20 rounded-lg border border-white/20 focus:ring-2 focus:ring-amber-500/50 text-sm text-white backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-[#2C3440]/60 rounded-lg border border-[#3D4451] focus:ring-2 focus:ring-amber-500/50 text-sm text-stone-50 backdrop-blur-sm"
                 >
                   {genres.map(genre => (
-                    <option key={genre.value} value={genre.value} className="bg-stone-900 text-white">
+                    <option key={genre.value} value={genre.value} className="bg-[#14181C] text-stone-50">
                       {genre.label}
                     </option>
                   ))}
@@ -517,10 +517,10 @@ return (
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
-                  className="w-full px-3 py-2 bg-black/20 rounded-lg border border-white/20 focus:ring-2 focus:ring-amber-500/50 text-sm text-white backdrop-blur-sm"
+                  className="w-full px-3 py-2 bg-[#2C3440]/60 rounded-lg border border-[#3D4451] focus:ring-2 focus:ring-amber-500/50 text-sm text-stone-50 backdrop-blur-sm"
                 >
                   {yearOptions.map(year => (
-                    <option key={year.value} value={year.value} className="bg-stone-900 text-white">
+                    <option key={year.value} value={year.value} className="bg-[#14181C] text-stone-50">
                       {year.label}
                     </option>
                   ))}
@@ -535,7 +535,7 @@ return (
                     setSearchQuery('')
                     setShowFilters(false)
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-stone-300 text-sm font-medium transition-all duration-200 backdrop-blur-sm border border-white/10"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-stone-300 text-sm font-medium transition-all duration-200 backdrop-blur-sm border border-[#3D4451]"
                 >
                   <X className="w-4 h-4" />
                   Clear All Filters
@@ -548,15 +548,15 @@ return (
 
       {/* Loading State */}
       {loading && (
-        <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl border border-[#3D4451] overflow-hidden">
           <div className="text-center py-20">
             <div className="relative mb-8">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-amber-400/30 rounded-full blur-3xl opacity-60 animate-pulse" />
               <div className="relative w-24 h-24 bg-gradient-to-r from-amber-500/90 to-amber-400/80 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30 border border-amber-500/50">
-                <Sparkles className="w-12 h-12 text-white animate-spin" />
+                <Sparkles className="w-12 h-12 text-stone-50 animate-spin" />
               </div>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3">
+            <h3 className="text-2xl font-bold text-stone-50 mb-3">
               Loading Rankings...
             </h3>
             <p className="text-stone-300 text-lg">
@@ -568,9 +568,9 @@ return (
 
       {/* Enhanced Rankings List */}
       {!loading && (
-        <div className="bg-black/20 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl border border-[#3D4451] overflow-hidden">
           {/* Enhanced Desktop Header */}
-          <div className="hidden md:block bg-gradient-to-r from-black/40 to-stone-500/10 border-b border-white/10 px-6 py-4">
+          <div className="hidden md:block bg-gradient-to-r from-[#14181C]/40 to-stone-500/10 border-b border-[#3D4451] px-6 py-4">
             <div className="grid grid-cols-12 gap-4 items-center text-sm font-bold text-stone-300">
               <div className="col-span-1 flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-400" />
@@ -624,7 +624,7 @@ return (
                       </div>
                       
                       {/* Enhanced Book Cover */}
-                      <div className="w-20 h-28 bg-gradient-to-br from-stone-700 to-stone-800 rounded-lg overflow-hidden flex-shrink-0 shadow-sm border border-white/20">
+                      <div className="w-20 h-28 bg-gradient-to-br from-stone-700 to-[#14181C] rounded-lg overflow-hidden flex-shrink-0 shadow-sm border border-[#3D4451]">
                         <Image 
                         width={80}
                         height={112}
@@ -638,7 +638,7 @@ return (
                       <div className="flex-1 min-w-0">
                         <div className="h-12 mb-2">
                         <Link href={`book/${book.openLibraryId ?? ''}`}>
-                          <h3 className="font-semibold text-white text-sm leading-tight hover:text-amber-400 transition-colors">
+                          <h3 className="font-semibold text-stone-50 text-sm leading-tight hover:text-amber-400 transition-colors">
                             {book.title.length > 45 ? `${book.title.slice(0, 45)}...` : book.title}
                           </h3>
                         </Link>
@@ -714,7 +714,7 @@ return (
 
                       {/* Enhanced Book Info */}
                       <div className="col-span-6 flex gap-4">
-                        <div className="w-26 h-36 bg-gradient-to-br from-stone-700 to-stone-800 rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-white/20">
+                        <div className="w-26 h-36 bg-gradient-to-br from-stone-700 to-[#14181C] rounded-xl overflow-hidden flex-shrink-0 shadow-sm border border-[#3D4451]">
                           <Image 
                           width={120}
                           height={180}
@@ -725,7 +725,7 @@ return (
                         </div>
                         <div className="flex-1 min-w-0">
                           <Link href={`book/${book.openLibraryId}`}>
-                            <h3 className="font-semibold text-white mb-1 hover:text-amber-400 cursor-pointer line-clamp-1 transition-colors">
+                            <h3 className="font-semibold text-stone-50 mb-1 hover:text-amber-400 cursor-pointer line-clamp-1 transition-colors">
                               {book.title}
                             </h3>
                           </Link>
@@ -777,7 +777,7 @@ return (
                             <div className="text-xs text-blue-400 px-3">Your rating</div>
                           </div>
                         ) : (
-                          <div className="text-xs text-stone-500 px-3 py-2 bg-white/5 rounded-xl text-center backdrop-blur-sm border border-white/10 max-w-[64px]">Not rated</div>
+                          <div className="text-xs text-stone-500 px-3 py-2 bg-white/5 rounded-xl text-center backdrop-blur-sm border border-[#3D4451] max-w-[64px]">Not rated</div>
                         )}
                       </div>}
                       {rankingType === "popularity" && <div className='col-span-2'>
@@ -811,10 +811,10 @@ return (
               <div className="relative mb-8">
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 to-amber-400/30 rounded-full blur-3xl opacity-60" />
                 <div className="relative w-24 h-24 bg-gradient-to-r from-amber-500/90 to-amber-400/80 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30 border border-amber-500/50">
-                  <BookOpen className="w-12 h-12 text-white" />
+                  <BookOpen className="w-12 h-12 text-stone-50" />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">
+              <h3 className="text-2xl font-bold text-stone-50 mb-3">
                 No books found
               </h3>
               <p className="text-stone-300 text-lg mb-4">

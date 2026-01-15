@@ -132,28 +132,47 @@ router.put('/collection/status', writeLimiter, authenticateUser, async (req, res
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { status, bookId } = req.body;
+  const { status, bookId: openLibraryId } = req.body;
 
   try {
-    if (!status || !bookId) {
+    if (!status || !openLibraryId) {
       return res.status(400).json({ error: 'Missing status or bookId' });
     }
 
-    // Update the userBook entry
-    const updated = await prisma.userBook.update({
+    // Validate status (only "to-read", "completed", or "dropped")
+    if (!['to-read', 'completed', 'dropped'].includes(status)) {
+      return res.status(400).json({
+        error: 'Invalid status. Must be "to-read", "completed", or "dropped"'
+      });
+    }
+
+    // Look up book by openLibraryId
+    const book = await prisma.book.findUnique({
+      where: { openLibraryId }
+    });
+
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found in database' });
+    }
+
+    // Use upsert to create if doesn't exist, update if it does
+    const updated = await prisma.userBook.upsert({
       where: {
         userId_bookId: {
           userId,
-          bookId,
+          bookId: book.id,
         },
       },
-      data: { status },
+      update: {
+        status
+      },
+      create: {
+        userId,
+        bookId: book.id,
+        status
+      },
       include: { book: true }
     });
-
-    if (!updated) {
-      return res.status(404).json({ error: 'Book entry not found for user' });
-    }
 
     // Create user activity entry
     await prisma.userActivity.create({
@@ -165,7 +184,11 @@ router.put('/collection/status', writeLimiter, authenticateUser, async (req, res
         data: {
           title: updated.book.title,
           status,
-          message: `You changed "${updated.book.title}" to ${status}`
+          message: status === 'to-read'
+            ? `You added "${updated.book.title}" to your reading list`
+            : status === 'completed'
+            ? `You marked "${updated.book.title}" as completed`
+            : `You marked "${updated.book.title}" as dropped`
         }
       }
     });
@@ -189,27 +212,49 @@ router.put('/collection/status', writeLimiter, authenticateUser, async (req, res
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { rating, bookId } = req.body;
+  const { rating, bookId: openLibraryId } = req.body;
 
   try {
-    if (rating == null || !bookId) {
+    if (rating == null || !openLibraryId) {
       return res.status(400).json({ error: 'Missing rating or bookId' });
     }
 
-    const updated = await prisma.userBook.update({
+    // Validate rating (0.5-5.0 in half-star increments)
+    if (rating < 0.5 || rating > 5 || (rating * 2) % 1 !== 0) {
+      return res.status(400).json({
+        error: 'Invalid rating. Must be 0.5-5.0 in half-star increments (e.g., 0.5, 1.0, 1.5, ..., 5.0)'
+      });
+    }
+
+    // Look up book by openLibraryId
+    const book = await prisma.book.findUnique({
+      where: { openLibraryId }
+    });
+
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found in database' });
+    }
+
+    // Use upsert to create if doesn't exist, update if it does
+    const updated = await prisma.userBook.upsert({
       where: {
         userId_bookId: {
           userId,
-          bookId,
+          bookId: book.id,
         },
       },
-      data: { rating },
+      update: {
+        rating,
+        status: 'completed' // Auto-set to "completed" when rating
+      },
+      create: {
+        userId,
+        bookId: book.id,
+        rating,
+        status: 'completed'
+      },
       include: { book: true } // so we can get title
     });
-
-    if (!updated) {
-      return res.status(404).json({ error: 'Book entry not found for user' });
-    }
 
     // Log activity
     await prisma.userActivity.create({
@@ -221,9 +266,27 @@ router.put('/collection/status', writeLimiter, authenticateUser, async (req, res
         data: {
           title: updated.book.title,
           rating,
-          message: `You changed "${updated.book.title}" to ${rating}/10`
+          message: `You rated "${updated.book.title}" ${rating}/5 stars`
         }
       }
+    });
+
+    // Recalculate book's average rating and total ratings
+    const result = await prisma.userBook.aggregate({
+      where: {
+        bookId: book.id,
+        rating: { gt: 0 }, // only positive ratings
+      },
+      _count: { rating: true },
+      _avg: { rating: true },
+    });
+
+    await prisma.book.update({
+      where: { id: book.id },
+      data: {
+        totalRatings: result._count.rating,
+        averageRating: result._avg.rating ?? 0, // fallback if null
+      },
     });
 
     // Invalidate user and book-related caches (rating affects rankings)

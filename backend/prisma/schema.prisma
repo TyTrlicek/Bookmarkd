@@ -72,7 +72,7 @@ model UserBook {
   id      String   @id @default(uuid())
   userId  String
   bookId  String
-  rating  Int?
+  rating  Float?
   comment String?
   status  String?
   addedAt DateTime @default(now())
@@ -91,7 +91,6 @@ model Review {
   userId           String
   bookId           String
   content          String
-  recommendation   String
   containsSpoilers Boolean       @default(false)
   isPrivate        Boolean       @default(false)
   helpfulCount     Int           @default(0)
@@ -104,7 +103,6 @@ model Review {
 
   @@unique([userId, bookId])
   @@index([bookId, createdAt])
-  @@index([bookId, recommendation])
   @@index([bookId, helpfulCount])
 }
 

@@ -26,16 +26,7 @@ export interface User {
     popularityRank?: number
     userRating?: number
     userStatus?: string
-    achievements?: Achievement[]
 
-}
-
-export interface Achievement {
-  id: number;               // Unique ID of the achievement
-  name: string;             // Achievement title
-  description: string;      // What the user needs to do
-  icon: string;             // Emoji or icon representing the achievement
-  earned?: boolean;         // Optional flag to indicate if the user has earned it
 }
 
 

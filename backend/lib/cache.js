@@ -7,7 +7,6 @@ class CacheManager {
       'search': 1000,
       'rankings': 500,
       'bookRankings': 2000,
-      'achievementStats': 1000,
       'userStats': 2000,
       'userCollection': 1000,
       'userProfile': 1000,

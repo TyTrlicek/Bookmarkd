@@ -33,6 +33,15 @@ router.post("/api/favorites", writeLimiter, authenticateUser, async (req, res) =
   }
 
   try {
+    // Check if user already has 4 favorites
+    const existingFavoritesCount = await prisma.favorite.count({
+      where: { userId: req.userId }
+    });
+
+    if (existingFavoritesCount >= 4) {
+      return res.status(400).json({ error: "Maximum of 4 favorites allowed. Remove one to add another." });
+    }
+
     const favorite = await prisma.favorite.create({
       data: {
         userId: req.userId,

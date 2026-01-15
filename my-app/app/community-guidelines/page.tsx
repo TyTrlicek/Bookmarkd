@@ -83,15 +83,15 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
     <div className="min-h-screen">
         <Header />
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900 pt-24 pb-16">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+      <div className="relative bg-gradient-to-br from-[#14181C] via-[#14181C] to-amber-900 pt-24 pb-16">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40" />
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-            <Users className="w-8 h-8 text-white" />
+            <Users className="w-8 h-8 text-stone-50" />
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-stone-50 mb-6 leading-tight">
             Community Guidelines
           </h1>
           
@@ -118,17 +118,17 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
 
       {/* Main Content */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
         
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
           {/* Introduction */}
-          <div className="mb-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center">
+          <div className="mb-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] text-center">
             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-6 h-6 text-white" />
+              <CheckCircle className="w-6 h-6 text-stone-50" />
             </div>
             
-            <h2 className="text-2xl font-bold text-white mb-4">Building Our Reading Community</h2>
+            <h2 className="text-2xl font-bold text-stone-50 mb-4">Building Our Reading Community</h2>
             <p className="text-stone-300 leading-relaxed max-w-3xl mx-auto">
               While Bookmarkd's full community features are still in development, these guidelines set the foundation 
               for how we'll interact when discussion posts, book clubs, and shared rankings arrive. Let's create a 
@@ -138,23 +138,23 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
 
           {/* Guidelines Overview */}
           <div className="mb-16">
-            <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-stone-50 mb-8 flex items-center gap-3">
               <Eye className="w-6 h-6 text-amber-400" />
               Quick Overview
             </h2>
             
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#3D4451]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {guidelines.map((guideline, index) => (
                   <button
                     key={guideline.id}
                     onClick={() => scrollToSection(guideline.id)}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-black/20 hover:bg-black/40 transition-all duration-200 text-left group border border-white/5 hover:border-amber-400/20"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[#2C3440]/60 hover:bg-[#2C3440]/80 transition-all duration-200 text-left group border border-white/5 hover:border-amber-400/20"
                   >
                     <div className="w-8 h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-lg flex items-center justify-center flex-shrink-0">
                       <guideline.icon className="w-4 h-4 text-amber-400" />
                     </div>
-                    <span className="text-white group-hover:text-amber-100 transition-colors font-medium">
+                    <span className="text-stone-50 group-hover:text-amber-100 transition-colors font-medium">
                       {index + 1}. {guideline.title}
                     </span>
                     <ChevronRight className="w-4 h-4 text-stone-400 ml-auto group-hover:text-amber-400 transition-colors" />
@@ -168,7 +168,7 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
           <div className="space-y-12">
             {guidelines.map((guideline, index) => (
               <section key={guideline.id} id={guideline.id} className="scroll-mt-24">
-                <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 relative overflow-hidden group">
+                <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] relative overflow-hidden group">
                   {/* Background decoration */}
                   <div className="absolute top-4 right-4 opacity-20">
                     <guideline.icon className="w-16 h-16 text-amber-400" />
@@ -177,7 +177,7 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
                   <div className="relative">
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                        <guideline.icon className="w-6 h-6 text-white" />
+                        <guideline.icon className="w-6 h-6 text-stone-50" />
                       </div>
                       <div>
                         <div className="flex items-center gap-3 mb-1">
@@ -185,7 +185,7 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
                             {index + 1}
                           </span>
                         </div>
-                        <h2 className="text-2xl font-bold text-white">{guideline.title}</h2>
+                        <h2 className="text-2xl font-bold text-stone-50">{guideline.title}</h2>
                       </div>
                     </div>
                     
@@ -201,30 +201,30 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
           </div>
 
           {/* Enforcement Section */}
-          <div className="mt-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+          <div className="mt-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451]">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-white" />
+                <AlertTriangle className="w-6 h-6 text-stone-50" />
               </div>
-              <h3 className="text-2xl font-bold text-white">Enforcement & Consequences</h3>
+              <h3 className="text-2xl font-bold text-stone-50">Enforcement & Consequences</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 bg-black/20 rounded-xl border border-white/5">
+              <div className="p-6 bg-[#2C3440]/60 rounded-xl border border-white/5">
                 <div className="text-yellow-400 font-semibold mb-2">First Warning</div>
                 <div className="text-stone-300 text-sm">
                   Friendly reminder about community standards with guidance on appropriate behavior.
                 </div>
               </div>
               
-              <div className="p-6 bg-black/20 rounded-xl border border-white/5">
+              <div className="p-6 bg-[#2C3440]/60 rounded-xl border border-white/5">
                 <div className="text-orange-400 font-semibold mb-2">Temporary Suspension</div>
                 <div className="text-stone-300 text-sm">
                   Temporary restriction from community features for repeated violations.
                 </div>
               </div>
               
-              <div className="p-6 bg-black/20 rounded-xl border border-white/5">
+              <div className="p-6 bg-[#2C3440]/60 rounded-xl border border-white/5">
                 <div className="text-red-400 font-semibold mb-2">Permanent Ban</div>
                 <div className="text-stone-300 text-sm">
                   Permanent removal for severe violations or continued problematic behavior.
@@ -236,10 +236,10 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
           {/* Call to Action */}
           <div className="mt-16 bg-gradient-to-r from-amber-500/10 to-amber-600/10 backdrop-blur-sm rounded-2xl p-8 border border-amber-400/20 text-center">
             <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mx-auto mb-6">
-              <UserCheck className="w-6 h-6 text-white" />
+              <UserCheck className="w-6 h-6 text-stone-50" />
             </div>
             
-            <h3 className="text-2xl font-bold text-white mb-4">Let's Build Something Great Together</h3>
+            <h3 className="text-2xl font-bold text-stone-50 mb-4">Let's Build Something Great Together</h3>
             <p className="text-stone-300 mb-6 max-w-2xl mx-auto leading-relaxed">
               These guidelines help us create a Bookmarkd community where readers can explore, learn, and share safely. 
               By following these principles, you're helping build the kind of reading community we all want to be part of.
@@ -251,12 +251,12 @@ We're building Bookmarkd's community features thoughtfully, with your safety and
           </div>
 
           {/* Contact Section */}
-          <div className="mt-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center">
+          <div className="mt-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] text-center">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-6 h-6 text-white" />
+              <Mail className="w-6 h-6 text-stone-50" />
             </div>
             
-            <h3 className="text-xl font-bold text-white mb-3">Questions or Concerns?</h3>
+            <h3 className="text-xl font-bold text-stone-50 mb-3">Questions or Concerns?</h3>
             <p className="text-stone-300 mb-6">
               If you have questions about these guidelines or need to report an issue, we're here to help.
             </p>

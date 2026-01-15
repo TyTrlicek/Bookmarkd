@@ -4,14 +4,15 @@ import { getBookData } from '../../../utils/util'
 import Header from '@/app/components/Header'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
 
 
-import { 
-  BookOpen, 
-  Star, 
-  Heart, 
-  Share2, 
-  Download, 
+import {
+  BookOpen,
+  Star,
+  Heart,
+  Share2,
+  Download,
   ShoppingCart,
   TrendingUp,
   Calendar,
@@ -27,7 +28,7 @@ import {
 import AddToCollectionPopup from '@/app/components/AddToCollectionPopup'
 import Review from '@/app/components/Review'
 import Image from 'next/image'
-import AchievementNotification from '@/app/components/AchievementNotification'
+import LoginModal from '@/app/components/LoginModal'
 
 interface BookClientProps {
   id: string;
@@ -35,7 +36,10 @@ interface BookClientProps {
 
 
 
-const BookClient = ({id}: BookClientProps) => {  
+const BookClient = ({id}: BookClientProps) => {
+  const { isAuthenticated } = useAuth()
+  const [showLoginModal, setShowLoginModal] = useState(false)
+
   const [image, setImage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFavorited, setIsFavorited] = useState(false)
@@ -59,10 +63,6 @@ const BookClient = ({id}: BookClientProps) => {
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-
-  // Achievement states
-  const [showAchievements, setShowAchievements] = useState(false);
-  const [achievements, setAchievements] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchCover = async () => {
@@ -125,7 +125,7 @@ return (
       <Header />
       
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
@@ -133,7 +133,7 @@ return (
             
             {/* Left Sidebar - Book Cover & Actions */}
             <div className="lg:col-span-1">
-              <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+              <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-6 border border-[#3D4451]">
                 
                 {/* Book Cover */}
                 <div className="text-center mb-6">
@@ -163,24 +163,24 @@ return (
 
                 {/* Metadata */}
                 <div className="space-y-4 mb-6">
-                  <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                    <h3 className="font-semibold text-white mb-3">Book Information</h3>
+                  <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-xl p-4 border border-[#3D4451]">
+                    <h3 className="font-semibold text-stone-50 mb-3">Book Information</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-stone-300">Author:</span>
-                        <span className="text-white font-medium">{author}</span>
+                        <span className="text-stone-50 font-medium">{author}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-stone-300">Published:</span>
-                        <span className="text-white">{formatDate(publishedDate)}</span>
+                        <span className="text-stone-300">{formatDate(publishedDate)}</span>
                       </div>
                       {/* <div className="flex justify-between">
                         <span className="text-stone-300">Pages:</span>
-                        <span className="text-white">{pageCount}</span>
+                        <span className="text-stone-50">{pageCount}</span>
                       </div> */}
                       <div className="flex justify-between">
                         <span className="text-stone-300">Genre:</span>
-                        <span className="text-white">{categories[0]}</span>
+                        <span className="text-stone-50">{categories[0]}</span>
                       </div>
                     </div>
                   </div>
@@ -192,16 +192,16 @@ return (
                     className={`flex-1 p-2 rounded-lg border transition-all backdrop-blur-sm ${
                       isFavorited 
                         ? 'bg-red-500/20 text-red-400 border-red-400/30 hover:bg-red-500/30' 
-                        : 'bg-white/5 text-stone-300 border-white/10 hover:bg-white/10 hover:text-white'
+                        : 'bg-white/5 text-stone-300 border-[#3D4451] hover:bg-white/10 hover:text-white'
                     }`}
                     onClick={() => setIsFavorited(!isFavorited)}
                   >
                     <Heart className={`w-4 h-4 mx-auto ${isFavorited ? 'fill-current' : ''}`} />
                   </button>
-                  <button className="flex-1 p-2 bg-white/5 text-stone-300 border border-white/10 rounded-lg hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm">
+                  <button className="flex-1 p-2 bg-white/5 text-stone-300 border border-[#3D4451] rounded-lg hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm">
                     <Share2 className="w-4 h-4 mx-auto" />
                   </button>
-                  <button className="flex-1 p-2 bg-white/5 text-stone-300 border border-white/10 rounded-lg hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm">
+                  <button className="flex-1 p-2 bg-white/5 text-stone-300 border border-[#3D4451] rounded-lg hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm">
                     <ExternalLink className="w-4 h-4 mx-auto" />
                   </button>
                 </div> */}
@@ -210,25 +210,25 @@ return (
 
             {/* Right Content Area */}
             <div className="lg:col-span-2">
-              <div className="bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10">
+              <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl border border-[#3D4451]">
                 
                 {/* Header with Title */}
-                <div className="p-6 border-b border-white/10">
-                  <h1 className="text-3xl font-bold text-white mb-2">{title}</h1>
+                <div className="p-6 border-b border-[#3D4451]">
+                  <h1 className="text-3xl font-bold text-stone-50 mb-2">{title}</h1>
                   <p className="text-stone-300">By {author}</p>
                 </div>
 
                 {/* Statistics Bar */}
-                <div className="p-6 border-b border-white/10">
+                <div className="p-6 border-b border-[#3D4451]">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     
                     {/* Score */}
                     <div className="text-center">
                       <div className="bg-gradient-to-br from-amber-600 to-amber-700 text-white rounded-xl p-4 mb-2 shadow-lg">
-                        <div className="text-2xl font-bold">{averageRating?.toFixed(2) ?? 'N/A'}</div>
+                        <div className="text-2xl font-bold text-amber-100">{averageRating?.toFixed(2) ?? 'N/A'}</div>
                         <div className="text-xs opacity-90">SCORE</div>
                       </div>
-                      <div className="text-xs text-stone-400">
+                      <div className="text-xs text-blue-200">
                         {totalRatings ?? 0} ratings
                       </div>
                     </div>
@@ -236,7 +236,7 @@ return (
                     {/* Ranking */}
                     <div className="text-center">
                       <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-xl p-4 mb-2 shadow-lg">
-                        <div className="text-2xl font-bold">#{ratingRank}</div>
+                        <div className="text-2xl font-bold text-emerald-200">#{ratingRank}</div>
                         <div className="text-xs opacity-90">RANKED</div>
                       </div>
                       <div className="text-xs text-stone-400">
@@ -247,7 +247,7 @@ return (
                     {/* Popularity */}
                     <div className="text-center">
                       <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl p-4 mb-2 shadow-lg">
-                        <div className="text-2xl font-bold">#{popularityRank}</div>
+                        <div className="text-2xl font-bold text-emerald-200">#{popularityRank}</div>
                         <div className="text-xs opacity-90">POPULAR</div>
                       </div>
                       <div className="text-xs text-stone-400">
@@ -258,7 +258,7 @@ return (
                     {/* Members */}
                     <div className="text-center">
                       <div className="bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-xl p-4 mb-2 shadow-lg">
-                        <div className="text-2xl font-bold">{totalRatings ?? 0}</div>
+                        <div className="text-2xl font-bold text-blue-200">{totalRatings ?? 0}</div>
                         <div className="text-xs opacity-90">MEMBERS</div>
                       </div>
                       <div className="text-xs text-stone-400">
@@ -270,7 +270,7 @@ return (
 
                 {/* Description */}
                 <div className="p-6">
-                  <h2 className="text-lg font-semibold text-white mb-4">Description</h2>
+                  <h2 className="text-lg font-semibold text-stone-50 mb-4">Description</h2>
                   <div className="prose prose-stone max-w-none">
                       {(() => {
                         const desc = description || 'No description available.';
@@ -301,7 +301,7 @@ return (
 
                   {/* Tags */}
                   <div className="mt-6">
-                    <h3 className="text-sm font-semibold text-white mb-2">Genres</h3>
+                    <h3 className="text-sm font-semibold text-stone-50 mb-2">Genres</h3>
                     <div className="flex flex-wrap gap-2">
                       {categories.map((tag) => (
                         <span key={tag} className="px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full text-sm border border-amber-400/20 backdrop-blur-sm">
@@ -311,21 +311,17 @@ return (
                     </div>
                   </div>
 
-                  <Review 
-                    totalRatings={totalRatings} 
-                    setShowWriteReview={setShowWriteReview} 
-                    showWriteReview={showWriteReview} 
-                    setUserRecommendation={setUserRecommendation} 
-                    userRecommendation={userRecommendation} 
-                    reviewContent={reviewContent} 
-                    containsSpoilers={containsSpoilers} 
-                    setContainsSpoilers={setContainsSpoilers} 
-                    reviewFilter={reviewFilter}
-                    setReviewFilter={setReviewFilter}
+                  <Review
+                    totalRatings={totalRatings}
+                    setShowWriteReview={setShowWriteReview}
+                    showWriteReview={showWriteReview}
+                    reviewContent={reviewContent}
+                    containsSpoilers={containsSpoilers}
+                    setContainsSpoilers={setContainsSpoilers}
                     id={id}
                     setReviewContent={setReviewContent}
-                    setAchievements={setAchievements}
-                    setShowAchievements={setShowAchievements}
+                    isAuthenticated={isAuthenticated}
+                    onLoginRequired={() => setShowLoginModal(true)}
                   />
                 </div>
               </div>
@@ -334,11 +330,15 @@ return (
         </div>
       </div>
 
-      {/* Achievement Notification */}
-      {showAchievements && (
-        <AchievementNotification
-          achievements={achievements}
-          onClose={() => setShowAchievements(false)}
+      {/* Login Modal */}
+      {showLoginModal && (
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onSuccess={() => {
+            setShowLoginModal(false);
+            window.location.reload(); // Refresh to update auth state
+          }}
         />
       )}
 

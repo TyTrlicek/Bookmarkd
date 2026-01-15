@@ -36,6 +36,7 @@ import axios from 'axios'
 import useAuthStore from '@/store/authStore'
 import { supabase } from '@/lib/supabaseClient'
 import EnhancedHero from './components/EnhancedHero'
+import BookCarouselHero from './components/BookCarouselHero'
 import { UserActivity } from './types/types'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
@@ -154,11 +155,11 @@ const HomePage = () => {
 
   // Coming Soon Component
   const ComingSoonSection = ({ icon: Icon, iconColor, title, subtitle, description }: {
-    icon: React.ElementType,
-    iconColor: string,
-    title: string,
-    subtitle: string,
-    description: string
+    icon: any;
+    iconColor: string;
+    title: string;
+    subtitle: string;
+    description: string;
   }) => (
     <section>
       <div className="flex items-center gap-3 mb-6">
@@ -166,12 +167,12 @@ const HomePage = () => {
           <Icon className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-white">{title}</h2>
+          <h2 className="text-3xl font-bold text-stone-50">{title}</h2>
           <p className="text-stone-300">{subtitle}</p>
         </div>
       </div>
       
-      <div className="bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10 relative overflow-hidden">
+      <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl border border-[#3D4451] relative overflow-hidden">
         {/* Coming Soon Content */}
         <div className="p-12 text-center relative">
           {/* Background decoration */}
@@ -189,7 +190,7 @@ const HomePage = () => {
               <Sparkles className="w-10 h-10 text-amber-400" />
             </div>
             
-            <h3 className="text-2xl font-bold text-white mb-3">Coming Soon</h3>
+            <h3 className="text-2xl font-bold text-stone-50 mb-3">Coming Soon</h3>
             <p className="text-stone-400 mb-6 max-w-md mx-auto leading-relaxed">
               {description}
             </p>
@@ -214,7 +215,7 @@ const HomePage = () => {
     isEmpty?: boolean, 
     emptyStateContent?: React.ReactNode 
   }) => (
-    <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+    <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl p-6 border border-[#3D4451]">
       <div className="h-108 relative">
         {!isEmpty ? (
           <BookList trendingData={data} />
@@ -232,29 +233,47 @@ const HomePage = () => {
       {/* Header */}
       <Header />
 
-      {/* Hero Section */}
-      <EnhancedHero userStats={userStats}/>
+      {/* Hero Section - Conditional Rendering */}
+      {!session && <BookCarouselHero />}
+
+      {/* Optional: Small welcome banner for authenticated users */}
+      {/* {session && userStats && (
+        <div className="bg-gradient-to-r from-amber-900 to-[#14181C] border-b border-amber-500 py-6">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-stone-300 text-lg">
+              Welcome back! You have <span className="text-amber-400 font-semibold">{userStats.booksInCollection}</span> books in your collection.
+            </p>
+          </div>
+        </div>
+      )} */}
 
       {/* Main Content with Dark Theme */}
       <div className="relative">
         {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
 
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
           {/* Trending Section */}
           <section className="mb-20">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <TrendingUp className="w-6 h-6 text-white" />
+            <div className="mb-8">
+              <div className="flex items-baseline gap-4 mb-3">
+                {/* Small accent element */}
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                  <div className="w-1 h-1 bg-amber-500/50 rounded-full" />
                 </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-white">Trending Now</h2>
-                  <p className="text-stone-300">Most popular books this week</p>
+
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Trending Now</h2>
                 </div>
               </div>
+
+              <p className="text-stone-400 text-sm ml-7 mb-4">Most popular books this week</p>
+
+              {/* Subtle divider with gradient */}
+              <div className="h-px bg-gradient-to-r from-amber-500/30 via-white/10 to-transparent" />
             </div>
             
             {/* Fixed Height Book List Container */}
@@ -266,7 +285,7 @@ const HomePage = () => {
                   <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mb-6 border border-amber-500/30">
                     <TrendingUp className="w-8 h-8 text-amber-400" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-white mb-3">
+                  <h3 className="text-2xl font-semibold text-stone-50 mb-3">
                     No Trending Books Yet
                   </h3>
                   <p className="text-stone-300 text-lg">
@@ -279,16 +298,23 @@ const HomePage = () => {
 
           {/* Recommended Section */}
           <section className="mb-20">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Award className="w-6 h-6 text-white" />
+            <div className="mb-8">
+              <div className="flex items-baseline gap-4 mb-3">
+                {/* Small accent element */}
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                  <div className="w-1 h-1 bg-emerald-500/50 rounded-full" />
                 </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-white">Recommended for You</h2>
-                  <p className="text-stone-300">Personalized picks based on your taste</p>
+
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Recommended for You</h2>
                 </div>
               </div>
+
+              <p className="text-stone-400 text-sm ml-7 mb-4">Personalized picks based on your taste</p>
+
+              {/* Subtle divider with gradient */}
+              <div className="h-px bg-gradient-to-r from-emerald-500/30 via-white/10 to-transparent" />
             </div>
 
             {/* Fixed Height Book List Container */}
@@ -303,7 +329,7 @@ const HomePage = () => {
                   </div>
 
                   {/* Conditional messaging */}
-                  <h3 className="text-2xl font-semibold text-white mb-3">
+                  <h3 className="text-2xl font-semibold text-stone-50 mb-3">
                     Want recommended books?
                   </h3>
 
@@ -381,18 +407,18 @@ const HomePage = () => {
           {/* <section className="mb-16">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Clock className="w-6 h-6 text-white" />
+                <Clock className="w-6 h-6 text-stone-50" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">Recent Activity</h2>
+                <h2 className="text-3xl font-bold text-stone-50">Recent Activity</h2>
                 <p className="text-stone-300">What's happening in your network</p>
               </div>
             </div>
             
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+            <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451]">
               <div className="space-y-6 max-h-112 overflow-y-auto">
                 {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center gap-4 py-4 border-b border-white/10 last:border-b-0 group">
+                  <div key={index} className="flex items-center gap-4 py-4 border-b border-[#3D4451] last:border-b-0 group">
                     <div className="w-14 h-14 bg-gradient-to-br from-amber-500/20 to-amber-600/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-amber-400/20">
                       {!activity.data.avatar_url && <User className="w-6 h-6 text-amber-400" />}
                       {activity.data.avatar_url && <Image
@@ -404,7 +430,7 @@ const HomePage = () => {
                                   />}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white group-hover:text-amber-100 transition-colors">
+                      <p className="text-stone-50 group-hover:text-amber-100 transition-colors">
                         <span className="font-semibold">{activity.data.globalMessage}</span>
                       </p>
                       <p className="text-sm text-stone-400 mt-1">{toAmericanDate(activity.createdAt)}</p>

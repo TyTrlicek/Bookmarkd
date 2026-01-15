@@ -2,20 +2,19 @@ const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser');
 const { reviewLimiter, voteLimiter, writeLimiter } = require('../middleware/rateLimiting');
-const { checkAndUnlockAchievements } = require('../utils');
 const prisma = require('../lib/prisma');
 
 const router = express.Router();
 
-router.post('/create-review', reviewLimiter, authenticateUser, async (req, res) => { 
+router.post('/create-review', reviewLimiter, authenticateUser, async (req, res) => {
   const userId = req.userId;
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { bookId, content, recommendation, containsSpoilers, isPrivate } = req.body;
+  const { bookId, content, containsSpoilers, isPrivate } = req.body;
 
-  if (!bookId || !content || !recommendation) {
+  if (!bookId || !content) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -33,21 +32,13 @@ router.post('/create-review', reviewLimiter, authenticateUser, async (req, res) 
         userId,
         bookId: book.id,
         content,
-        recommendation,
         containsSpoilers,
         isPrivate,
       },
     });
 
-    const achievementContext = {            
-        };
-        
-      const unlockedAchievements = await checkAndUnlockAchievements(userId, achievementContext);
-
-    return res.status(201).json({ 
-                  // message: 'Book added to user list', 
-                  review, 
-                  unlockedAchievements
+    return res.status(201).json({
+                  review
               });
 
   } catch (error) {
@@ -224,7 +215,6 @@ router.get('/reviews/:openLibraryId', async (req, res) => {
         username: review.user.username,
         userId: review.user.id,
         updatedAt: review.updatedAt,
-        recommendation: review.recommendation,
         content: review.content,
         createdAt: review.createdAt,
         helpfulCount: review.helpfulCount,
@@ -420,9 +410,9 @@ router.put('/reviews/:reviewId', writeLimiter, authenticateUser, async (req, res
   try {
     const { reviewId } = req.params;
     const userId = req.userId;
-    const { content, recommendation, containsSpoilers } = req.body;
+    const { content, containsSpoilers } = req.body;
 
-    if (!content || !recommendation) {
+    if (!content) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -444,7 +434,6 @@ router.put('/reviews/:reviewId', writeLimiter, authenticateUser, async (req, res
       where: { id: reviewId },
       data: {
         content,
-        recommendation,
         containsSpoilers,
         updatedAt: new Date()
       },
@@ -462,7 +451,6 @@ router.put('/reviews/:reviewId', writeLimiter, authenticateUser, async (req, res
     res.json({
       id: updatedReview.id,
       content: updatedReview.content,
-      recommendation: updatedReview.recommendation,
       containsSpoilers: updatedReview.containsSpoilers,
       updatedAt: updatedReview.updatedAt,
       username: updatedReview.user.username,

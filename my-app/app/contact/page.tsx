@@ -89,15 +89,15 @@ We're happy to explain how things work or share updates about upcoming features.
       <Header />
       
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-stone-900 via-stone-800 to-blue-900 pt-24 pb-16">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+      <div className="relative bg-gradient-to-br from-[#14181C] via-[#14181C] to-blue-900 pt-24 pb-16">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40" />
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-            <Mail className="w-8 h-8 text-white" />
+            <Mail className="w-8 h-8 text-stone-50" />
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-stone-50 mb-6 leading-tight">
             Contact & Support
           </h1>
           
@@ -124,17 +124,17 @@ We're happy to explain how things work or share updates about upcoming features.
 
       {/* Main Content */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
         
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
           {/* Quick Contact */}
           <div className="mb-16 bg-gradient-to-r from-blue-500/10 to-blue-600/10 backdrop-blur-sm rounded-2xl p-8 border border-blue-400/20 text-center">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-6 h-6 text-white" />
+              <Zap className="w-6 h-6 text-stone-50" />
             </div>
             
-            <h2 className="text-2xl font-bold text-white mb-4">Quick Contact</h2>
+            <h2 className="text-2xl font-bold text-stone-50 mb-4">Quick Contact</h2>
             <p className="text-stone-300 mb-6 leading-relaxed max-w-2xl mx-auto">
               For any questions, suggestions, or issues, email us directly. We typically respond within 1-3 business days and read every message personally.
             </p>
@@ -150,7 +150,7 @@ We're happy to explain how things work or share updates about upcoming features.
 
           {/* Support Categories */}
           <div className="mb-16">
-            <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-stone-50 mb-8 flex items-center gap-3">
               <MessageSquare className="w-6 h-6 text-blue-400" />
               How Can We Help?
             </h2>
@@ -167,7 +167,7 @@ We're happy to explain how things work or share updates about upcoming features.
                   className={`p-6 rounded-xl transition-all duration-200 text-left group border ${
                     selectedCategory === category.id
                       ? 'bg-blue-500/20 border-blue-400/40 shadow-lg'
-                      : 'bg-black/30 border-white/10 hover:bg-black/40 hover:border-blue-400/20'
+                      : 'bg-[#2C3440]/80 border-[#3D4451] hover:bg-[#2C3440]/80 hover:border-blue-400/20'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${
@@ -176,12 +176,12 @@ We're happy to explain how things work or share updates about upcoming features.
                       : 'bg-gradient-to-br from-blue-500/20 to-blue-600/20'
                   }`}>
                     <category.icon className={`w-5 h-5 ${
-                      selectedCategory === category.id ? 'text-white' : 'text-blue-400'
+                      selectedCategory === category.id ? 'text-stone-50' : 'text-blue-400'
                     }`} />
                   </div>
                   
                   <h3 className={`font-bold mb-2 transition-colors ${
-                    selectedCategory === category.id ? 'text-blue-100' : 'text-white group-hover:text-blue-100'
+                    selectedCategory === category.id ? 'text-blue-100' : 'text-stone-50 group-hover:text-blue-100'
                   }`}>
                     {category.title}
                   </h3>
@@ -196,13 +196,13 @@ We're happy to explain how things work or share updates about upcoming features.
 
           {/* Selected Category Details */}
           {selectedCategoryData && (
-            <div className="mb-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+            <div className="mb-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451]">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                  <selectedCategoryData.icon className="w-6 h-6 text-white" />
+                  <selectedCategoryData.icon className="w-6 h-6 text-stone-50" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">{selectedCategoryData.title}</h3>
+                  <h3 className="text-2xl font-bold text-stone-50">{selectedCategoryData.title}</h3>
                   <p className="text-blue-300">{selectedCategoryData.description}</p>
                 </div>
               </div>
@@ -225,37 +225,37 @@ We're happy to explain how things work or share updates about upcoming features.
 
           {/* Response Time & Expectations */}
           <div className="mb-16">
-            <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-stone-50 mb-8 flex items-center gap-3">
               <Clock className="w-6 h-6 text-green-400" />
               What to Expect
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-xl p-6 border border-[#3D4451]">
                 <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center mb-4">
-                  <CheckCircle className="w-5 h-5 text-white" />
+                  <CheckCircle className="w-5 h-5 text-stone-50" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Personal Response</h3>
+                <h3 className="text-lg font-bold text-stone-50 mb-2">Personal Response</h3>
                 <p className="text-stone-300 text-sm leading-relaxed">
                   Every email is read personally by us. You'll get a thoughtful, human response, not an automated reply.
                 </p>
               </div>
               
-              <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-xl p-6 border border-[#3D4451]">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-4">
-                  <Clock className="w-5 h-5 text-white" />
+                  <Clock className="w-5 h-5 text-stone-50" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Quick Turnaround</h3>
+                <h3 className="text-lg font-bold text-stone-50 mb-2">Quick Turnaround</h3>
                 <p className="text-stone-300 text-sm leading-relaxed">
                   We typically respond within 1-3 business days. Urgent issues like safety concerns are prioritized.
                 </p>
               </div>
               
-              <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-xl p-6 border border-[#3D4451]">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="w-5 h-5 text-white" />
+                  <Shield className="w-5 h-5 text-stone-50" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Confidential</h3>
+                <h3 className="text-lg font-bold text-stone-50 mb-2">Confidential</h3>
                 <p className="text-stone-300 text-sm leading-relaxed">
                   Your messages are handled confidentially. We only share information when necessary to resolve issues.
                 </p>
@@ -264,12 +264,12 @@ We're happy to explain how things work or share updates about upcoming features.
           </div>
 
           {/* Privacy & Security Reminder */}
-          <div className="mb-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+          <div className="mb-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451]">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                <Lock className="w-6 h-6 text-white" />
+                <Lock className="w-6 h-6 text-stone-50" />
               </div>
-              <h3 className="text-2xl font-bold text-white">Privacy & Security</h3>
+              <h3 className="text-2xl font-bold text-stone-50">Privacy & Security</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -277,7 +277,7 @@ We're happy to explain how things work or share updates about upcoming features.
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-white font-semibold mb-1">Never Share Passwords</h4>
+                    <h4 className="text-stone-50 font-semibold mb-1">Never Share Passwords</h4>
                     <p className="text-stone-300 text-sm">
                       We'll never ask for your password via email. If you need a password reset, we'll guide you through the secure process.
                     </p>
@@ -287,7 +287,7 @@ We're happy to explain how things work or share updates about upcoming features.
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-white font-semibold mb-1">Safe to Share</h4>
+                    <h4 className="text-stone-50 font-semibold mb-1">Safe to Share</h4>
                     <p className="text-stone-300 text-sm">
                       Your username, email address, and descriptions of issues are safe to include in support emails.
                     </p>
@@ -295,8 +295,8 @@ We're happy to explain how things work or share updates about upcoming features.
                 </div>
               </div>
               
-              <div className="bg-black/20 rounded-xl p-4 border border-white/5">
-                <h4 className="text-white font-semibold mb-2">When Reporting Issues:</h4>
+              <div className="bg-[#2C3440]/60 rounded-xl p-4 border border-white/5">
+                <h4 className="text-stone-50 font-semibold mb-2">When Reporting Issues:</h4>
                 <ul className="text-stone-300 text-sm space-y-1">
                   <li>• Describe what you were trying to do</li>
                   <li>• Explain what happened instead</li>
@@ -311,9 +311,9 @@ We're happy to explain how things work or share updates about upcoming features.
           <div className="mb-16 bg-gradient-to-r from-purple-500/10 to-purple-600/10 backdrop-blur-sm rounded-2xl p-8 border border-purple-400/20">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
+                <BookOpen className="w-6 h-6 text-stone-50" />
               </div>
-              <h3 className="text-2xl font-bold text-white">Growing Support</h3>
+              <h3 className="text-2xl font-bold text-stone-50">Growing Support</h3>
             </div>
             
             <p className="text-stone-300 leading-relaxed">
@@ -322,12 +322,12 @@ We're happy to explain how things work or share updates about upcoming features.
           </div>
 
           {/* Final CTA */}
-          <div className="text-center bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
+          <div className="text-center bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451]">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Heart className="w-6 h-6 text-white" />
+              <Heart className="w-6 h-6 text-stone-50" />
             </div>
             
-            <h3 className="text-2xl font-bold text-white mb-4">We're Here for You</h3>
+            <h3 className="text-2xl font-bold text-stone-50 mb-4">We're Here for You</h3>
             <p className="text-stone-300 mb-6 max-w-2xl mx-auto leading-relaxed">
               Your questions, feedback, and concerns help make Bookmarkd better for everyone. Don't hesitate to reach out—we genuinely want to hear from you.
             </p>

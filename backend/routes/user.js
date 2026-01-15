@@ -26,27 +26,54 @@ router.get('/me', authenticateUser, async (req, res) => {
         return res.json(cachedUser);
       }
 
-      console.log(`[UserProfile] Cache miss for user ${userId}, fetching from DB...`);
-      const user = await prisma.user.findUnique({
-        where: { id: req.userId },
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          createdAt: true,
-          avatar_url: true,
-        },
-      });
+      console.log(`[UserProfile] ⚠️ Cache miss for user ${userId}, fetching from DB...`);
+      console.log(`[UserProfile] About to execute prisma.user.findUnique...`);
+      console.log(`[UserProfile] Query params: { where: { id: "${req.userId}" } }`);
 
-      if (!user) return res.status(404).json({ error: 'User not found' });
+      let user;
+      try {
+        user = await prisma.user.findUnique({
+          where: { id: req.userId },
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            createdAt: true,
+            avatar_url: true,
+          },
+        });
+        console.log(`[UserProfile] ✅ Query completed. User found: ${!!user}`);
+      } catch (dbError) {
+        console.error(`[UserProfile] ❌ DATABASE ERROR in findUnique:`);
+        console.error('Error name:', dbError.name);
+        console.error('Error message:', dbError.message);
+        console.error('Stack:', dbError.stack);
+        throw dbError;
+      }
+
+      if (!user) {
+        console.log(`[UserProfile] User not found, returning 404`);
+        return res.status(404).json({ error: 'User not found' });
+      }
 
       // Cache the user profile
-      await cache.set(cacheKey, user, TTL.USER_PROFILE);
-      console.log(`[UserProfile] Cached user profile for ${userId} (TTL=${TTL.USER_PROFILE}s)`);
+      console.log(`[UserProfile] Caching user profile...`);
+      try {
+        await cache.set(cacheKey, user, TTL.USER_PROFILE);
+        console.log(`[UserProfile] ✅ Cached user profile for ${userId} (TTL=${TTL.USER_PROFILE}s)`);
+      } catch (cacheError) {
+        console.error(`[UserProfile] ⚠️ Cache write failed:`, cacheError);
+        // Continue anyway
+      }
 
+      console.log(`[UserProfile] Sending response...`);
       res.json(user);
+      console.log(`[UserProfile] ✅ Response sent`);
     } catch (error) {
-      console.error('Error fetching user:', error);
+      console.error('❌ [UserProfile] CRITICAL ERROR in /me endpoint:');
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Stack trace:', error.stack);
       res.status(500).json({ error: 'Server error' });
     }
   });
@@ -68,7 +95,11 @@ router.get('/me', authenticateUser, async (req, res) => {
           avatar_url,
         },
       });
-  
+
+      // Invalidate user-related caches
+      await cache.invalidateUser(userId);
+      console.log(`[UserUpdate] Invalidated caches for user ${userId}`);
+
       return res.status(200).json({ message: 'Successfully updated user' });
     } catch (error) {
       console.error('Error updating user profile:', error);
@@ -127,14 +158,9 @@ router.get('/me', authenticateUser, async (req, res) => {
   try {
     // Use a transaction to ensure all deletions succeed together
     await prisma.$transaction(async (tx) => {
-      // Delete user achievements
-      await tx.userAchievement.deleteMany({
-        where: { userId }
-      });
-
       // Delete user activities (both as actor and target)
       await tx.userActivity.deleteMany({
-        where: { 
+        where: {
           OR: [
             { userId },
             { actorId: userId }
@@ -198,65 +224,76 @@ router.get('/me', authenticateUser, async (req, res) => {
   router.get('/stats', authenticateUser, async (req, res) => {
   const userId = req.userId;
   try {
+    console.log(`[UserStats] 🔍 Starting stats request for user ${userId}`);
+
     const cacheKey = cache.generateKey('userStats', userId);
+    console.log(`[UserStats] Generated cache key: ${cacheKey}`);
 
     // Try to get cached stats first
+    console.log(`[UserStats] Attempting cache lookup...`);
     const cachedStats = await cache.get(cacheKey);
     if (cachedStats) {
-      console.log(`[UserStats] Served from cache for user ${userId}`);
+      console.log(`[UserStats] ✅ Served from cache for user ${userId}`);
       return res.json(cachedStats);
     }
 
-    console.log(`[UserStats] Cache miss for user ${userId}, calculating stats...`);
+    console.log(`[UserStats] ⚠️ Cache miss for user ${userId}, calculating stats...`);
 
     // Ensure user exists in database
-    let user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        createdAt: true,
-        avatar_url: true,
-      },
-    });
-
-    if (!user) {
-      const username = req.user.email ? req.user.email.split('@')[0] : 'user';
-
-      user = await prisma.user.create({
-        data: {
-          id: userId,
-          email: req.user?.email,
-          username: username
+    console.log(`[UserStats] Step 1: Looking up user in database...`);
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          createdAt: true,
+          avatar_url: true,
         },
       });
+      console.log(`[UserStats] User lookup complete. Found: ${!!user}`);
+    } catch (err) {
+      console.error(`[UserStats] ❌ Error in user lookup:`, err);
+      throw err;
     }
 
-    // Get all stats in parallel
-    const [
-      booksInCollection,
-      reviewsWritten,
-      achievementsUnlocked,
-      averageRatingData
-    ] = await Promise.all([
-      // Books in Collection
-      prisma.userBook.count({
-        where: { userId }
-      }),
+    if (!user) {
+      console.log(`[UserStats] User not found in database`);
+      return res.status(404).json({ error: 'User profile not found. Please complete profile setup.' });
+    }
 
-      // Reviews Written
-      prisma.review.count({
-        where: { userId }
-      }),
+    console.log(`[UserStats] Step 2: Fetching parallel stats (books, reviews, ratings)...`);
 
-      // Achievements Unlocked
-      prisma.userAchievement.count({
-        where: { userId }
-      }),
+    // Get all stats in parallel with individual error handling
+    let booksInCollection, reviewsWritten, averageRatingData;
 
-      // Average Rating (excluding null and 0 ratings)
-      prisma.userBook.aggregate({
+    try {
+      console.log(`[UserStats] Querying userBook.count...`);
+      booksInCollection = await prisma.userBook.count({
+        where: { userId }
+      });
+      console.log(`[UserStats] ✅ Books count: ${booksInCollection}`);
+    } catch (err) {
+      console.error(`[UserStats] ❌ Error counting books:`, err);
+      throw err;
+    }
+
+    try {
+      console.log(`[UserStats] Querying review.count...`);
+      reviewsWritten = await prisma.review.count({
+        where: { userId }
+      });
+      console.log(`[UserStats] ✅ Reviews count: ${reviewsWritten}`);
+    } catch (err) {
+      console.error(`[UserStats] ❌ Error counting reviews:`, err);
+      throw err;
+    }
+
+    try {
+      console.log(`[UserStats] Querying userBook.aggregate for average rating...`);
+      averageRatingData = await prisma.userBook.aggregate({
         where: {
           userId,
           rating: {
@@ -265,66 +302,85 @@ router.get('/me', authenticateUser, async (req, res) => {
           }
         },
         _avg: { rating: true }
-      })
-    ]);
+      });
+      console.log(`[UserStats] ✅ Average rating data:`, averageRatingData);
+    } catch (err) {
+      console.error(`[UserStats] ❌ Error aggregating ratings:`, err);
+      throw err;
+    }
 
+    console.log(`[UserStats] Step 3: Building stats object...`);
     const stats = {
       booksInCollection,
       reviewsWritten,
-      achievementsUnlocked,
+      achievementsUnlocked: 0, // Achievements feature removed
       averageRating: averageRatingData._avg.rating || 0,
       user
     };
+    console.log(`[UserStats] ✅ Stats object created:`, stats);
 
     // Cache the results
-    await cache.set(cacheKey, stats, TTL.USER_STATS);
-    console.log(`[UserStats] Cached stats for user ${userId} (TTL=${TTL.USER_STATS}s)`);
+    console.log(`[UserStats] Step 4: Caching results...`);
+    try {
+      await cache.set(cacheKey, stats, TTL.USER_STATS);
+      console.log(`[UserStats] ✅ Cached stats for user ${userId} (TTL=${TTL.USER_STATS}s)`);
+    } catch (err) {
+      console.error(`[UserStats] ⚠️ Warning: Failed to cache stats:`, err);
+      // Continue anyway - caching failure shouldn't break the request
+    }
 
+    console.log(`[UserStats] Step 5: Sending response...`);
     res.json(stats);
+    console.log(`[UserStats] ✅ Response sent successfully`);
 
   } catch (error) {
-    console.error('Error fetching user stats:', error);
+    console.error('❌ [UserStats] CRITICAL ERROR in /stats endpoint:');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Stack trace:', error.stack);
+    console.error('Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     res.status(500).json({ error: 'Failed to fetch user stats' });
   }
 });
 
-router.get('/achievements', authenticateUser, async (req, res) => {
-  const userId = req.userId;
+// Achievement feature removed - endpoint disabled
+// router.get('/achievements', authenticateUser, async (req, res) => {
+//   const userId = req.userId;
 
-  if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+//   if (!userId) {
+//     return res.status(401).json({ error: 'Unauthorized' });
+//   }
 
-  try {
-    // Fetch all achievements unlocked by this user
-    const userAchievements = await prisma.userAchievement.findMany({
-      where: { userId },
-      include: {
-        achievement: true,
-      },
-      orderBy: {
-        achievement: {
-          tier: 'asc'
-        }
-      }
-    });
+//   try {
+//     // Fetch all achievements unlocked by this user
+//     const userAchievements = await prisma.userAchievement.findMany({
+//       where: { userId },
+//       include: {
+//         achievement: true,
+//       },
+//       orderBy: {
+//         achievement: {
+//           tier: 'asc'
+//         }
+//       }
+//     });
 
-    const achievements = userAchievements.map(ua => ({
-      id: ua.achievement.id,
-      name: ua.achievement.name,
-      description: ua.achievement.description,
-      tier: ua.achievement.tier,
-      category: ua.achievement.category,
-      unlockedAt: ua.createdAt,
-      earned: true
-    }));
+//     const achievements = userAchievements.map(ua => ({
+//       id: ua.achievement.id,
+//       name: ua.achievement.name,
+//       description: ua.achievement.description,
+//       tier: ua.achievement.tier,
+//       category: ua.achievement.category,
+//       unlockedAt: ua.createdAt,
+//       earned: true
+//     }));
 
-    return res.status(200).json({ achievements });
-  } catch (error) {
-    console.error('Error fetching user achievements:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-});
+//     return res.status(200).json({ achievements });
+//   } catch (error) {
+//     console.error('Error fetching user achievements:', error);
+//     return res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 
 
 module.exports = router;

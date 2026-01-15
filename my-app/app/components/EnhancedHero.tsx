@@ -12,7 +12,6 @@ import LibraryBuildingPrompt from './LibraryBuildingPrompt';
 interface UserStats {
   booksInCollection: number;
   reviewsWritten: number;
-  achievementsUnlocked: number;
 }
 
 interface FavoriteBooksHeroProps {
@@ -158,10 +157,10 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
   // Unauthenticated User Experience
   if (!session) {
     return (
-      <section className="relative overflow-hidden bg-gradient-to-t from-stone-900 via-stone-800 to-amber-900 min-h-screen">
+      <section className="relative overflow-hidden bg-gradient-to-t from-[#14181C] via-[#14181C] to-amber-900 min-h-screen">
         {/* Enhanced Background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/50 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/70 via-transparent to-[#14181C]/50 z-10" />
           <div className="absolute inset-0 opacity-30 mix-blend-overlay" />
         </div>
 
@@ -170,7 +169,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
             {/* Hero Content */}
             <div className="text-center mb-16 max-w-4xl mx-auto">
               <div className="mb-8">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-stone-50 mb-6 leading-tight">
                   Discover Your Next
                   <span className="block bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                     Favorite Book
@@ -184,17 +183,17 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
               </div>
 
               {/* Enhanced CTA Section */}
-              <div className="bg-black/30 backdrop-blur-xl rounded-3xl border border-amber-500/20 p-8 md:p-12 max-w-2xl mx-auto relative overflow-hidden">
+              <div className="bg-[#2C3440] backdrop-blur-xl rounded-3xl border border-amber-500/20 p-8 md:p-12 max-w-2xl mx-auto relative overflow-hidden">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-amber-500/10 to-transparent rounded-full -translate-x-16 -translate-y-16" />
                 <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-to-tl from-orange-500/10 to-transparent rounded-full translate-x-12 translate-y-12" />
                 
                 <div className="relative z-10">
                   <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                    <BookOpen className="w-10 h-10 text-white" onClick={() => router.push('/auth')}/>
+                    <BookOpen className="w-10 h-10 text-stone-50" onClick={() => router.push('/auth')}/>
                   </div>
                   
-                  <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  <h3 className="text-3xl md:text-4xl font-bold text-stone-50 mb-4">
                     Sign Up Now!
                   </h3>
                   
@@ -224,14 +223,14 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
                   <div className="space-y-4">
                     <button
                       onClick={() => router.push('/auth')}
-                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:-translate-y-1 transform text-lg"
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-stone-50 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:-translate-y-1 transform text-lg"
                     >
                       Get Started!
                     </button>
                     
                     <button
                       onClick={() => router.push('/auth')}
-                      className="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 px-8 rounded-xl transition-all duration-300 border border-white/20 hover:border-white/30 backdrop-blur-sm"
+                      className="w-full bg-white/10 hover:bg-white/20 text-stone-50 font-medium py-3 px-8 rounded-xl transition-all duration-300 border border-[#3D4451] hover:border-white/30 backdrop-blur-sm"
                     >
                       Sign In
                     </button>
@@ -273,10 +272,10 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
 
   // Authenticated User Experience
   return (
-    <section className="relative overflow-hidden bg-gradient-to-t from-stone-900 via-stone-800 to-amber-900 min-h-screen">
+    <section className="relative overflow-hidden bg-gradient-to-t from-[#14181C] via-[#14181C] to-amber-900 min-h-screen">
       {/* Cinematic Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
         <div className="absolute inset-0 opacity-20 mix-blend-overlay"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
@@ -296,7 +295,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-white text-lg">Loading your library...</p>
+              <p className="text-stone-50 text-lg">Loading your library...</p>
             </div>
           </div>
         ) : userStats?.booksInCollection === 0 ? (
@@ -304,15 +303,15 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
           <div className="text-center min-h-[60vh] flex items-center justify-center">
             <div className="max-w-2xl mx-auto">
               <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
-                <BookOpen className="w-12 h-12 text-white" />
+                <BookOpen className="w-12 h-12 text-stone-50" />
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">Welcome to Bookmarkd!</h1>
+              <h1 className="text-4xl md:text-6xl font-bold text-stone-50 mb-6">Welcome to Bookmarkd!</h1>
               <p className="text-xl text-stone-300 mb-8">
                 Start building your personal library by adding your first book.
               </p>
               <button
                 onClick={() => router.push('/browse')}
-                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:-translate-y-1 transform text-lg"
+                className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-stone-50 font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25 hover:-translate-y-1 transform text-lg"
               >
                 Browse Books
               </button>
@@ -327,7 +326,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
           <div>
             {/* Header Section */}
             <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-stone-50 mb-6 leading-tight">
                 Favorite Books
               </h1>
               <p className="text-xl md:text-2xl text-stone-300 mb-4 leading-relaxed max-w-3xl mx-auto">
@@ -346,7 +345,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
                   onRemoveBook={handleRemoveBook}
                   onAddBook={handleAddBook}
                   showAddSlots={true}
-                  maxSlots={6}
+                  maxSlots={4}
                   layout="grid"
                   showStats={true}
                   userStats={userStats}
@@ -362,7 +361,7 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
                   onRemoveBook={handleRemoveBook}
                   onAddBook={handleAddBook}
                   showAddSlots={true}
-                  maxSlots={6}
+                  maxSlots={4}
                   layout="horizontal"
                   showStats={false}
                   className="px-4"
@@ -384,14 +383,6 @@ export default function FavoriteBooksHero({ favoriteBooks: propFavoriteBooks, us
                     </div>
                     <div className="text-xs text-stone-400 uppercase tracking-wider">
                       Reviews Written
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-400 mb-1">
-                      {userStats?.achievementsUnlocked ?? '—'}
-                    </div>
-                    <div className="text-xs text-stone-400 uppercase tracking-wider">
-                      Achievements
                     </div>
                   </div>
                 </div>

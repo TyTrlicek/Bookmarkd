@@ -163,7 +163,7 @@ export default function MobileAuthPage() {
   const stats = [
     { value: "2M+", label: "Books Available" },
     { value: "500K+", label: "Authors" },
-    { value: "50+", label: "Achievements" },
+    { value: "10K+", label: "Active Readers" },
     { value: "24/7", label: "Book Discovery" }
   ]
 
@@ -176,7 +176,7 @@ export default function MobileAuthPage() {
             <Image src="/brand-logo.png" width={96} height={96} alt="logo" className='rounded-full'/>
           </div>
           <div className="text-left">
-            <h1 className="text-3xl font-bold text-white">Bookmarkd</h1>
+            <h1 className="text-3xl font-bold text-stone-50">Bookmarkd</h1>
             <p className="text-stone-300 text-sm">Keep track of your books effortlessly</p>
           </div>
         </div>
@@ -195,7 +195,7 @@ export default function MobileAuthPage() {
                   <BookOpen className="w-8 h-8 text-white" />
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">
+              <h2 className="text-xl font-bold text-stone-50 mb-2">
                 Join Bookmarkd Today!
               </h2>
               <p className="text-stone-300 text-sm">
@@ -251,7 +251,7 @@ export default function MobileAuthPage() {
             <div className="grid grid-cols-2 gap-3 mb-4">
               {stats.slice(0, 2).map((stat, index) => (
                 <div key={index} className="text-center p-3 bg-black/20 backdrop-blur-sm rounded-lg border border-white/10">
-                  <div className="text-lg font-bold text-white">{stat.value}</div>
+                  <div className="text-lg font-bold text-stone-50">{stat.value}</div>
                   <div className="text-xs text-stone-300">{stat.label}</div>
                 </div>
               ))}
@@ -274,7 +274,7 @@ export default function MobileAuthPage() {
                   <User className="w-8 h-8 text-white" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
+              <h3 className="text-xl font-bold text-stone-50 mb-2">
                 Complete Your Profile
               </h3>
               <p className="text-stone-300 text-sm">
@@ -306,7 +306,7 @@ export default function MobileAuthPage() {
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                        className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 text-stone-50 rounded-full flex items-center justify-center transition-colors"
                       >
                         <X className="w-2 h-2" />
                       </button>
@@ -348,7 +348,7 @@ export default function MobileAuthPage() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    className="w-full pl-9 pr-4 py-3 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-white text-sm"
+                    className="w-full pl-9 pr-4 py-3 bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 text-sm"
                   />
                 </div>
               </div>
@@ -357,7 +357,7 @@ export default function MobileAuthPage() {
               <button
                 type="submit"
                 disabled={isUploadingImage || !username.trim()}
-                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/30 border border-amber-400/30"
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-50 font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/30 border border-amber-400/30"
               >
                 {isUploadingImage ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

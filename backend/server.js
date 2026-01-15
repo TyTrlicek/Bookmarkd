@@ -18,7 +18,41 @@ const recomendationRoute = require('./routes/reccomendation')
 const redis = require ('./lib/redis');
 const { cache, TTL } = require('./lib/cache');
 const rankingCache = require('./lib/rankingCache');
-const { checkAndUnlockAchievements } = require('./utils');
+
+// Process-level error handlers for crash debugging
+process.on('uncaughtException', (error) => {
+  console.error('🔴 UNCAUGHT EXCEPTION - Process will exit!');
+  console.error('Error name:', error.name);
+  console.error('Error message:', error.message);
+  console.error('Stack trace:', error.stack);
+  console.error('Error object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔴 UNHANDLED REJECTION - Process may crash!');
+  console.error('Promise:', promise);
+  console.error('Reason:', reason);
+  if (reason instanceof Error) {
+    console.error('Stack trace:', reason.stack);
+  }
+});
+
+process.on('SIGTERM', () => {
+  console.log('📛 SIGTERM signal received - graceful shutdown');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('📛 SIGINT signal received - graceful shutdown');
+  process.exit(0);
+});
+
+process.on('SIGSEGV', () => {
+  console.error('🔴 SIGSEGV (Segmentation Fault) - Critical error!');
+  console.error('Process memory:', process.memoryUsage());
+  process.exit(139);
+});
 
 const openLibraryAPI = axios.create({
   baseURL: 'https://openlibrary.org',
@@ -88,7 +122,7 @@ app.get('/api/search', async (req, res) => {
 
     console.log(`[Search] Cache miss for local search: "${query}", querying database...`);
 
-    // Fetch local results
+    // Fetch local results - prioritize English books
     const localResults = await prisma.book.findMany({
       where: {
         OR: [
@@ -96,20 +130,32 @@ app.get('/api/search', async (req, res) => {
           { author: { contains: query, mode: 'insensitive' } },
         ],
       },
-      take: 50, // get more, we'll re-rank below
+      take: 100, // get more so we can filter/prioritize English books
     });
 
     if (localResults.length > 0) {
       // Score matches for relevance
       const scored = localResults.map(book => {
         let score = 0;
+
+        // Title matching
         if (book.title.toLowerCase() === query.toLowerCase()) score += 100; // exact title match
         else if (book.title.toLowerCase().startsWith(query.toLowerCase())) score += 50;
         else if (book.title.toLowerCase().includes(query.toLowerCase())) score += 20;
 
+        // Author matching
         if (book.author.toLowerCase() === query.toLowerCase()) score += 80; // exact author match
         else if (book.author.toLowerCase().startsWith(query.toLowerCase())) score += 40;
         else if (book.author.toLowerCase().includes(query.toLowerCase())) score += 15;
+
+        // Heavy English language bonus - prioritize English books
+        const language = book.language?.toLowerCase() || 'unknown';
+        if (language === 'eng' || language === 'english' || language === 'en') {
+          score += 200; // Major boost for English books
+        } else if (language === 'unknown') {
+          score += 50; // Moderate boost for unknown (likely English)
+        }
+        // Non-English books get no bonus, effectively deprioritizing them
 
         return { ...book, _score: score };
       });
@@ -144,36 +190,79 @@ app.get('/api/search', async (req, res) => {
 
     console.log(`[Search] Cache miss for OpenLibrary search: "${query}", calling API...`);
 
+    // Request more results and filter by English language
     const response = await openLibraryAPI.get('/search.json', {
       params: {
         q: query,
-        limit: 50,
+        language: 'eng', // Filter for English books in API call
+        limit: 100,
       },
     });
 
     const rawBooks = response.data.docs;
 
     const filteredBooks = rawBooks
-      .filter(book =>
-        book.title &&
-        book.author_name?.length &&
-        book.cover_i &&
-        book.key
-        && book.title !== 'Study Guide'
-      )
+      .filter(book => {
+        // Basic filtering
+        if (!book.title || !book.author_name?.length || !book.cover_i || !book.key) {
+          return false;
+        }
+        if (book.title === 'Study Guide') {
+          return false;
+        }
+
+        // Heavy English language filtering
+        const languages = book.language || [];
+
+        // If no language specified, assume it might be English (keep it)
+        if (languages.length === 0) {
+          return true;
+        }
+
+        // Check if any language is English
+        const hasEnglish = languages.some(lang =>
+          lang === 'eng' ||
+          lang === 'en' ||
+          lang === 'english' ||
+          lang.toLowerCase() === 'eng' ||
+          lang.toLowerCase() === 'en'
+        );
+
+        // Only keep if it has English or no language specified
+        return hasEnglish || languages.length === 0;
+      })
 
       .map(book => {
         let score = 0;
         const title = book.title.toLowerCase();
         const author = book.author_name?.[0]?.toLowerCase() || "";
 
+        // Title matching
         if (title === query.toLowerCase()) score += 100;
         else if (title.startsWith(query.toLowerCase())) score += 50;
         else if (title.includes(query.toLowerCase())) score += 20;
 
+        // Author matching
         if (author === query.toLowerCase()) score += 80;
         else if (author.startsWith(query.toLowerCase())) score += 40;
         else if (author.includes(query.toLowerCase())) score += 15;
+
+        // Edition count bonus (popular books)
+        score += Math.min(15, (book.edition_count || 0));
+
+        // Heavy English language bonus for scoring
+        const languages = book.language || [];
+        if (languages.length === 0) {
+          score += 100; // Big bonus for unknown (likely English)
+        } else {
+          const hasEnglish = languages.some(lang =>
+            lang === 'eng' || lang === 'en' || lang === 'english' ||
+            lang.toLowerCase() === 'eng' || lang.toLowerCase() === 'en'
+          );
+          if (hasEnglish) {
+            score += 200; // Massive bonus for confirmed English
+          }
+        }
 
         return {
           title: book.title || 'Unknown Title',
@@ -194,7 +283,7 @@ app.get('/api/search', async (req, res) => {
           language: book.language?.[0] || 'Unknown',
           openLibraryId: book.key?.split('/').pop() || null,
           isbn: book.isbn?.[0] || null,
-          _score: score + Math.min(15, (book.edition_count || 0)),
+          _score: score,
         };
       })
       .sort((a, b) => b._score - a._score)
@@ -235,35 +324,54 @@ app.get('/api/trending', async (req, res) => {
       where: { addedAt: { gte: sevenDaysAgo } },
       _count: { bookId: true },
       orderBy: { _count: { bookId: 'desc' } },
-      take: 10,
+      take: 15,
     });
 
     const trendingBookIds = trendingBooksGrouped.map((b) => b.bookId);
 
-    const trendingBooks = await prisma.book.findMany({
+    let finalBooks = await prisma.book.findMany({
       where: { id: { in: trendingBookIds } },
     });
 
     // Maintain the correct order
-    const orderedTrendingBooks = trendingBookIds.map(
-      (id) => trendingBooks.find((book) => book.id === id)
+    let orderedTrendingBooks = trendingBookIds.map(
+      (id) => finalBooks.find((book) => book.id === id)
     );
 
-    
+    // 3️⃣ If less than 15 trending books, fill with most popular books
+    if (orderedTrendingBooks.length < 15) {
+      console.log(`Only ${orderedTrendingBooks.length} trending books found, filling with popular books...`);
+
+      const needed = 15 - orderedTrendingBooks.length;
+      const existingIds = orderedTrendingBooks.map(b => b.id);
+
+      const popularBooks = await prisma.book.findMany({
+        where: {
+          id: { notIn: existingIds },
+          totalRatings: { gt: 0 }
+        },
+        orderBy: [
+          { totalRatings: 'desc' },
+          { averageRating: 'desc' }
+        ],
+        take: needed
+      });
+
+      orderedTrendingBooks = [...orderedTrendingBooks, ...popularBooks];
+    }
 
     const cacheTTL = process.env.TRENDING_CACHE_TTL
-  ? parseInt(process.env.TRENDING_CACHE_TTL)
-  : 3600; // fallback to 1 hour
+      ? parseInt(process.env.TRENDING_CACHE_TTL)
+      : 3600; // fallback to 1 hour
 
-await redis.set(
-  'trendingBooks',
-  JSON.stringify(orderedTrendingBooks),
-  'EX',
-  cacheTTL
-);
+    await redis.set(
+      'trendingBooks',
+      JSON.stringify(orderedTrendingBooks),
+      'EX',
+      cacheTTL
+    );
 
-
-    console.log('Trending books recalculated and cached');
+    console.log(`Trending books recalculated and cached (${orderedTrendingBooks.length} books)`);
 
     res.json(orderedTrendingBooks);
   } catch (err) {
@@ -271,7 +379,6 @@ await redis.set(
     res.status(500).json({ error: 'Failed to fetch trending books' });
   }
 });
-
 
 app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
   const id = req.query.id;
@@ -426,8 +533,9 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
       let popularityRank = rankings?.popularityRank || null;
 
       let userStatus = null;
+      let userRating = null;
 
-  // If user is logged in, get their status for this book
+  // If user is logged in, get their status and rating for this book
   if (userId) {
     const userBook = await prisma.userBook.findUnique({
       where: {
@@ -438,12 +546,14 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
       },
     });
     userStatus = userBook?.status ?? null;
+    userRating = userBook?.rating ?? null;
   }
       return res.json({
         ...existingBook,
         ratingRank,
         popularityRank,
-        userStatus
+        userStatus,
+        userRating
       });
     }
 
@@ -477,51 +587,119 @@ app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
     let coverId = book.covers?.[0] || null;
     let isbn = null;
 
-if (!coverId) {
-  try {
-    const editionsRes = await openLibraryAPI.get(`/works/${id}/editions.json?limit=10`);
-    const editions = editionsRes.data.entries;
+// Helper function to check if edition is in English
+const isEnglishEdition = (edition) => {
+  if (!edition.languages || edition.languages.length === 0) {
+    // If no language specified, assume English (common for older entries)
+    return true;
+  }
+  return edition.languages.some(lang =>
+    lang.key === '/languages/eng' ||
+    lang === '/languages/eng' ||
+    (typeof lang === 'object' && lang.key === '/languages/eng')
+  );
+};
 
-    for (const ed of editions) {
-      if (ed.covers?.length) {
+// Helper function to calculate edition priority score
+const calculateEditionPriority = (edition) => {
+  let score = 0;
+
+  // Prioritize major English publishers
+  const majorPublishers = ['Tor', 'Gollancz', 'Orion', 'Harper', 'Penguin', 'Random House', 'Del Rey', 'Orbit'];
+  const publisherStr = edition.publishers?.join(' ').toLowerCase() || '';
+
+  if (majorPublishers.some(pub => publisherStr.includes(pub.toLowerCase()))) {
+    score += 100;
+  }
+
+  // Prefer editions with ISBN-10 (better Amazon compatibility)
+  if (edition.isbn_10?.length) {
+    score += 50;
+  }
+
+  // Prefer editions with covers
+  if (edition.covers?.length) {
+    score += 30;
+  }
+
+  // Prefer editions with ISBN-13 as fallback
+  if (edition.isbn_13?.length) {
+    score += 20;
+  }
+
+  // Prefer more recent editions (US market tends to have newer ISBNs)
+  const pubDate = edition.publish_date;
+  if (pubDate) {
+    const year = parseInt(pubDate.match(/\d{4}/)?.[0]);
+    if (year && year >= 2000) {
+      score += 10;
+    }
+  }
+
+  return score;
+};
+
+// Fetch more editions and filter/prioritize for English editions
+try {
+  const editionsRes = await openLibraryAPI.get(`/works/${id}/editions.json?limit=50`);
+  let editions = editionsRes.data.entries || [];
+
+  // Filter for English editions only
+  const englishEditions = editions.filter(isEnglishEdition);
+
+  console.log(`Found ${editions.length} total editions, ${englishEditions.length} English editions for ${id}`);
+
+  if (englishEditions.length > 0) {
+    // Sort by priority score (highest first)
+    englishEditions.sort((a, b) => calculateEditionPriority(b) - calculateEditionPriority(a));
+
+    // First pass: Try to find edition with both cover and ISBN
+    for (const ed of englishEditions) {
+      if (ed.covers?.length && (ed.isbn_10?.length || ed.isbn_13?.length)) {
         coverId = ed.covers[0];
+        // Prefer ISBN-10 for Amazon compatibility
+        isbn = ed.isbn_10?.[0] || ed.isbn_13?.[0];
+        console.log(`Selected edition with cover and ISBN from ${ed.publishers?.[0] || 'unknown publisher'}`);
+        break;
+      }
+    }
 
-        // Prefer ISBN-10, fallback to ISBN-13
-        if (ed.isbn_10?.length) {
-          isbn = ed.isbn_10[0];
-        } else if (ed.isbn_13?.length) {
-          isbn = ed.isbn_13[0];
-        } else {
-          isbn = null;
+    // Second pass: If no cover found yet, take any edition with cover
+    if (!coverId) {
+      for (const ed of englishEditions) {
+        if (ed.covers?.length) {
+          coverId = ed.covers[0];
+          isbn = ed.isbn_10?.[0] || ed.isbn_13?.[0] || null;
+          console.log(`Selected edition with cover (no ISBN) from ${ed.publishers?.[0] || 'unknown publisher'}`);
+          break;
         }
-
-        break;
       }
     }
-  } catch (editionErr) {
-    console.warn(`Could not fetch edition covers for ${id}:`, editionErr.message);
-  }
-}
 
-// If cover was already found but ISBN is still null, try again without cover constraint
-if (!isbn) {
-  try {
-    const editionsRes = await openLibraryAPI.get(`/works/${id}/editions.json?limit=10`);
-    const editions = editionsRes.data.entries;
-
-    for (const ed of editions) {
-      // Prefer ISBN-10, fallback to ISBN-13
-      if (ed.isbn_10?.length) {
-        isbn = ed.isbn_10[0];
-        break;
-      } else if (ed.isbn_13?.length) {
-        isbn = ed.isbn_13[0];
-        break;
+    // Third pass: If still no ISBN, take best edition with ISBN
+    if (!isbn) {
+      for (const ed of englishEditions) {
+        if (ed.isbn_10?.length || ed.isbn_13?.length) {
+          isbn = ed.isbn_10?.[0] || ed.isbn_13?.[0];
+          console.log(`Selected ISBN from ${ed.publishers?.[0] || 'unknown publisher'} (no cover)`);
+          break;
+        }
       }
     }
-  } catch (editionErr) {
-    console.warn(`Could not fetch ISBNs for ${id}:`, editionErr.message);
+  } else {
+    console.warn(`No English editions found for ${id}, will use any available edition`);
+    // Fallback: use any edition if no English ones found
+    if (editions.length > 0) {
+      editions.sort((a, b) => calculateEditionPriority(b) - calculateEditionPriority(a));
+      const bestEdition = editions[0];
+      if (bestEdition.covers?.length) {
+        coverId = bestEdition.covers[0];
+      }
+      isbn = bestEdition.isbn_10?.[0] || bestEdition.isbn_13?.[0] || null;
+    }
   }
+} catch (editionErr) {
+  console.warn(`Could not fetch editions for ${id}:`, editionErr.message);
 }
 
 
@@ -588,17 +766,9 @@ app.post('/api/user/booklist', writeLimiter, authenticateUser, async (req, res) 
 
     try {
         // Ensure user exists in database
-        let user = await prisma.user.findUnique({ where: { id: userId } });
+        const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
-            const username = req.user.email ? req.user.email.split('@')[0] : 'user';
-
-            user = await prisma.user.create({
-                data: {
-                    id: userId,
-                    email: req.user?.email,
-                    username: username
-                },
-            });
+            return res.status(404).json({ error: 'User profile not found. Please complete profile setup.' });
         }
         const {
             openLibraryId,
@@ -630,25 +800,36 @@ app.post('/api/user/booklist', writeLimiter, authenticateUser, async (req, res) 
             return res.status(200).json({ message: 'Book already in user list', book });
         }
 
+        // Validate rating (0.5-5.0 in half-star increments)
+        let validatedRating = rating;
+        let validatedStatus = status;
+
+        if (rating !== null && rating !== undefined) {
+            if (rating < 0.5 || rating > 5 || (rating * 2) % 1 !== 0) {
+                return res.status(400).json({
+                    error: 'Invalid rating. Must be 0.5-5.0 in half-star increments (e.g., 0.5, 1.0, 1.5, ..., 5.0)'
+                });
+            }
+            // Auto-set to "completed" when rating is provided
+            validatedStatus = 'completed';
+        }
+
+        // Validate status (only "to-read" or "completed")
+        if (validatedStatus && !['to-read', 'completed'].includes(validatedStatus)) {
+            return res.status(400).json({
+                error: 'Invalid status. Must be "to-read" or "completed"'
+            });
+        }
+
         const userBook = await prisma.userBook.create({
             data: {
                 userId,
                 bookId: book.id,
-                rating,
+                rating: validatedRating,
                 comment,
-                status,
+                status: validatedStatus,
             },
         });
-
-        const achievementContext = {
-            loggedAt: new Date(), // For "Night Owl" achievement
-            bookAddedAt: userBook.addedAt, // For "Old Timer" achievement
-            newStatus: status,
-            newRating: rating,
-            bookData: book 
-        };
-        
-        const unlockedAchievements = await checkAndUnlockAchievements(userId, achievementContext);
 
         await prisma.userActivity.create({
             data: {
@@ -657,11 +838,11 @@ app.post('/api/user/booklist', writeLimiter, authenticateUser, async (req, res) 
                 type: 'add_to_list',
                 bookId: book.id,
                 data: {
-                    status,
-                    rating,
+                    status: validatedStatus,
+                    rating: validatedRating,
                     title: book.title,
-                    message: rating > 0 ? `You rated "${book.title}" ${rating}/10` : `You added "${book.title}" to your collection`,
-                    globalMessage: rating > 0 ? `${user.username} rated "${book.title}" ${rating}/10` : `${user.username} added "${book.title}" to their collection`,
+                    message: validatedRating > 0 ? `You rated "${book.title}" ${validatedRating}/5 stars` : `You added "${book.title}" to your collection`,
+                    globalMessage: validatedRating > 0 ? `${user.username} rated "${book.title}" ${validatedRating}/5 stars` : `${user.username} added "${book.title}" to their collection`,
                     avatar_url: user.avatar_url,
                 }
             }
@@ -692,10 +873,9 @@ app.post('/api/user/booklist', writeLimiter, authenticateUser, async (req, res) 
 
 
 
-              return res.status(201).json({ 
-                  message: 'Book added to user list', 
-                  book, 
-                  unlockedAchievements
+              return res.status(201).json({
+                  message: 'Book added to user list',
+                  book
               });
               
           } catch (error) {
@@ -706,6 +886,37 @@ app.post('/api/user/booklist', writeLimiter, authenticateUser, async (req, res) 
   
   
   
+
+// Get books by the same author
+app.get('/api/books/by-author', async (req, res) => {
+  const { author, excludeBookId, limit = 6 } = req.query;
+
+  if (!author) {
+    return res.status(400).json({ error: 'Author parameter is required' });
+  }
+
+  try {
+    const books = await prisma.book.findMany({
+      where: {
+        author: {
+          equals: author,
+          mode: 'insensitive'
+        },
+        ...(excludeBookId && { id: { not: excludeBookId } })
+      },
+      orderBy: [
+        { totalRatings: 'desc' },
+        { averageRating: 'desc' }
+      ],
+      take: parseInt(limit)
+    });
+
+    res.json(books);
+  } catch (err) {
+    console.error('Error fetching books by author:', err.message);
+    res.status(500).json({ error: 'Failed to fetch books by author' });
+  }
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);

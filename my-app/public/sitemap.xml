@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://bookmarkd.fun/</loc>
+    <loc>https://www.bookmarkd.fun/</loc>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/about</loc>
+    <loc>https://www.bookmarkd.fun/about</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/rankings</loc>
+    <loc>https://www.bookmarkd.fun/rankings</loc>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/browse</loc>
+    <loc>https://www.bookmarkd.fun/browse</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/contact</loc>
+    <loc>https://www.bookmarkd.fun/contact</loc>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/help</loc>
+    <loc>https://www.bookmarkd.fun/help</loc>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/community-guidelines</loc>
+    <loc>https://www.bookmarkd.fun/community-guidelines</loc>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/privacy</loc>
+    <loc>https://www.bookmarkd.fun/privacy</loc>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/cookies</loc>
+    <loc>https://www.bookmarkd.fun/cookies</loc>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/terms</loc>
+    <loc>https://www.bookmarkd.fun/terms</loc>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://bookmarkd.fun/auth</loc>
+    <loc>https://www.bookmarkd.fun/auth</loc>
     <priority>0.7</priority>
   </url>
   <!-- Dynamic content like /books/[book-id] could be generated here -->

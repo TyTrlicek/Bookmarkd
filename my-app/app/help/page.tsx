@@ -241,15 +241,15 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
       <Header />
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-stone-900 via-stone-800 to-emerald-900 pt-24 pb-16">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+      <div className="relative bg-gradient-to-br from-[#14181C] via-[#14181C] to-emerald-900 pt-24 pb-16">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40" />
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-            <HelpCircle className="w-8 h-8 text-white" />
+            <HelpCircle className="w-8 h-8 text-stone-50" />
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-stone-50 mb-6 leading-tight">
             Help & FAQ
           </h1>
           
@@ -266,14 +266,14 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
 
       {/* Main Content */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
         
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
 
           {/* FAQ Categories */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-stone-50 mb-6 flex items-center gap-3">
               <HelpCircle className="w-6 h-6 text-emerald-400" />
               Frequently Asked Questions
             </h2>
@@ -295,11 +295,11 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
             {faqs.map((faq, index) => (
               <div
                 key={faq.id}
-                className="bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden"
+                className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-[#3D4451] overflow-hidden"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full p-6 text-left flex items-center justify-between hover:bg-black/20 transition-colors"
+                  className="w-full p-6 text-left flex items-center justify-between hover:bg-[#2C3440]/60 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -311,7 +311,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
                           {faq.category}
                         </span>
                       </div>
-                      <h3 className="text-white font-semibold text-lg">{faq.question}</h3>
+                      <h3 className="text-stone-50 font-semibold text-lg">{faq.question}</h3>
                     </div>
                   </div>
                   
@@ -325,7 +325,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
                 </button>
                 
                 {openFAQ === index && (
-                  <div className="px-6 pb-6 border-t border-white/10 bg-gradient-to-r from-black/10 to-emerald-900/5">
+                  <div className="px-6 pb-6 border-t border-[#3D4451] bg-gradient-to-r from-[#14181C]/10 to-emerald-900/5">
                     <div className="pt-6">
                       <div className="prose prose-invert max-w-none">
                         <div 
@@ -371,7 +371,7 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
                                     if (/^\d+\./.test(line.trim())) {
                                       const [number, ...rest] = line.trim().split(' ')
                                       return `
-                                        <div class="flex items-start gap-4 py-2 px-4 rounded-lg bg-black/20 border border-emerald-400/10 hover:border-emerald-400/20 transition-colors group">
+                                        <div class="flex items-start gap-4 py-2 px-4 rounded-lg bg-[#2C3440]/60 border border-emerald-400/10 hover:border-emerald-400/20 transition-colors group">
                                           <div class="w-6 h-6 bg-gradient-to-br from-emerald-500/20 to-emerald-600/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                             <span class="text-emerald-300 text-sm font-semibold">${number.replace('.', '')}</span>
                                           </div>
@@ -409,12 +409,12 @@ The global rankings give you a true picture of what the entire Bookmarkd communi
           </div>
 
           {/* Still Need Help Section */}
-          <div className="mt-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center">
+          <div className="mt-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] text-center">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <MessageCircle className="w-6 h-6 text-white" />
+              <MessageCircle className="w-6 h-6 text-stone-50" />
             </div>
             
-            <h3 className="text-xl font-bold text-white mb-3">Still need help?</h3>
+            <h3 className="text-xl font-bold text-stone-50 mb-3">Still need help?</h3>
             <p className="text-stone-300 mb-6">
               Can't find the answer you're looking for? We are here to help.
             </p>

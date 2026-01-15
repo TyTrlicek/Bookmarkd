@@ -91,10 +91,10 @@ export default function AuthCallback() {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-stone-900 to-black flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-[#14181C] to-[#14181C] flex items-center justify-center">
       <div className="text-center max-w-md mx-auto px-6">
         <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-        <p className="text-white text-xl font-semibold mb-2">{status}</p>
+        <p className="text-stone-50 text-xl font-semibold mb-2">{status}</p>
         {bookTitle && (
           <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl p-4 mt-4 border border-amber-500/30">
             <p className="text-amber-300 text-sm">

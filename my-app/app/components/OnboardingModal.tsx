@@ -29,12 +29,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
       title: "Rate & Review",
       description: "Share your thoughts and help others discover their next great read",
       icon: Star,
-      action: "Explore Features"
-    },
-    {
-      title: "Unlock Achievements",
-      description: "Complete reading challenges and earn badges as you build your library",
-      icon: Award,
       action: "Begin Journey"
     }
   ];
@@ -61,7 +55,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-stone-800 to-stone-900 rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all duration-300 border border-amber-500/20">
+      <div className="bg-gradient-to-br from-[#14181C] to-[#14181C] rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all duration-300 border border-amber-500/20">
 
         {/* Header */}
         <div className="relative bg-gradient-to-r from-amber-600 to-orange-600 p-6 rounded-t-2xl text-white overflow-hidden">
@@ -85,12 +79,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
           <div className="relative z-10 text-center">
             <div className="mb-4">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full backdrop-blur-sm border-2 border-white/30">
-                <Icon size={32} className="text-white" />
+                <Icon size={32} className="text-stone-50" />
               </div>
             </div>
 
             <h2 className="text-2xl font-bold mb-2">{currentStepData.title}</h2>
-            <p className="text-white/90 leading-relaxed">{currentStepData.description}</p>
+            <p className="text-stone-50/90 leading-relaxed">{currentStepData.description}</p>
           </div>
         </div>
 
@@ -121,8 +115,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) =>
               {[
                 { icon: Search, text: "Search millions of books" },
                 { icon: BookOpen, text: "Build your personal library" },
-                { icon: Star, text: "Rate and review books" },
-                { icon: Award, text: "Unlock reading achievements" }
+                { icon: Star, text: "Rate and review books" }
               ].map((feature, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-stone-700/30 rounded-lg">
                   <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">

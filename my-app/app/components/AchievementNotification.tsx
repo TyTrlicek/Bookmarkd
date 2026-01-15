@@ -52,7 +52,7 @@ const AchievementNotification = ({ achievements, onClose }: any) => {
   const colors = getAchievementColors(currentAchievement.tier);
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-500 p-4">
+    <div className="fixed inset-0 bg-[#14181C]/60 flex items-center justify-center z-500 p-4">
       <div className={`bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all duration-300 ${
         isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
       }`}>
@@ -79,7 +79,7 @@ const AchievementNotification = ({ achievements, onClose }: any) => {
           <div className="relative z-10 text-center">
             <div className="mb-4">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full backdrop-blur-sm border-2 border-white/30">
-                <Icon size={32} className="text-white" />
+                <Icon size={32} className="text-stone-50" />
               </div>
             </div>
             

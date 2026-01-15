@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { supabase } from '@/lib/supabaseClient'
+import { Miss_Fajardose } from 'next/font/google'
 
 interface PendingBookAddition {
   openLibraryId: string
@@ -16,7 +17,6 @@ export const addPendingBookToCollection = async (): Promise<{ success: boolean, 
     if (!pendingData) {
       return { success: false, error: 'No pending book addition found' }
     }
-
     const pending: PendingBookAddition = JSON.parse(pendingData)
 
     // Check if the data is not too old (1 hour max)

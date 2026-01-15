@@ -33,7 +33,6 @@ import {
   List,
   Eye,
   CheckCircle,
-  BookOpenCheck,
   X,
   BarChart3,
   Target,
@@ -59,9 +58,12 @@ import EditCollectionPopup from '../components/EditCollectionPopup'
 import Image from 'next/image'
 import Footer from '../components/Footer'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
 
 const MyCollectionPage = () => {
-  const [viewMode, setViewMode] = useState('list')
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+  const [viewMode, setViewMode] = useState('grid')
   const [sortBy, setSortBy] = useState('addedAt')
   const [sortOrder, setSortOrder] = useState('desc')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -71,18 +73,24 @@ const MyCollectionPage = () => {
   const [tempStatus, setTempStatus] = useState<string | undefined>('')
   const [isFavorite, setIsFavorite] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const router = useRouter();
-  
+
   // Edit popup state
   const [editingBook, setEditingBook] = useState<BookInList | null>(null)
   const [showEditPopup, setShowEditPopup] = useState(false)
   const [tempRating, setTempRating] = useState(0)
-  const [hoverRating, setHoverRating] = useState(0)
 
   useEffect(() => {
-    console.log('books fetched');
-    fetchBooks();
-  }, [])
+    if (!isLoading && !isAuthenticated) {
+      router.push('/auth?redirect=/collection');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('books fetched');
+      fetchBooks();
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
   const handleClickOutside = (event: any) => {
@@ -129,8 +137,8 @@ const MyCollectionPage = () => {
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'completed': return <CheckCircle className="w-4 h-4" />
-      case 'reading': return <BookOpenCheck className="w-4 h-4" />
       case 'to-read': return <Eye className="w-4 h-4" />
+      case 'dropped': return <X className="w-4 h-4" />
       default: return null
     }
   }
@@ -138,8 +146,8 @@ const MyCollectionPage = () => {
   const getStatusText = (status: string) => {
     switch(status) {
       case 'completed': return 'Completed'
-      case 'reading': return 'Reading'
       case 'to-read': return 'To Read'
+      case 'dropped': return 'Dropped'
       default: return ''
     }
   }
@@ -147,8 +155,8 @@ const MyCollectionPage = () => {
   const getStatusColor = (status: string) => {
     switch(status) {
       case 'completed': return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      case 'reading': return 'bg-amber-50 text-amber-700 border-amber-200'
       case 'to-read': return 'bg-blue-50 text-blue-700 border-blue-200'
+      case 'dropped': return 'bg-red-50 text-red-700 border-red-200'
       default: return 'bg-slate-50 text-slate-700 border-slate-200'
     }
   }
@@ -198,36 +206,35 @@ const MyCollectionPage = () => {
       gradient: "from-amber-500 to-amber-600",
       description: "In your collection"
     },
-    { 
-      label: "Completed", 
-      value: books.filter(b => b.status === 'completed').length.toString(), 
-      icon: CheckCircle, 
+    {
+      label: "Completed",
+      value: books.filter(b => b.status === 'completed').length.toString(),
+      icon: CheckCircle,
       gradient: "from-emerald-500 to-emerald-600",
       description: "Books finished"
     },
-    { 
-      label: "Currently Reading", 
-      value: books.filter(b => b.status === 'reading').length.toString(), 
-      icon: BookOpenCheck, 
-      gradient: "from-blue-500 to-blue-600",
-      description: "In progress"
-    },
-    { 
-      label: "To Read", 
-      value: books.filter(b => b.status === 'to-read').length.toString(), 
-      icon: Target, 
+    {
+      label: "To Read",
+      value: books.filter(b => b.status === 'to-read').length.toString(),
+      icon: Target,
       gradient: "from-purple-500 to-purple-600",
       description: "Waiting to start"
+    },
+    {
+      label: "Dropped",
+      value: books.filter(b => b.status === 'dropped').length.toString(),
+      icon: X,
+      gradient: "from-red-500 to-red-600",
+      description: "Did not finish"
     }
   ]
 
   const handleOpenEditPopup = (book: BookInList) => {
-    
+
     setEditingBook(book)
     setTempRating(book.rating || 0)
     setTempStatus(book.status)
     setShowEditPopup(true)
-    setHoverRating(0)
   }
 
 
@@ -309,7 +316,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
   };
 
   return (
-    <div className="group bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-black/30 hover:border-amber-500/30 transition-all duration-300 overflow-hidden">
+    <div className="group bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451] hover:bg-[#2C3440]/80 hover:border-amber-500/30 transition-all duration-300 overflow-hidden">
       <div className="p-2 md:p-6">
         {/* Desktop Layout (md and up) */}
         <div className="hidden md:flex gap-6">
@@ -324,7 +331,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                 className="w-full h-full object-cover"
                 style={{ objectFit: 'cover' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/30 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>
           {/* Content */}
@@ -333,7 +340,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
                 <Link href={`/book/${book.book.openLibraryId}`} className="group/link mr-2">
-                  <h3 className="font-bold text-xl text-white mb-2 hover:text-amber-400 transition-colors line-clamp-2">
+                  <h3 className="font-bold text-xl text-stone-50 mb-2 hover:text-amber-400 transition-colors line-clamp-2">
                     {book.book.title}
                   </h3>
                 </Link>
@@ -369,10 +376,10 @@ const BookListItem = ({ book }: {book: BookInList}) => {
     <div className="flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => {
         const rating = book.rating || 0;
-        const starValue = (i + 1) * 2;
+        const starValue = i + 1; // 5-star scale
         const isFilled = rating >= starValue;
-        const isHalfFilled = rating >= starValue - 1 && rating < starValue;
-        
+        const isHalfFilled = rating >= starValue - 0.5 && rating < starValue;
+
         return (
           <div key={i} className="relative">
             <Star className="w-4 h-4 text-stone-500" />
@@ -388,7 +395,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
         );
       })}
     </div>
-    <span className="text-sm font-semibold text-white">{book.rating}/10</span>
+    <span className="text-sm font-semibold text-stone-50">{(book.rating || 0).toFixed(1)}/5</span>
   </>
 ) : (
   <span className="text-sm text-stone-400">No rating</span>
@@ -435,7 +442,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                         autoFocus
                         maxLength={100}
                       />
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/10">
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#3D4451]">
                         <div className="text-xs text-stone-400">
                           Press Ctrl+Enter to save, Esc to cancel • {commentValue.length}/100
                         </div>
@@ -460,7 +467,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
                   </div>
                 </div>
               ) : (
-                <div className="bg-gradient-to-r from-white/5 to-white/10 border border-white/10 rounded-lg p-4 relative backdrop-blur-sm group/comment">
+                <div className="bg-gradient-to-r from-white/5 to-white/10 border border-[#3D4451] rounded-lg p-4 relative backdrop-blur-sm group/comment">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       {book.comment ? (
@@ -517,7 +524,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
             <div>
               <div className="flex items-start gap-2 mb-1">
                 <Link href={`/book/${book.book.openLibraryId}`} className="flex-1 min-w-0">
-                  <h3 className="font-bold text-base leading-tight text-white hover:text-amber-400 transition-colors line-clamp-2">
+                  <h3 className="font-bold text-base leading-tight text-stone-50 hover:text-amber-400 transition-colors line-clamp-2">
                     {book.book.title}
                   </h3>
                 </Link>
@@ -550,10 +557,10 @@ const BookListItem = ({ book }: {book: BookInList}) => {
     <div className="flex items-center gap-0.5">
       {[...Array(5)].map((_, i) => {
         const rating = book.rating || 0;
-        const starValue = (i + 1) * 2; // Each star represents 2 points
+        const starValue = i + 1; // 5-star scale
         const isFilled = rating >= starValue;
-        const isHalfFilled = rating >= starValue - 1 && rating < starValue;
-        
+        const isHalfFilled = rating >= starValue - 0.5 && rating < starValue;
+
         return (
           <div key={i} className="relative">
             <Star className="w-4 h-4 text-stone-500" />
@@ -569,7 +576,7 @@ const BookListItem = ({ book }: {book: BookInList}) => {
         );
       })}
     </div>
-    <span className="text-sm font-semibold text-white">{book.rating}/10</span>
+    <span className="text-sm font-semibold text-stone-50">{(book.rating || 0).toFixed(1)}/5</span>
   </>
 ) : (
   <span className="text-sm text-stone-400">No rating</span>
@@ -596,50 +603,153 @@ const BookListItem = ({ book }: {book: BookInList}) => {
     </div>
   );
 };
+
+// Grid view component - Letterboxd style
+const BookGridItem = ({ book }: {book: BookInList}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      className="relative group cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => router.push(`/book/${book.book.openLibraryId}?author=${encodeURIComponent(book.book.author || 'Unknown Author')}`)}
+    >
+      {/* Book Cover */}
+      <div className="aspect-[2/3] relative overflow-hidden rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300">
+        <Image
+          src={book.book.image || '/placeholder-book.png'}
+          alt={book.book.title}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+
+        {/* Hover Overlay with Additional Info */}
+        <div className={`absolute inset-0 bg-gradient-to-t from-[#14181C] via-black/60 to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="absolute bottom-0 left-0 right-0 p-3 space-y-2">
+            <h3 className="text-stone-50 font-semibold text-sm line-clamp-2">{book.book.title}</h3>
+            <p className="text-stone-300 text-xs">{book.book.author || 'Unknown Author'}</p>
+
+            {/* Status Badge */}
+            {book.status && (
+              <div className="flex items-center gap-1">
+                {getStatusIcon(book.status)}
+                <span className="text-xs text-stone-50">{getStatusText(book.status)}</span>
+              </div>
+            )}
+
+            {/* Categories */}
+            {book.book.categories && book.book.categories.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {book.book.categories.slice(0, 2).map((cat) => (
+                  <span key={cat} className="text-xs bg-white/20 text-stone-50 px-2 py-0.5 rounded">
+                    {cat}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Edit Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenEditPopup(book);
+              }}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-stone-50 text-xs font-medium py-2 px-3 rounded transition-colors"
+            >
+              Edit
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Rating Below Cover */}
+      <div className="mt-2 text-center">
+        {book.rating && book.rating > 0 ? (
+          <div className="flex items-center justify-center gap-1">
+            {[...Array(5)].map((_, i) => {
+              const starValue = i + 1; // 5-star scale (0.5-5.0)
+              const isFilled = book.rating ? book.rating >= starValue : false;
+              const isHalf = book.rating ? (!isFilled && book.rating >= starValue - 0.5) : false;
+
+              return (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${
+                    isFilled ? 'fill-amber-400 text-amber-400' :
+                    isHalf ? 'fill-amber-400/50 text-amber-400' :
+                    'text-stone-600'
+                  }`}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-xs text-stone-500">No rating</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#14181C] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full mb-4"></div>
+          <p className="text-stone-50">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect via useEffect
+  }
+
 return (
     <div className="min-h-screen">
       {/* Header */}
       <Header />
 
       {/* Stats Dashboard */}
-      <section className="relative">
-        {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+      {/* <section className="relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#14181C] via-[#14181C] to-[#14181C]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40" />
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-12 hidden md:block">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">Reading Overview</h2>
+            <h2 className="text-3xl font-bold text-stone-50 mb-2">Reading Overview</h2>
             <p className="text-stone-300">Track Your Reading Status</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-black/20 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-black/30 transition-all group">
+              <div key={index} className="bg-[#2C3440]/60 backdrop-blur-sm rounded-xl p-6 border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all group">
                 <div className="flex items-start justify-between mb-4">
                   <div className={`w-12 h-12 bg-gradient-to-r ${stat.gradient} rounded-lg flex items-center justify-center shadow-lg`}>
-                    <stat.icon className="w-6 h-6 text-white" />
+                    <stat.icon className="w-6 h-6 text-stone-50" />
                   </div>
                   <BarChart3 className="w-4 h-4 text-stone-400 group-hover:text-amber-400 transition-colors" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+                <div className="text-3xl font-bold text-stone-50 mb-1">{stat.value}</div>
                 <div className="text-sm font-medium text-stone-200 mb-1">{stat.label}</div>
                 <div className="text-xs text-stone-400">{stat.description}</div>
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Collection Section */}
       <div className="relative">
         {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
           {/* Controls */}
-          <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6 mb-8">
+          <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451] p-6 mb-8">
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
               <div className="flex items-center gap-4 flex-1">
                 <div className="relative flex-1 max-w-md">
@@ -647,7 +757,7 @@ return (
                   <input
                     type="text"
                     placeholder="Search your library..."
-                    className="w-full pl-10 pr-4 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-stone-400 focus:bg-white/10 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/30 transition-all backdrop-blur-sm"
+                    className="w-full pl-10 pr-4 py-3 border border-[#3D4451] rounded-lg bg-white/5 text-stone-50 placeholder-stone-400 focus:bg-white/10 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/30 transition-all backdrop-blur-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -657,7 +767,7 @@ return (
                   <button
                     type="button"
                     onClick={() => setShowSortMenu(!showSortMenu)}
-                    className="flex items-center gap-2 px-4 py-3 border border-white/20 bg-white/5 text-white hover:bg-white/10 rounded-lg transition-all font-medium backdrop-blur-sm"
+                    className="flex items-center gap-2 px-4 py-3 border border-[#3D4451] bg-white/5 text-stone-50 hover:bg-white/10 rounded-lg transition-all font-medium backdrop-blur-sm"
                   >
                     <ArrowUpDown className="w-4 h-4" />
                     Sort
@@ -665,7 +775,7 @@ return (
                   </button>
                   
                   {showSortMenu && (
-                    <div className="absolute top-full mt-2 right-0 bg-black backdrop-blur-sm border border-white/20 rounded-lg shadow-xl p-2 min-w-[180px] z-20">
+                    <div className="absolute top-full mt-2 right-0 bg-[#14181C] backdrop-blur-sm border border-[#3D4451] rounded-lg shadow-xl p-2 min-w-[180px] z-20">
                       <button
                         type="button"
                         onClick={() => { setSortBy('addedAt'); setSortOrder('desc'); setShowSortMenu(false); }}
@@ -744,14 +854,14 @@ return (
               </div>
               
               <div className="flex items-center gap-3">
-                {/* <div className="flex items-center gap-1 bg-black/30 rounded-lg p-1 backdrop-blur-sm border border-white/10">
+                <div className="flex items-center gap-1 bg-[#2C3440]/80 rounded-lg p-1 backdrop-blur-sm border border-[#3D4451]">
                   <button
                     type="button"
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-md transition-all ${
-                      viewMode === 'grid' 
-                        ? 'bg-amber-500/20 text-amber-300 shadow-sm' 
-                        : 'text-stone-400 hover:text-white'
+                      viewMode === 'grid'
+                        ? 'bg-amber-500/20 text-amber-300 shadow-sm'
+                        : 'text-stone-400 hover:text-stone-50'
                     }`}
                   >
                     <Grid className="w-4 h-4" />
@@ -760,19 +870,19 @@ return (
                     type='button'
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-md transition-all ${
-                      viewMode === 'list' 
-                        ? 'bg-amber-500/20 text-amber-300 shadow-sm' 
-                        : 'text-stone-400 hover:text-white'
+                      viewMode === 'list'
+                        ? 'bg-amber-500/20 text-amber-300 shadow-sm'
+                        : 'text-stone-400 hover:text-stone-50'
                     }`}
                   >
                     <List className="w-4 h-4" />
                   </button>
-                </div> */}
+                </div>
               </div>
             </div>
 
             {/* Status Filter Tabs */}
-            <div className="border-b border-white/10">
+            <div className="border-b border-[#3D4451]">
               <nav className="flex space-x-2 lg:space-x-8 justify-center">
                 <button
                   type="button"
@@ -780,21 +890,10 @@ return (
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     statusFilter === 'all'
                       ? 'border-amber-500 text-amber-400'
-                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-white/20'
+                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-[#3D4451]'
                   }`}
                 >
                   All Books
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('reading')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    statusFilter === 'reading'
-                      ? 'border-amber-500 text-amber-400'
-                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-white/20'
-                  }`}
-                >
-                  Currently Reading
                 </button>
                 <button
                   type="button"
@@ -802,7 +901,7 @@ return (
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     statusFilter === 'completed'
                       ? 'border-amber-500 text-amber-400'
-                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-white/20'
+                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-[#3D4451]'
                   }`}
                 >
                   Completed
@@ -813,10 +912,21 @@ return (
                   className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     statusFilter === 'to-read'
                       ? 'border-amber-500 text-amber-400'
-                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-white/20'
+                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-[#3D4451]'
                   }`}
                 >
                   To Read
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('dropped')}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    statusFilter === 'dropped'
+                      ? 'border-amber-500 text-amber-400'
+                      : 'border-transparent text-stone-400 hover:text-stone-200 hover:border-[#3D4451]'
+                  }`}
+                >
+                  Dropped
                 </button>
               </nav>
             </div>
@@ -825,7 +935,7 @@ return (
           {/* Results Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-2xl font-bold text-white">Your Books</h3>
+              <h3 className="text-2xl font-bold text-stone-50">Your Books</h3>
               <p className="text-stone-300">
                 Showing {filteredAndSortedBooks.length} of {books.length} books
               </p>
@@ -833,32 +943,42 @@ return (
           </div>
 
           {/* Books Display */}
-          <div className="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
-            <div className="bg-gradient-to-r from-black/40 to-amber-500/10 border-b border-white/10 px-6 py-4">
+          <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451] overflow-hidden">
+            <div className="bg-gradient-to-r from-[#14181C]/40 to-amber-500/10 border-b border-[#3D4451] px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Library className="w-5 h-5 text-amber-400" />
-                  <span className="font-medium text-white">Book Collection</span>
+                  <span className="font-medium text-stone-50">Book Collection</span>
                 </div>
-                <span className="text-sm text-stone-300 bg-white/10 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                <span className="text-sm text-stone-300 bg-white/10 px-3 py-1 rounded-full border border-[#3D4451] backdrop-blur-sm">
                   {filteredAndSortedBooks.length} items
                 </span>
               </div>
             </div>
 
             <div className="p-6">
-              <div className="space-y-4">
-                {filteredAndSortedBooks.map((book) => (
-                  <BookListItem key={book.bookId} book={book} />
-                ))}
-              </div>
+              {viewMode === 'list' ? (
+                // List View
+                <div className="space-y-4">
+                  {filteredAndSortedBooks.map((book) => (
+                    <BookListItem key={book.bookId} book={book} />
+                  ))}
+                </div>
+              ) : (
+                // Grid View - Letterboxd Style
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                  {filteredAndSortedBooks.map((book) => (
+                    <BookGridItem key={book.bookId} book={book} />
+                  ))}
+                </div>
+              )}
 
               {filteredAndSortedBooks.length === 0 && statusFilter !== "all" &&  (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D4451]">
                     <BookOpen className="w-8 h-8 text-stone-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No books found</h3>
+                  <h3 className="text-lg font-semibold text-stone-50 mb-2">No books found</h3>
                   <p className="text-stone-300 mb-4">Try adjusting your search criteria or filters</p>
                   <button 
                     type='button' 
@@ -870,10 +990,10 @@ return (
               )}
               {filteredAndSortedBooks.length === 0 && statusFilter === "all" &&  (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D4451]">
                     <BookOpen className="w-8 h-8 text-stone-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No books found</h3>
+                  <h3 className="text-lg font-semibold text-stone-50 mb-2">No books found</h3>
                   <p className="text-stone-300 mb-4">Try adding some books to your collection!</p>
                   <button 
                     type='button' 
@@ -891,19 +1011,17 @@ return (
       </div>
 
       {/* Edit Popup */}
-      <EditCollectionPopup 
-        showEditPopup={showEditPopup} 
-        editingBook={editingBook} 
-        setBooks={setBooks} 
-        books={books} 
-        tempRating={tempRating} 
-        tempStatus={tempStatus} 
-        setEditingBook={setEditingBook} 
-        setShowEditPopup={setShowEditPopup} 
-        setTempStatus={setTempStatus} 
-        setHoverRating={setHoverRating} 
-        setTempRating={setTempRating} 
-        hoverRating={hoverRating}
+      <EditCollectionPopup
+        showEditPopup={showEditPopup}
+        editingBook={editingBook}
+        setBooks={setBooks}
+        books={books}
+        tempRating={tempRating}
+        tempStatus={tempStatus}
+        setEditingBook={setEditingBook}
+        setShowEditPopup={setShowEditPopup}
+        setTempStatus={setTempStatus}
+        setTempRating={setTempRating}
       />
      
 

@@ -17,10 +17,10 @@ const MobileBookListItem = ({ book }: { book: BookData }) => {
 
   const getScoreColor = (score: number) => {
     if(score === 0) return 'text-stone-400'
-    if (score >= 8) return 'text-emerald-400'
-    if (score >= 6.5) return 'text-blue-400'
-    if (score >= 5) return 'text-amber-400'
-    if (score >= 4) return 'text-orange-400'
+    if (score >= 4.5) return 'text-emerald-400'
+    if (score >= 3.5) return 'text-blue-400'
+    if (score >= 2.5) return 'text-amber-400'
+    if (score >= 2) return 'text-orange-400'
     return 'text-red-400'
   }
 
@@ -41,7 +41,7 @@ const MobileBookListItem = ({ book }: { book: BookData }) => {
 
   return (
     <div 
-      className="bg-stone-800/40 backdrop-blur-sm rounded-2xl border border-stone-700/40 p-4 hover:border-amber-500/40 transition-all duration-300 hover:bg-stone-800/60 cursor-pointer group"
+      className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-stone-700/40 p-4 hover:border-amber-500/40 transition-all duration-300 hover:bg-[#2C3440] cursor-pointer group"
       onClick={handleClick}
     >
       <div className="flex gap-4">
@@ -67,7 +67,7 @@ const MobileBookListItem = ({ book }: { book: BookData }) => {
           )}
 
           {/* {book.averageRating && book.averageRating > 0 && (
-            <div className="absolute top-1 right-1 bg-black/70 backdrop-blur-sm rounded px-1.5 py-0.5">
+            <div className="absolute top-1 right-1 bg-[#14181C]/70 backdrop-blur-sm rounded px-1.5 py-0.5">
               <span className={`text-xs font-bold ${getScoreColor(book.averageRating)}`}>
                 {book.averageRating.toFixed(1)}
               </span>
@@ -87,7 +87,7 @@ const MobileBookListItem = ({ book }: { book: BookData }) => {
         {/* Book Info */}
         <div className="flex-1 min-w-0 space-y-2">
           <div className="space-y-1">
-            <h3 className="font-bold text-white text-sm sm:text-base leading-tight line-clamp-2 group-hover:text-amber-300 transition-colors duration-200">
+            <h3 className="font-bold text-stone-50 text-sm sm:text-base leading-tight line-clamp-2 group-hover:text-amber-300 transition-colors duration-200">
               {book.title}
             </h3>
             <p className="text-stone-400 text-xs sm:text-sm font-medium">

@@ -1,9 +1,10 @@
-import { BookOpenCheck, CheckCircle, Eye, Save, Star, Trash2, X } from "lucide-react"
+import { CheckCircle, Eye, Save, Trash2, X, XCircle } from "lucide-react"
 import { BookInList } from "../types/types"
 import { useState } from "react"
 import axios from "axios"
 import { supabase } from "@/lib/supabaseClient"
 import Image from "next/image"
+import StarRating from "./StarRating"
 
 interface EditCollectionPopupProps {
     showEditPopup: boolean;
@@ -15,30 +16,38 @@ interface EditCollectionPopupProps {
     setEditingBook: React.Dispatch<React.SetStateAction<BookInList | null>>;
     setShowEditPopup: React.Dispatch<React.SetStateAction<boolean>>
     setTempStatus: React.Dispatch<React.SetStateAction<string | undefined>>
-    setHoverRating: React.Dispatch<React.SetStateAction<number>>
     setTempRating: React.Dispatch<React.SetStateAction<number>>
-    hoverRating: number;
 }
 
-const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempStatus, tempRating, setEditingBook, setShowEditPopup, setTempStatus, setHoverRating, setTempRating, hoverRating}: EditCollectionPopupProps) => {
+const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempStatus, tempRating, setEditingBook, setShowEditPopup, setTempStatus, setTempRating}: EditCollectionPopupProps) => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     
     if (!showEditPopup || !editingBook) return null
 
     const handleSaveChanges = async () => {
         if (!editingBook) return
-    
+
         try {
           // Store original values for rollback
           const originalBook = books.find(book => book.bookId === editingBook.bookId)
           const originalRating = originalBook?.rating
           const originalStatus = originalBook?.status
-    
-          // Update local state optimistically
-          setBooks(prevBooks => 
-            prevBooks.map(book => 
-              book.bookId === editingBook.bookId 
-                ? { ...book, rating: tempRating, status: tempStatus } 
+
+          // Auto-change status to "completed" when rating a "to-read" book
+          // BUT only if the user didn't manually change the status themselves
+          let effectiveStatus = tempStatus
+          const userManuallyChangedStatus = tempStatus !== originalStatus
+
+          // This matches backend behavior: backend always sets status to "completed" when rating
+          if (tempRating > 0 && !userManuallyChangedStatus && originalStatus === 'to-read') {
+            effectiveStatus = 'completed'
+          }
+
+          // Update local state optimistically with the effective status
+          setBooks(prevBooks =>
+            prevBooks.map(book =>
+              book.bookId === editingBook.bookId
+                ? { ...book, rating: tempRating, status: effectiveStatus }
                 : book
             )
           )
@@ -46,7 +55,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
           // Here you would make your API calls
           console.log(`Saving changes for book ${editingBook.bookId}:`, {
             rating: tempRating,
-            status: tempStatus
+            status: effectiveStatus
           })
     
           const {
@@ -62,8 +71,8 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
           // Save rating if changed
           if (tempRating !== originalRating) {
             await axios.put(
-              `${process.env.NEXT_PUBLIC_API_URL}/collection/rating`, 
-              { rating: tempRating, bookId: editingBook.bookId }, 
+              `${process.env.NEXT_PUBLIC_API_URL}/collection/rating`,
+              { rating: tempRating, bookId: editingBook.book.openLibraryId },
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -72,12 +81,12 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
               }
             )
           }
-    
-          // Save status if changed
-          if (tempStatus !== originalStatus) {
+
+          // Save status if changed (using effectiveStatus, not tempStatus)
+          if (effectiveStatus !== originalStatus) {
             await axios.put(
-              `${process.env.NEXT_PUBLIC_API_URL}/collection/status`, 
-              { status: tempStatus, bookId: editingBook.bookId }, 
+              `${process.env.NEXT_PUBLIC_API_URL}/collection/status`,
+              { status: effectiveStatus, bookId: editingBook.book.openLibraryId },
               {
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
@@ -156,21 +165,20 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
         setShowEditPopup(false)
         setTempRating(0)
         setTempStatus('')
-        setHoverRating(0)
         setShowDeleteConfirm(false)
     }
 
     return (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div className="bg-black backdrop-blur-lg rounded-xl shadow-2xl border border-white/20 max-w-md w-full max-h-[90vh] overflow-y-auto">
+  <div className="fixed inset-0 bg-[#14181C]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-[#14181C] backdrop-blur-lg rounded-xl shadow-2xl border border-[#3D4451] max-w-md w-full max-h-[90vh] overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-white/20">
-        <h3 className="text-lg font-semibold text-white">Edit Book</h3>
+      <div className="flex items-center justify-between p-6 border-b border-[#3D4451]">
+        <h3 className="text-lg font-semibold text-stone-50">Edit Book</h3>
         <button
           onClick={handleCloseEditPopup}
           className="p-2 hover:bg-white/10 rounded-lg transition-colors"
         >
-          <X className="w-5 h-5 text-stone-300 hover:text-white" />
+          <X className="w-5 h-5 text-stone-300 hover:text-stone-50" />
         </button>
       </div>
 
@@ -186,7 +194,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
             className="w-16 h-24 object-cover rounded-lg shadow-lg"
           />
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-white mb-1">{editingBook.book.title}</h4>
+            <h4 className="font-medium text-stone-50 mb-1">{editingBook.book.title}</h4>
             <p className="text-sm text-stone-300">{editingBook.book.author}</p>
           </div>
         </div>
@@ -197,10 +205,10 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
           <div className="space-y-2">
             {[
               { value: 'to-read', label: 'To Read', icon: Eye, color: 'blue' },
-              { value: 'reading', label: 'Currently Reading', icon: BookOpenCheck, color: 'amber' },
-              { value: 'completed', label: 'Completed', icon: CheckCircle, color: 'emerald' }
+              { value: 'completed', label: 'Completed', icon: CheckCircle, color: 'emerald' },
+              { value: 'dropped', label: 'Dropped', icon: XCircle, color: 'red' }
             ].map((status) => (
-              <label key={status.value} className="flex items-center gap-3 p-3 border border-white/20 rounded-lg hover:bg-white/5 cursor-pointer transition-colors backdrop-blur-sm">
+              <label key={status.value} className="flex items-center gap-3 p-3 border border-[#3D4451] rounded-lg hover:bg-white/5 cursor-pointer transition-colors backdrop-blur-sm">
                 <input
                   type="radio"
                   name="status"
@@ -211,9 +219,13 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
                 />
                 <div className={`w-8 h-8 ${
                   status.color === 'blue' ? 'bg-blue-500/20 text-blue-400' :
-                  status.color === 'amber' ? 'bg-amber-500/20 text-amber-400' :
-                  'bg-emerald-500/20 text-emerald-400'
-                } rounded-lg flex items-center justify-center backdrop-blur-sm border border-${status.color === 'blue' ? 'blue' : status.color === 'amber' ? 'amber' : 'emerald'}-500/30`}>
+                  status.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400' :
+                  'bg-red-500/20 text-red-400'
+                } rounded-lg flex items-center justify-center backdrop-blur-sm border ${
+                  status.color === 'blue' ? 'border-blue-500/30' :
+                  status.color === 'emerald' ? 'border-emerald-500/30' :
+                  'border-red-500/30'
+                }`}>
                   <status.icon className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-medium text-stone-200">{status.label}</span>
@@ -225,35 +237,18 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
         {/* Rating Section */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-stone-200 mb-3">Rating</label>
-          <div className="flex items-center gap-2 mb-2">
-            {[...Array(10)].map((_, i) => {
-              const starValue = i + 1
-              const isActive = starValue <= (hoverRating || tempRating)
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onMouseEnter={() => setHoverRating(starValue)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  onClick={() => setTempRating(starValue)}
-                  className="hover:scale-110 transition-transform"
-                >
-                  <Star 
-                    className={`w-6 h-6 ${isActive ? 'text-amber-400 fill-amber-400' : 'text-stone-500 hover:text-amber-300'}`} 
-                  />
-                </button>
-              )
-            })}
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-stone-300">
-              {tempRating && hoverRating > 0 ? `${hoverRating}/10` : `${tempRating}/10`}
-            </span>
+          <div className="flex items-center justify-between mb-2">
+            <StarRating
+              rating={tempRating}
+              onRatingChange={setTempRating}
+              size="large"
+              showValue={true}
+            />
             {tempRating > 0 && (
               <button
                 type="button"
                 onClick={() => setTempRating(0)}
-                className="text-xs text-stone-400 hover:text-stone-200 underline"
+                className="text-xs text-stone-400 hover:text-stone-200 underline transition-colors"
               >
                 Clear rating
               </button>
@@ -289,7 +284,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between p-6 border-t border-white/20 bg-black/20 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-6 border-t border-[#3D4451] bg-[#2C3440]/60 backdrop-blur-sm">
         <button
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
@@ -303,7 +298,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
           <button
             type="button"
             onClick={handleCloseEditPopup}
-            className="px-4 py-2 text-stone-300 bg-white/5 border border-white/20 rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
+            className="px-4 py-2 text-stone-300 bg-white/5 border border-[#3D4451] rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
           >
             Cancel
           </button>

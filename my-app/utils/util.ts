@@ -35,13 +35,14 @@ export const getBookData = async (id: string, searchAuthor?: string): Promise<Bo
         categories: res.data.categories || [],
         language: res.data.language || 'Unknown',
         openLibraryId: res.data.openLibraryId || null,
+        isbn: res.data.isbn || null,
         averageRating: res.data.averageRating,
         totalRatings: res.data.totalRatings,
         popularityRank: res.data.popularityRank || 0,
         ratingRank: res.data.ratingRank || 0,
         userStatus: res.data.userStatus || null,
-        id: res.data.id,
-        achievements: res.data.unlockedAchievements || [],
+        userRating: res.data.userRating || null,
+        id: res.data.id
       }
     } catch (err) {
       console.error('Error fetching book data from backend:', err)
@@ -71,6 +72,7 @@ export const getBookData = async (id: string, searchAuthor?: string): Promise<Bo
         categories: book.categories || [],
         language: book.language || 'Unknown',
         openLibraryId: book.openLibraryId || null,
+        isbn: book.isbn || null,
         averageRating: book.averageRating || null,
         totalRatings: book.totalRatings || null,
         id: book.id,

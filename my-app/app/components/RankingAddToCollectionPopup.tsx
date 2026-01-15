@@ -165,7 +165,7 @@ export default function RankingAddToCollectionPopup({
         </button>
       ) : (
         <button          
-          className="w-full font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-[1.02] bg-black/30 hover:bg-stone-500/20 text-stone-300 border border-white/20 shadow-md hover:shadow-lg backdrop-blur-sm"         
+          className="w-full font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-[1.02] bg-[#2C3440]/80 hover:bg-stone-500/20 text-stone-300 border border-[#3D4451] shadow-md hover:shadow-lg backdrop-blur-sm"         
           onClick={() => setIsOpen(true)}       
         >         
           <Plus className="w-4 h-4" />         
@@ -230,14 +230,14 @@ export default function RankingAddToCollectionPopup({
         onClick={handleBackdropClick}
       >
         <div 
-          className="bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-white/10 backdrop-blur-md"
+          className="bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C] rounded-2xl shadow-2xl w-full max-w-lg mx-4 transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-[#3D4451] backdrop-blur-md"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-black/40 to-stone-500/10 p-6 rounded-t-2xl border-b border-white/10 top-0 z-10 backdrop-blur-md">
+          <div className="bg-gradient-to-r from-[#14181C]/40 to-stone-500/10 p-6 rounded-t-2xl border-b border-[#3D4451] top-0 z-10 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-stone-50 mb-1 flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-amber-400/20 border border-amber-400/30">
                     <Plus className="w-5 h-5 text-amber-400" />
                   </div>
@@ -266,7 +266,7 @@ export default function RankingAddToCollectionPopup({
                 <button
                   type="button"
                   onClick={() => setShowRatingDropdown(!showRatingDropdown)}
-                  className="w-full p-4 bg-black/30 border border-white/20 rounded-xl hover:border-amber-400/50 transition-all duration-200 flex items-center justify-between backdrop-blur-sm"
+                  className="w-full p-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl hover:border-amber-400/50 transition-all duration-200 flex items-center justify-between backdrop-blur-sm"
                 >
                   <div className="flex items-center gap-3">
                     {rating > 0 ? (
@@ -293,7 +293,7 @@ export default function RankingAddToCollectionPopup({
 
                 {/* Rating Dropdown */}
                 {showRatingDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-stone-800 border border-white/20 rounded-xl shadow-xl z-20 max-h-64 overflow-y-auto backdrop-blur-md">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#2C3440] border border-[#3D4451] rounded-xl shadow-xl z-20 max-h-64 overflow-y-auto backdrop-blur-md">
                     {ratingOptions.map((option) => (
                       <button
                         key={option.value}
@@ -302,7 +302,7 @@ export default function RankingAddToCollectionPopup({
                           setRating(option.value);
                           setShowRatingDropdown(false);
                         }}
-                        className={`w-full p-4 text-left hover:bg-white/10 transition-colors duration-150 border-b border-white/10 last:border-b-0 ${
+                        className={`w-full p-4 text-left hover:bg-white/10 transition-colors duration-150 border-b border-[#3D4451] last:border-b-0 ${
                           rating === option.value ? 'bg-white/10' : ''
                         }`}
                       >
@@ -346,7 +346,7 @@ export default function RankingAddToCollectionPopup({
                       className={`w-full p-4 rounded-xl border transition-all duration-200 text-left transform hover:scale-[1.02] backdrop-blur-sm ${
                         status === option.value
                           ? `${option.color} border-current shadow-lg`
-                          : 'border-white/20 hover:border-white/30 bg-black/20 hover:bg-white/5'
+                          : 'border-[#3D4451] hover:border-white/30 bg-[#2C3440]/60 hover:bg-white/5'
                       }`}
                     >
                       <div className="flex items-center gap-4">
@@ -373,7 +373,7 @@ export default function RankingAddToCollectionPopup({
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 px-6 py-3 border border-white/20 text-stone-300 rounded-xl hover:bg-white/10 hover:border-white/30 transition-all duration-200 font-medium backdrop-blur-sm"
+                className="flex-1 px-6 py-3 border border-[#3D4451] text-stone-300 rounded-xl hover:bg-white/10 hover:border-white/30 transition-all duration-200 font-medium backdrop-blur-sm"
                 disabled={isSubmitting}
               >
                 Cancel

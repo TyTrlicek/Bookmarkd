@@ -82,15 +82,15 @@ Your feedback shapes the future of Bookmarkd. Whether you've found a bug, have a
     <div className="min-h-screen">
         <Header />
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900 pt-24 pb-16">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+      <div className="relative bg-gradient-to-br from-[#14181C] via-[#14181C] to-amber-900 pt-24 pb-16">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40" />
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
             <Bookmark className="w-8 h-8 text-white" />
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-stone-50 mb-6 leading-tight">
             About Bookmarkd
           </h1>
           
@@ -118,29 +118,29 @@ Your feedback shapes the future of Bookmarkd. Whether you've found a bug, have a
       {/* Main Content */}
       <div className="relative">
 
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
         
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-16">
           {/* Table of Contents */}
           <div className="mb-16">
-            <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-stone-50 mb-8 flex items-center gap-3">
               <BookOpen className="w-6 h-6 text-amber-400" />
               What You'll Learn
             </h2>
             
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-6 border border-[#3D4451]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {sections.map((section, index) => (
                   <button
                     key={section.id}
                     onClick={() => scrollToSection(section.id)}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-black/20 hover:bg-black/40 transition-all duration-200 text-left group border border-white/5 hover:border-amber-400/20"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-[#2C3440]/60 hover:bg-[#2C3440]/80 transition-all duration-200 text-left group border border-white/5 hover:border-amber-400/20"
                   >
                     <div className="w-8 h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-lg flex items-center justify-center flex-shrink-0">
                       <section.icon className="w-4 h-4 text-amber-400" />
                     </div>
-                    <span className="text-white group-hover:text-amber-100 transition-colors font-medium">
+                    <span className="text-stone-50 group-hover:text-amber-100 transition-colors font-medium">
                       {section.title}
                     </span>
                     <ChevronRight className="w-4 h-4 text-stone-400 ml-auto group-hover:text-amber-400 transition-colors" />
@@ -154,7 +154,7 @@ Your feedback shapes the future of Bookmarkd. Whether you've found a bug, have a
           <div className="space-y-12">
             {sections.map((section, index) => (
               <section key={section.id} id={section.id} className="scroll-mt-24">
-                <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 relative overflow-hidden group">
+                <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] relative overflow-hidden group">
                   {/* Background decoration */}
                   <div className="absolute top-4 right-4 opacity-20">
                     <section.icon className="w-16 h-16 text-amber-400" />
@@ -166,7 +166,7 @@ Your feedback shapes the future of Bookmarkd. Whether you've found a bug, have a
                         <section.icon className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-white">{section.title}</h2>
+                        <h2 className="text-2xl font-bold text-stone-50">{section.title}</h2>
                       </div>
                     </div>
                     
@@ -182,46 +182,46 @@ Your feedback shapes the future of Bookmarkd. Whether you've found a bug, have a
           </div>
 
           {/* Stats Section */}
-          <div className="mt-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-            <h3 className="text-2xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3">
+          <div className="mt-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451]">
+            <h3 className="text-2xl font-bold text-stone-50 mb-8 text-center flex items-center justify-center gap-3">
               <TrendingUp className="w-6 h-6 text-amber-400" />
               By the Numbers
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-6 bg-black/20 rounded-xl border border-white/5">
+              <div className="text-center p-6 bg-[#2C3440]/60 rounded-xl border border-white/5">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Globe className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-2">Millions</div>
+                <div className="text-3xl font-bold text-stone-50 mb-2">Millions</div>
                 <div className="text-stone-400">Books Available</div>
               </div>
               
-              <div className="text-center p-6 bg-black/20 rounded-xl border border-white/5">
+              <div className="text-center p-6 bg-[#2C3440]/60 rounded-xl border border-white/5">
                 <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-2">&lt;2s</div>
+                <div className="text-3xl font-bold text-stone-50 mb-2">&lt;2s</div>
                 <div className="text-stone-400">Average Load Time</div>
               </div>
               
-              <div className="text-center p-6 bg-black/20 rounded-xl border border-white/5">
+              <div className="text-center p-6 bg-[#2C3440]/60 rounded-xl border border-white/5">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                   <DollarSign className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-2">100%</div>
+                <div className="text-3xl font-bold text-stone-50 mb-2">100%</div>
                 <div className="text-stone-400">Free</div>
               </div>
             </div>
           </div>
 
           {/* Contact Section */}
-          <div className="mt-16 bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center">
+          <div className="mt-16 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] text-center">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Mail className="w-6 h-6 text-white" />
             </div>
             
-            <h3 className="text-xl font-bold text-white mb-3">Let's Connect</h3>
+            <h3 className="text-xl font-bold text-stone-50 mb-3">Let's Connect</h3>
             <p className="text-stone-300 mb-6 max-w-2xl mx-auto">
               Have questions, suggestions, or just want to share your love of books? 
               We'd love to hear from you. Every message gets a personal response.

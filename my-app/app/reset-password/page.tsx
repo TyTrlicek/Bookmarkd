@@ -103,7 +103,7 @@ function ResetPasswordForm() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-7 h-7 text-white" />
+              <BookOpen className="w-7 h-7 text-stone-50" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-stone-900">MyBookHive</h1>

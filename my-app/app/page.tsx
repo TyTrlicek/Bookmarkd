@@ -5,7 +5,7 @@ import HomeClient from "./HomeClient";
 export const metadata: Metadata = {
   title: "Bookmarkd – Track, Rate & Discover Books",
   description:
-    "Bookmarkd is the ultimate book tracking app. Keep your personal collection, rate and review books, explore community rankings, discover recommendations, and earn achievements.",
+    "Bookmarkd is the ultimate book tracking app. Keep your personal collection, rate and review books, explore community rankings, and discover personalized recommendations.",
   keywords: [
     "book tracker",
     "book ratings",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Bookmarkd – Track, Rate & Discover Books",
     description:
-      "Track your reading, review books, explore rankings, get recommendations, and earn achievements on Bookmarkd.",
+      "Track your reading, review books, explore rankings, and get personalized recommendations on Bookmarkd.",
     url: "https://bookmarkd.fun",
     siteName: "Bookmarkd",
     images: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Bookmarkd – Track, Rate & Discover Books",
     description:
-      "Track your personal collection, rate books, see rankings, reviews, and earn achievements.",
+      "Track your personal collection, rate books, see rankings, and read reviews from the community.",
     images: ["/brand-logo.png"],
     creator: "@bookmarkd",
   },

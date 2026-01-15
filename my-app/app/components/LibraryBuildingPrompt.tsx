@@ -40,22 +40,22 @@ const LibraryBuildingPrompt: React.FC<LibraryBuildingPromptProps> = ({ bookCount
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 mb-4">
           <Sparkles className="w-6 h-6 text-amber-400" />
-          <h2 className="text-3xl font-bold text-white">Keep Building Your Library!</h2>
+          <h2 className="text-3xl font-bold text-stone-50">Keep Building Your Library!</h2>
           <Sparkles className="w-6 h-6 text-amber-400" />
         </div>
         <p className="text-xl text-stone-300 mb-2">
           Great start! You have {bookCount} book{bookCount !== 1 ? 's' : ''} in your collection.
         </p>
         <p className="text-stone-400">
-          Add more books to unlock achievements and get better recommendations.
+          Add more books to get better personalized recommendations.
         </p>
       </div>
 
       {/* Progress indicator */}
       <div className="mb-12">
-        <div className="bg-stone-800/50 rounded-2xl p-6 border border-stone-700/50">
+        <div className="bg-[#2C3440] rounded-2xl p-6 border border-stone-700/50">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-white font-medium">Library Progress</span>
+            <span className="text-stone-50 font-medium">Library Progress</span>
             <span className="text-amber-400 font-bold">{bookCount}/6 books</span>
           </div>
           <div className="w-full bg-stone-700 rounded-full h-3 mb-2">
@@ -78,12 +78,12 @@ const LibraryBuildingPrompt: React.FC<LibraryBuildingPromptProps> = ({ bookCount
             <button
               key={index}
               onClick={suggestion.action}
-              className="group bg-stone-800 backdrop-blur-sm rounded-2xl p-6 border border-stone-700/40 hover:border-amber-500/40 transition-all duration-300 hover:bg-stone-800/60 text-left"
+              className="group bg-[#2C3440] backdrop-blur-sm rounded-2xl p-6 border border-stone-700/40 hover:border-amber-500/40 transition-all duration-300 hover:bg-[#2C3440] text-left"
             >
               <div className={`w-12 h-12 bg-gradient-to-r ${suggestion.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-white font-semibold mb-2 group-hover:text-amber-300 transition-colors">
+              <h3 className="text-stone-50 font-semibold mb-2 group-hover:text-amber-300 transition-colors">
                 {suggestion.title}
               </h3>
               <p className="text-stone-400 text-sm mb-3">

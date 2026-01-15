@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import axios from 'axios';
 import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserActivity {
   id: string;
@@ -22,6 +23,7 @@ interface UserActivity {
 }
 
 const Header = () => {
+  const { isAuthenticated, accessToken } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -32,7 +34,7 @@ const Header = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState<UserActivity[]>([]);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  
+
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -68,14 +70,9 @@ const Header = () => {
   };
 
   const fetchNotifications = async () => {
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
-
-    const accessToken = session?.access_token;
-
     if (!accessToken) {
-      setNotifications([])
+      setNotifications([]);
+      setNotificationCount(0);
       return;
     }
 
@@ -136,8 +133,13 @@ const Header = () => {
   };
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    if (isAuthenticated && accessToken) {
+      fetchNotifications();
+    } else {
+      setNotifications([]);
+      setNotificationCount(0);
+    }
+  }, [isAuthenticated, accessToken]);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -217,7 +219,7 @@ const Header = () => {
 
   const BookListItem = ({ book }: { book: BookData }) => (
     <div 
-      className="p-3 hover:bg-stone-600 cursor-pointer border-b border-stone-500 bg-stone-800 last:border-b-0"
+      className="p-3 hover:bg-stone-600 cursor-pointer border-b border-stone-500 bg-[#2C3440] last:border-b-0"
       onClick={() => handleSearchItemClick((book.openLibraryId ?? ''), book.author)}
     >
       <div className="flex gap-3">
@@ -285,7 +287,7 @@ const Header = () => {
   );
 
 return (
-    <header className="bg-stone-900 border-b border-stone-700 shadow-lg sticky top-0 z-50">
+    <header className="bg-[#14181C] border-b border-stone-700 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -304,7 +306,9 @@ return (
           <nav className="hidden lg:flex items-center gap-6">
             <a href="/" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Home</a>
             <a href="/browse" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Browse</a>
-            <a href="/collection" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">My Collection</a>
+            {isAuthenticated && (
+              <a href="/collection" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">My Collection</a>
+            )}
             <a href="/rankings" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Rankings</a>
             {/* <a href="#" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Clubs</a> */}
           </nav>
@@ -325,7 +329,7 @@ return (
                   placeholder="Search books, authors..."
                   value={searchQuery}
                   onChange={handleSearchInputChange}
-                  className={`pl-10 py-2 bg-stone-800 text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 w-64 transition-all ${
+                  className={`pl-10 py-2 bg-[#2C3440] text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 w-64 transition-all ${
                     isSearchLoading ? 'pr-10' : 'pr-4'
                   }`}
                 />
@@ -333,7 +337,7 @@ return (
               
               {/* Desktop Search Results Dropdown */}
               {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-96 overflow-y-auto z-55">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl max-h-96 overflow-y-auto z-55">
                   {isSearchLoading ? (
                     <SearchLoadingItem />
                   ) : books.length > 0 ? (
@@ -364,8 +368,84 @@ return (
             </div>
             
             {/* Desktop Notifications */}
-            <div className="relative" ref={notificationsRef}>
-              <button 
+            {isAuthenticated && (
+              <div className="relative" ref={notificationsRef}>
+                <button
+                  onClick={toggleNotifications}
+                  className="p-2 text-stone-400 hover:text-amber-400 relative transition-colors"
+                >
+                  <Bell className="w-5 h-5" />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[10px] bg-amber-600 text-stone-900 rounded-full flex items-center justify-center font-medium">
+                      {notificationCount > 99 ? '99+' : notificationCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Notifications Dropdown */}
+                {isNotificationsOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-80 bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl z-55">
+                    <div className="p-4 border-b border-stone-600 bg-[#14181C]">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-stone-100">Notifications</h3>
+                        {notificationCount > 0 && (
+                          <button
+                            onClick={markAllAsRead}
+                            className="text-xs text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1 transition-colors"
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="max-h-96 overflow-y-auto">
+                      {isLoadingNotifications ? (
+                        <div className="p-8 text-center">
+                          <div className="animate-spin w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto"></div>
+                          <p className="text-stone-400 text-sm mt-2">Loading notifications...</p>
+                        </div>
+                      ) : notifications.length > 0 ? (
+                        notifications.map((notification) => (
+                          <NotificationItem key={notification.id} notification={notification} />
+                        ))
+                      ) : (
+                        <div className="p-8 text-center">
+                          <Bell className="w-12 h-12 text-stone-600 mx-auto mb-3" />
+                          <p className="text-stone-400 text-sm">No new notifications</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isAuthenticated ? (
+              <Link href="/profile" className="p-2 text-stone-400 hover:text-amber-400 transition-colors">
+                <User className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link
+                href="/auth"
+                className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-sm font-medium rounded-lg transition-all"
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile Controls */}
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={toggleSearch}
+              className="p-2 text-stone-400 hover:text-amber-400 transition-colors"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+            {isAuthenticated && (
+              <button
                 onClick={toggleNotifications}
                 className="p-2 text-stone-400 hover:text-amber-400 relative transition-colors"
               >
@@ -376,74 +456,20 @@ return (
                   </span>
                 )}
               </button>
-
-              {/* Notifications Dropdown */}
-              {isNotificationsOpen && (
-                <div className="absolute right-0 top-full mt-1 w-80 bg-stone-800 border border-stone-600 rounded-lg shadow-xl z-55">
-                  <div className="p-4 border-b border-stone-600 bg-stone-900">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-stone-100">Notifications</h3>
-                      {notificationCount > 0 && (
-                        <button
-                          onClick={markAllAsRead}
-                          className="text-xs text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1 transition-colors"
-                        >
-                          <CheckCircle className="w-3 h-3" />
-                          Mark all read
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="max-h-96 overflow-y-auto">
-                    {isLoadingNotifications ? (
-                      <div className="p-8 text-center">
-                        <div className="animate-spin w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto"></div>
-                        <p className="text-stone-400 text-sm mt-2">Loading notifications...</p>
-                      </div>
-                    ) : notifications.length > 0 ? (
-                      notifications.map((notification) => (
-                        <NotificationItem key={notification.id} notification={notification} />
-                      ))
-                    ) : (
-                      <div className="p-8 text-center">
-                        <Bell className="w-12 h-12 text-stone-600 mx-auto mb-3" />
-                        <p className="text-stone-400 text-sm">No new notifications</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <Link href="/profile" className="p-2 text-stone-400 hover:text-amber-400 transition-colors">
-              <User className="w-5 h-5" />
-            </Link>
-          </div>
-
-          {/* Mobile Controls */}
-          <div className="flex items-center gap-2 md:hidden">
-            <button 
-              onClick={toggleSearch}
-              className="p-2 text-stone-400 hover:text-amber-400 transition-colors"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={toggleNotifications}
-              className="p-2 text-stone-400 hover:text-amber-400 relative transition-colors"
-            >
-              <Bell className="w-5 h-5" />
-              {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[10px] bg-amber-600 text-stone-900 rounded-full flex items-center justify-center font-medium">
-                  {notificationCount > 99 ? '99+' : notificationCount}
-                </span>
-              )}
-            </button>
-            <Link href="/profile" className="p-2 text-stone-400 hover:text-amber-400 transition-colors">
-              <User className="w-5 h-5" />
-            </Link>
-            <button 
+            )}
+            {isAuthenticated ? (
+              <Link href="/profile" className="p-2 text-stone-400 hover:text-amber-400 transition-colors">
+                <User className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link
+                href="/auth"
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium rounded-lg transition-all"
+              >
+                Sign In
+              </Link>
+            )}
+            <button
               onClick={toggleMenu}
               className="p-2 text-stone-400 hover:text-amber-400 lg:hidden transition-colors"
             >
@@ -469,7 +495,7 @@ return (
                   placeholder="Search books, authors..."
                   value={searchQuery}
                   onChange={handleSearchInputChange}
-                  className={`w-full pl-10 py-2 bg-stone-800 text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all ${
+                  className={`w-full pl-10 py-2 bg-[#2C3440] text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all ${
                     isSearchLoading ? 'pr-10' : 'pr-4'
                   }`}
                   autoFocus
@@ -478,7 +504,7 @@ return (
               
               {/* Mobile Search Results Dropdown */}
               {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-stone-800 border border-stone-600 rounded-lg shadow-xl max-h-80 overflow-y-auto z-55">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl max-h-80 overflow-y-auto z-55">
                   {isSearchLoading ? (
                     <SearchLoadingItem />
                   ) : books.length > 0 ? (
@@ -514,10 +540,10 @@ return (
         )}
 
         {/* Mobile Notifications Panel */}
-        {isNotificationsOpen && (
+        {isAuthenticated && isNotificationsOpen && (
           <div className="md:hidden mt-3 pb-1" ref={mobileNotificationsRef}>
-            <div className="bg-stone-800 border border-stone-600 rounded-lg shadow-xl">
-              <div className="p-4 border-b border-stone-600 bg-stone-900">
+            <div className="bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl">
+              <div className="p-4 border-b border-stone-600 bg-[#14181C]">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-stone-100">Notifications</h3>
                   {notificationCount > 0 && (
@@ -531,7 +557,7 @@ return (
                   )}
                 </div>
               </div>
-              
+
               <div className="max-h-80 overflow-y-auto">
                 {isLoadingNotifications ? (
                   <div className="p-8 text-center">
@@ -557,37 +583,39 @@ return (
         {isMenuOpen && (
           <div className="lg:hidden mt-3 pb-3 border-t border-stone-700 pt-3">
             <nav className="flex flex-col gap-3">
-              <a 
-                href="/" 
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-stone-800 transition-colors"
+              <a
+                href="/"
+                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </a>
-              <a 
-                href="/browse" 
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-stone-800 transition-colors"
+              <a
+                href="/browse"
+                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Browse
               </a>
-              <a 
-                href="/collection" 
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-stone-800 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                My Collection
-              </a>
-              {/* <a 
-                href="#" 
-                className="text-stone-300 hover:text-amber-400 font-medium transition-colors py-2 px-3 rounded-lg hover:bg-stone-800"
+              {isAuthenticated && (
+                <a
+                  href="/collection"
+                  className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Collection
+                </a>
+              )}
+              {/* <a
+                href="#"
+                className="text-stone-300 hover:text-amber-400 font-medium transition-colors py-2 px-3 rounded-lg hover:bg-[#2C3440]"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Clubs
               </a> */}
-              <a 
-                href="/rankings" 
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-stone-800 transition-colors"
+              <a
+                href="/rankings"
+                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Rankings

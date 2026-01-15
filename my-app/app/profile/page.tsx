@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
-import { Achievement, BookData, User, UserActivity } from '../types/types'
+import { BookData, User, UserActivity } from '../types/types'
 import { 
   BookOpen, 
   Star, 
@@ -34,8 +34,11 @@ import Image from 'next/image'
 import Footer from '../components/Footer'
 import { set } from 'lodash'
 import FavoritesList from '../components/FavoritesList'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function AccountPage() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -52,15 +55,11 @@ export default function AccountPage() {
   const [booksInCollection, setBooksInCollection] = useState(0);
   const [reviewsWritten, setReviewsWritten] = useState(0);
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [achievementCount, setAchievementCount] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [favoriteBooks, setFavoriteBooks] = useState<BookData[]>([]);
-const [favoritesLoading, setFavoritesLoading] = useState(true);
-
-  const router = useRouter()
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
 
   const fetchFavoriteBooks = async () => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -149,12 +148,20 @@ const handleAddFavoriteBook = async (selectedBook: BookData) => {
 };
 
 useEffect(() => {
+  if (!authLoading && !isAuthenticated) {
+    router.push('/auth?redirect=/profile');
+  }
+}, [isAuthenticated, authLoading, router]);
+
+useEffect(() => {
+  if (!isAuthenticated) return;
+
   const fetchUserData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const accessToken = session?.access_token;
 
     if (!accessToken) {
-      router.push('/auth');
+      console.error('No access token available');
       return;
     }
 
@@ -196,28 +203,6 @@ useEffect(() => {
       setRecentActivity(activityResponse.data);
     } catch (error) {
       console.error('Error getting user activity:', error);
-    }
-
-    try {
-      // Fetch achievements
-      const achievementsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/achievements`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const userAchievements = achievementsResponse.data.achievements || [];
-      setAchievementCount(userAchievements.length);
-
-      const combinedAchievements = allAchievements.map((ach: Achievement) => ({
-        ...ach,
-        earned: !!userAchievements.find((ua: Achievement) => ua.id === ach.id),
-      }));
-
-      setAchievements(combinedAchievements);
-    } catch (error) {
-      console.error('Error fetching achievements:', error);
     }
 
     try {
@@ -423,61 +408,13 @@ setUser((prevUser) => ({
   const userStats = [
     { label: "Books in Collection", value: booksInCollection, icon: BookMarked, color: "from-blue-500 to-blue-600" },
     { label: "Books Rated This Year", value: reviewsWritten || 0, icon: BookOpen, color: "from-amber-500 to-amber-600" },
-    { label: "Average Book Rating", value: (averageRating || 0), icon: Star, color: "from-emerald-500 to-emerald-600" },
-    { label: "Achievements Unlocked", value: achievementCount, icon: Award, color: "from-purple-500 to-purple-600" }
+    { label: "Average Book Rating", value: (averageRating || 0), icon: Star, color: "from-emerald-500 to-emerald-600" }
   ]
-
-  const allowedGenres = [
-  "Fantasy",
-  "Romance",
-  "Science Fiction",
-  "Magic",
-  "Mystery",
-  "Thriller",
-  "Supernatural",
-  "Non-Fiction",
-  "Adventure"
-];
-
-const allAchievements = [
-  { id: 5, name: "Bookworm I", description: "Finish 1 book", icon: "📕" },
-  { id: 6, name: "Bookworm II", description: "Finish 10 books", icon: "📘" },
-  { id: 7, name: "Bookworm III", description: "Finish 50 books", icon: "📗" },
-  { id: 8, name: "Bookworm IV", description: "Finish 100 books", icon: "📕" },
-  { id: 9, name: "Bookworm V", description: "Finish 250 books", icon: "📙" },
-  { id: 10, name: "Bookworm VI", description: "Finish 500 books", icon: "📚" },
-  { id: 11, name: "Bookworm VII", description: "Finish 1000 books", icon: "📚" },
-  { id: 12, name: "Explorer I", description: "Read books from 10 different authors", icon: "🧭" },
-  { id: 13, name: "Explorer II", description: "Read books from 50 different authors", icon: "🧭" },
-  { id: 14, name: "Explorer III", description: "Read books from 100 different authors", icon: "🧭" },
-  { id: 15, name: "Genre Collector I", description: "Read books from 5 different genres", icon: "🎨" },
-  { id: 16, name: "Genre Collector II", description: "Read books from 9 different genres", icon: "🎨" },
-  { id: 17, name: "Reviewer I", description: "Write your first review", icon: "✍️" },
-  { id: 18, name: "Reviewer II", description: "Write 10 reviews", icon: "📝" },
-  { id: 19, name: "Reviewer III", description: "Write 50 reviews", icon: "📝" },
-  { id: 20, name: "Old Timer", description: "Log a book that's been in your TBR for over a year", icon: "⏳" },
-  { id: 21, name: "Night Owl", description: "Log a book after midnight", icon: "🌙" },
-  { id: 22, name: "Honest Critic", description: "Give 10 books a 1-star rating", icon: "⭐" },
-  { id: 23, name: "Balanced Critic", description: "Give at least one book each rating from 1–10 stars", icon: "⚖️" }
-];
-
-let idCounter = 24;
-
-allowedGenres.forEach((genre) => {
-  allAchievements.push(
-    { id: idCounter++, name: `${genre} Reader I`, description: `Read 10 ${genre} books`, icon: "📖" },
-    { id: idCounter++, name: `${genre} Reader II`, description: `Read 50 ${genre} books`, icon: "📖" },
-    { id: idCounter++, name: `${genre} Reader III`, description: `Read 100 ${genre} books`, icon: "📖" }
-  );
-});
-
-
-
 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#14181C] via-[#14181C] to-amber-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse shadow-2xl">
             <BookOpen className="w-10 h-10 text-white" />
@@ -488,8 +425,23 @@ allowedGenres.forEach((genre) => {
     )
   }
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#14181C] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full mb-4"></div>
+          <p className="text-stone-50">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect via useEffect
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-t from-stone-900 via-stone-800 to-stone-800">
+    <div className="min-h-screen bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]">
       {/* Header */}
       <Header />
 
@@ -498,7 +450,7 @@ allowedGenres.forEach((genre) => {
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
         {/* Profile Section */}
         <section className="mb-16">
-          <div className="bg-black/30 backdrop-blur-sm rounded-3xl p-10 mb-10 border border-white/10 shadow-2xl">
+          <div className="bg-[#2C3440] backdrop-blur-sm rounded-3xl p-10 mb-10 border border-[#3D4451] shadow-2xl">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-amber-400/30 shadow-2xl">
                 {user?.avatar_url ? (
@@ -516,7 +468,7 @@ allowedGenres.forEach((genre) => {
                 )}
               </div>
               <div className="text-center md:text-left flex-1">
-                <h2 className="text-4xl font-bold text-white mb-3">
+                <h2 className="text-4xl font-bold text-stone-50 mb-3">
                   Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">{user?.username}</span>!
                 </h2>
                 {user?.bio && (
@@ -542,7 +494,7 @@ allowedGenres.forEach((genre) => {
               <div className="flex gap-4">
                 <button 
                   onClick={handleEditProfile}
-                  className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl border border-white/20 transition-all backdrop-blur-sm group"
+                  className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-stone-50 rounded-xl border border-[#3D4451] transition-all backdrop-blur-sm group"
                 >
                   <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                   Edit Profile
@@ -561,8 +513,8 @@ allowedGenres.forEach((genre) => {
 
           {/* Delete Account Modal */}
 {showDeleteModal && (
-  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowDeleteModal(false)}>
-    <div className="bg-stone-900 border border-red-500/30 rounded-3xl max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+  <div className="fixed inset-0 bg-[#14181C]/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowDeleteModal(false)}>
+    <div className="bg-[#14181C] border border-red-500/30 rounded-3xl max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
       {/* Modal Header */}
       <div className="flex items-center justify-between p-8 border-b border-red-500/20">
         <div className="flex items-center gap-3">
@@ -570,7 +522,7 @@ allowedGenres.forEach((genre) => {
             <AlertTriangle className="w-6 h-6 text-red-400" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-white">Delete Account</h3>
+            <h3 className="text-2xl font-bold text-stone-50">Delete Account</h3>
             <p className="text-red-400 text-sm">This action cannot be undone</p>
           </div>
         </div>
@@ -590,7 +542,7 @@ allowedGenres.forEach((genre) => {
             <li>• Your profile and account information</li>
             <li>• All your book collections and ratings</li>
             <li>• All your reviews and comments</li>
-            <li>• Your reading history and achievements</li>
+            <li>• Your reading history and activity</li>
             <li>• Your profile picture and settings</li>
           </ul>
         </div>
@@ -604,7 +556,7 @@ allowedGenres.forEach((genre) => {
             placeholder="DELETE"
             value={deleteConfirmText}
             onChange={(e) => setDeleteConfirmText(e.target.value)}
-            className="w-full px-4 py-3 bg-black/30 border border-red-500/30 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors placeholder-stone-500 text-white"
+            className="w-full px-4 py-3 bg-[#2C3440]/80 border border-red-500/30 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors placeholder-stone-500 text-stone-50"
           />
         </div>
 
@@ -620,7 +572,7 @@ allowedGenres.forEach((genre) => {
           <button
             onClick={handleDeleteAccount}
             disabled={isDeleting || deleteConfirmText !== 'DELETE'}
-            className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-red-500 hover:bg-red-600 text-stone-50 font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDeleting ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -638,23 +590,24 @@ allowedGenres.forEach((genre) => {
 )}
 
 {/* Favorite Books Section */}
-<section className="mt-16 mb-16 bg-stone-900 px-6 py-4 rounded-3xl border border-white/10 shadow-2xl">
-  <div className="flex items-center justify-between mb-8">
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
-        <BookMarked className="w-6 h-6 text-white" />
+<section className="mt-16 mb-16 bg-[#14181C] px-6 py-4 rounded-3xl border border-[#3D4451] shadow-2xl">
+  <div className="mb-8">
+    <div className="flex items-baseline gap-4 mb-3">
+      {/* Small accent element */}
+      <div className="flex items-center gap-1.5">
+        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+        <div className="w-1 h-1 bg-purple-500/50 rounded-full" />
       </div>
-      <div>
-        <h2 className="text-3xl font-bold text-white">Favorite Books</h2>
-        <p className="text-stone-300">Your Personal Favorites</p>
+
+      <div className="flex-1">
+        <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Favorite Books</h2>
       </div>
     </div>
-    
-    {/* Show book count */}
-    {/* <div className="text-right">
-      <div className="text-2xl font-bold text-white">{favoriteBooks.length}</div>
-      <div className="text-sm text-stone-400">books</div>
-    </div> */}
+
+    <p className="text-stone-400 text-sm ml-7 mb-4">Your personal favorites</p>
+
+    {/* Subtle divider with gradient */}
+    <div className="h-px bg-gradient-to-r from-purple-500/30 via-white/10 to-transparent" />
   </div>
 
   {/* Desktop: Grid Layout */}
@@ -665,7 +618,7 @@ allowedGenres.forEach((genre) => {
       onRemoveBook={handleRemoveFavoriteBook}
       onAddBook={handleAddFavoriteBook}
       showAddSlots={true}
-      maxSlots={6}
+      maxSlots={4}
       layout="grid"
       showStats={false}
       className="mb-8"
@@ -680,7 +633,7 @@ allowedGenres.forEach((genre) => {
       onRemoveBook={handleRemoveFavoriteBook}
       onAddBook={handleAddFavoriteBook}
       showAddSlots={true}
-      maxSlots={6}
+      maxSlots={4}
       layout="horizontal"
       showStats={false}
       className="mb-8"
@@ -689,11 +642,11 @@ allowedGenres.forEach((genre) => {
 
   {/* Empty State */}
   {/* {!favoritesLoading && favoriteBooks.length === 0 && (
-    <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-12 text-center border border-white/10">
+    <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-12 text-center border border-[#3D4451]">
       <div className="w-20 h-20 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20">
         <BookMarked className="w-10 h-10 text-amber-400" />
       </div>
-      <h3 className="text-2xl font-bold text-white mb-4">No Favorites Yet</h3>
+      <h3 className="text-2xl font-bold text-stone-50 mb-4">No Favorites Yet</h3>
       <p className="text-stone-400 mb-6 max-w-md mx-auto">
         Start building your collection by adding books you love to your favorites. 
         These will be your go-to recommendations for other readers!
@@ -712,11 +665,11 @@ allowedGenres.forEach((genre) => {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {userStats.map((stat, index) => (
-              <div key={index} className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/10 hover:bg-black/40 transition-all group shadow-lg">
+              <div key={index} className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 text-center border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all group shadow-lg">
                 <div className={`w-16 h-16 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                   <stat.icon className="w-8 h-8 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-2 group-hover:text-amber-200 transition-colors">{stat.value}</div>
+                <div className="text-3xl font-bold text-stone-50 mb-2 group-hover:text-amber-200 transition-colors">{stat.value}</div>
                 <div className="text-sm text-stone-400">{stat.label}</div>
               </div>
             ))}
@@ -725,63 +678,33 @@ allowedGenres.forEach((genre) => {
 
 
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Achievements Section */}
-          <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Award className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-white">Achievements</h2>
-                <p className="text-stone-300">Your reading milestones</p>
-              </div>
-            </div>
-            
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 shadow-lg max-h-144 overflow-y-auto no-scrollbar">
-              {achievements.map((achievement, index) => (
-                <div key={index} className={`p-6 hover:bg-white/5 transition-colors group ${index !== achievements.length - 1 ? 'border-b border-white/10' : ''}`}>
-                  <div className="flex items-center gap-4">
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl ${achievement.earned ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/20 border border-amber-400/20' : 'bg-stone-800/50 border border-stone-700/50'}`}>
-                      {achievement.earned ? achievement.icon : '🔒'}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className={`font-semibold mb-1 ${achievement.earned ? 'text-white group-hover:text-amber-300 transition-colors' : 'text-stone-500'}`}>
-                        {achievement.name}
-                      </h3>
-                      <p className={`text-sm ${achievement.earned ? 'text-stone-300' : 'text-stone-600'}`}>
-                        {achievement.description}
-                      </p>
-                    </div>
-                    {achievement.earned && (
-                      <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                        <div className="w-4 h-4 bg-white rounded-full"></div>
-                      </div>
-                    )}
-                  </div>
+        {/* Recent Activity Section */}
+        <section>
+            <div className="mb-6">
+              <div className="flex items-baseline gap-4 mb-3">
+                {/* Small accent element */}
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                  <div className="w-1 h-1 bg-blue-500/50 rounded-full" />
                 </div>
-              ))}
-            </div>
-          </section>
 
-          {/* Recent Activity Section */}
-          <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Clock className="w-6 h-6 text-white" />
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Recent Activity</h2>
+                </div>
               </div>
-              <div>
-                <h2 className="text-3xl font-bold text-white">Recent Activity</h2>
-                <p className="text-stone-300">Your Recent Activity</p>
-              </div>
+
+              <p className="text-stone-400 text-sm ml-7 mb-4">Your recent activity</p>
+
+              {/* Subtle divider with gradient */}
+              <div className="h-px bg-gradient-to-r from-blue-500/30 via-white/10 to-transparent" />
             </div>
             
-            <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 shadow-lg max-h-144 overflow-y-auto no-scrollbar">
+            <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] shadow-lg max-h-144 overflow-y-auto no-scrollbar">
               <div className="space-y-6">
                 {recentActivity.map((activity, index) => (
                   <div 
                     key={activity.id || index} 
-                    className="flex items-start gap-4 py-4 border-b border-white/10 last:border-b-0 group"
+                    className="flex items-start gap-4 py-4 border-b border-[#3D4451] last:border-b-0 group"
                   >
                     <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-amber-600/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-amber-400/20">
                       {activity.data.avatar_url ? (
@@ -806,7 +729,7 @@ allowedGenres.forEach((genre) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="space-y-1">
-                        <p className="text-white text-sm leading-relaxed group-hover:text-amber-100 transition-colors">
+                        <p className="text-stone-50 text-sm leading-relaxed group-hover:text-amber-100 transition-colors">
                           <span className="font-medium">{activity.data.message}</span>
                         </p>
                       </div>
@@ -819,33 +742,32 @@ allowedGenres.forEach((genre) => {
               </div>
             </div>
           </section>
-        </div>
 
         {/* Quick Actions */}
         {/* <section className="mt-16">
-          <h2 className="text-3xl font-bold text-white mb-8">Quick Actions</h2>
+          <h2 className="text-3xl font-bold text-stone-50 mb-8">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <button className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-black/40 transition-all text-left group shadow-lg">
+            <button className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all text-left group shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <BookOpen className="w-8 h-8 text-white" />
+                <BookOpen className="w-8 h-8 text-stone-50" />
               </div>
-              <h3 className="font-semibold text-white mb-3 text-xl group-hover:text-amber-200 transition-colors">Add New Book</h3>
+              <h3 className="font-semibold text-stone-50 mb-3 text-xl group-hover:text-amber-200 transition-colors">Add New Book</h3>
               <p className="text-stone-400 text-sm">Track a new book you're reading</p>
             </button>
 
-            <button className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-black/40 transition-all text-left group shadow-lg">
+            <button className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all text-left group shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <Star className="w-8 h-8 text-white" />
+                <Star className="w-8 h-8 text-stone-50" />
               </div>
-              <h3 className="font-semibold text-white mb-3 text-xl group-hover:text-amber-200 transition-colors">Write Review</h3>
+              <h3 className="font-semibold text-stone-50 mb-3 text-xl group-hover:text-amber-200 transition-colors">Write Review</h3>
               <p className="text-stone-400 text-sm">Share your thoughts on a book</p>
             </button>
 
-            <button className="bg-black/30 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-black/40 transition-all text-left group shadow-lg">
+            <button className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all text-left group shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <TrendingUp className="w-8 h-8 text-white" />
+                <TrendingUp className="w-8 h-8 text-stone-50" />
               </div>
-              <h3 className="font-semibold text-white mb-3 text-xl group-hover:text-amber-200 transition-colors">View Stats</h3>
+              <h3 className="font-semibold text-stone-50 mb-3 text-xl group-hover:text-amber-200 transition-colors">View Stats</h3>
               <p className="text-stone-400 text-sm">Detailed reading analytics</p>
             </button>
           </div>
@@ -854,22 +776,22 @@ allowedGenres.forEach((genre) => {
 
       {/* Edit Profile Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowEditModal(false)}>
-          <div className="bg-stone-900 border border-white/20 rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-[#14181C]/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowEditModal(false)}>
+          <div className="bg-[#14181C] border border-[#3D4451] rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-8 border-b border-white/10">
+            <div className="flex items-center justify-between p-8 border-b border-[#3D4451]">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
                   <Settings className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">Edit Profile</h3>
+                  <h3 className="text-2xl font-bold text-stone-50">Edit Profile</h3>
                   <p className="text-stone-400 text-sm">Update your profile information</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors border border-white/20"
+                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors border border-[#3D4451]"
               >
                 <X className="w-6 h-6 text-stone-400" />
               </button>
@@ -885,7 +807,7 @@ allowedGenres.forEach((genre) => {
                 <div className="flex items-center gap-6">
                   {/* Current/Preview Image */}
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/20">
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#3D4451]">
                       {newProfileImagePreview ? (
                         <Image 
                           width={96}
@@ -912,7 +834,7 @@ allowedGenres.forEach((genre) => {
                       <button
                         type="button"
                         onClick={removeNewImage}
-                        className="absolute -top-1 -right-1 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
+                        className="absolute -top-1 -right-1 w-7 h-7 bg-red-500 hover:bg-red-600 text-stone-50 rounded-full flex items-center justify-center transition-colors shadow-lg"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -923,7 +845,7 @@ allowedGenres.forEach((genre) => {
                   <div className="flex-1">
                     <label
                       htmlFor="editProfileImage"
-                      className="inline-flex items-center gap-2 px-6 py-3 border border-white/30 rounded-xl hover:bg-white/10 cursor-pointer transition-colors text-sm text-white backdrop-blur-sm"
+                      className="inline-flex items-center gap-2 px-6 py-3 border border-white/30 rounded-xl hover:bg-white/10 cursor-pointer transition-colors text-sm text-stone-50 backdrop-blur-sm"
                     >
                       <Camera className="w-5 h-5" />
                       {newProfileImage ? 'Change Photo' : 'Upload New Photo'}
@@ -955,7 +877,7 @@ allowedGenres.forEach((genre) => {
                     value={editForm.username}
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                     maxLength={20}
-                    className="w-full px-4 py-4 bg-black/30 border border-white/20 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-white backdrop-blur-sm"
+                    className="w-full px-4 py-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-stone-50 backdrop-blur-sm"
                   />
                   <p className="text-xs text-stone-500 mt-2">
                     {editForm.username.length}/20 characters
@@ -977,7 +899,7 @@ allowedGenres.forEach((genre) => {
                   onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                   rows={4}
                   maxLength={200}
-                  className="w-full px-4 py-4 bg-black/30 border border-white/20 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-white backdrop-blur-sm resize-none"
+                  className="w-full px-4 py-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-stone-50 backdrop-blur-sm resize-none"
                 />
                 <p className="text-xs text-stone-500 mt-2">
                   {editForm.bio.length}/200 characters

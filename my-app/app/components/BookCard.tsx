@@ -45,10 +45,10 @@ const BookCard = ({ book, id }: BookCardProps ) => {
   // Function to get score color based on value
   const getScoreColor = (score: number) => {
     if(score === 0) return 'text-stone-400'
-    if (score >= 8) return 'text-emerald-400'
-    if (score >= 6.5) return 'text-blue-400'
-    if (score >= 5) return 'text-amber-400'
-    if (score >= 4) return 'text-orange-400'
+    if (score >= 4) return 'text-emerald-400'
+    if (score >= 3.25) return 'text-blue-400'
+    if (score >= 2.5) return 'text-amber-400'
+    if (score >= 2) return 'text-orange-400'
     return 'text-red-400'
   }
 
@@ -67,8 +67,8 @@ const BookCard = ({ book, id }: BookCardProps ) => {
 
   if (isLoading) {
     return (
-      <div className="bg-stone-800/40 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden shadow-2xl">
-        <div className="aspect-[3/4] bg-gradient-to-br from-stone-700/50 to-stone-800/50 animate-pulse relative">
+      <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden shadow-2xl">
+        <div className="aspect-[3/4] bg-gradient-to-br from-stone-700/50 to-[#14181C]/50 animate-pulse relative">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
@@ -84,8 +84,8 @@ const BookCard = ({ book, id }: BookCardProps ) => {
 
   if (!book) {
     return (
-      <div className="bg-stone-800/40 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden shadow-2xl">
-        <div className="aspect-[3/4] bg-gradient-to-br from-stone-700/50 to-stone-800/50 flex items-center justify-center">
+      <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden shadow-2xl">
+        <div className="aspect-[3/4] bg-gradient-to-br from-stone-700/50 to-[#14181C]/50 flex items-center justify-center">
           <span className="text-stone-400 text-sm font-medium">Failed to load book data</span>
         </div>
       </div>
@@ -94,7 +94,7 @@ const BookCard = ({ book, id }: BookCardProps ) => {
 
   return (
     <div 
-      className="group cursor-pointer relative bg-stone-800/40 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden hover:border-amber-500/40 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10 min-h-96 min-w-48 max-w-[190px] max-h-[388px]"
+      className="group cursor-pointer relative bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden hover:border-amber-500/40 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10 min-h-96 min-w-48 max-w-[190px] max-h-[388px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => handleImageClick((book.openLibraryId ?? ''), book.author)}
@@ -128,7 +128,7 @@ const BookCard = ({ book, id }: BookCardProps ) => {
         </div>
 
         {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/20 opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
 
         {/* Quick Actions - Floating on hover */}
         {/* <div className={`absolute top-4 right-4 space-y-2 transition-all duration-300 ${
@@ -139,7 +139,7 @@ const BookCard = ({ book, id }: BookCardProps ) => {
             className={`p-2.5 rounded-full backdrop-blur-sm border transition-all duration-200 hover:scale-110 ${
               isLiked 
                 ? 'bg-red-500/90 border-red-400/60 text-white shadow-lg shadow-red-500/30' 
-                : 'bg-black/40 border-white/20 text-white hover:bg-red-500/80 hover:border-red-400/60'
+                : 'bg-[#2C3440]/80 border-[#3D4451] text-white hover:bg-red-500/80 hover:border-red-400/60'
             }`}
           >
             <Heart className="w-4 h-4" fill={isLiked ? 'currentColor' : 'none'} />
@@ -148,14 +148,14 @@ const BookCard = ({ book, id }: BookCardProps ) => {
           
           <button
             onClick={handleShare}
-            className="p-2.5 rounded-full backdrop-blur-sm border bg-black/40 border-white/20 text-white hover:bg-stone-600/80 hover:border-stone-500/60 transition-all duration-200 hover:scale-110"
+            className="p-2.5 rounded-full backdrop-blur-sm border bg-[#2C3440]/80 border-[#3D4451] text-white hover:bg-stone-600/80 hover:border-stone-500/60 transition-all duration-200 hover:scale-110"
           >
             <Share2 className="w-4 h-4" />
           </button>
         </div> */}
 
         {/* Reading Progress Indicator */}
-        {/* <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
+        {/* <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#2C3440]/80">
           <div 
             className="h-full bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-700 group-hover:from-amber-300 group-hover:to-amber-500"
             style={{ width: `${Math.abs((book.title || '').length * 7) % 100}%` }}
@@ -163,10 +163,10 @@ const BookCard = ({ book, id }: BookCardProps ) => {
         </div> */}
 
         {/* Hover overlay with additional info */}
-        <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end transition-opacity duration-300 ${
+        <div className={`absolute inset-0 bg-gradient-to-t from-[#14181C]/90 via-black/20 to-transparent flex items-end transition-opacity duration-300 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`}>
-          <div className="p-4 text-white w-full">
+          <div className="p-4 text-stone-50 w-full">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1 text-xs">
                 <Eye className="w-3 h-3" />
@@ -182,9 +182,9 @@ const BookCard = ({ book, id }: BookCardProps ) => {
       </div>
 
       {/* Book Information */}
-      <div className="p-4 space-y-3 bg-gradient-to-b from-stone-800/20 to-stone-800/40">
+      <div className="p-4 space-y-3 bg-gradient-to-b from-[#14181C]/20 to-[#14181C]/40">
         {/* Title */}
-        <h3 className="font-bold text-white text-sm leading-tight line-clamp-2 group-hover:text-amber-300 transition-colors duration-200">
+        <h3 className="font-bold text-stone-50 text-sm leading-tight line-clamp-2 group-hover:text-amber-300 transition-colors duration-200">
           {book.title}
         </h3>
 

@@ -10,7 +10,7 @@ const attachIfUserExists = (req, res, next) => {
 
     try {
       // Verify the JWT and decode the payload
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
 
       // Supabase stores user ID in the 'sub' claim of JWT
       req.userId = decoded.sub;
