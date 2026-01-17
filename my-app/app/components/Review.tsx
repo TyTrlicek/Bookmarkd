@@ -19,6 +19,7 @@ interface BookCardProps {
   setReviewContent: React.Dispatch<React.SetStateAction<string>>;
   isAuthenticated: boolean;
   onLoginRequired: () => void;
+  checkAuth?: () => void;
 }
 
 const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpoilers, reviewContent, setContainsSpoilers, id, setReviewContent, isAuthenticated, onLoginRequired }: BookCardProps) => {
