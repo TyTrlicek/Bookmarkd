@@ -32,7 +32,7 @@ const searchAuthor = searchParams.get('author')
   console.log("Book ID", id);
 
   const router = useRouter()
-  const { isAuthenticated, accessToken, checkAuth } = useAuth()
+  const { isAuthenticated, accessToken,getAccessToken } = useAuth()
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginIntent, setLoginIntent] = useState<'rate' | 'status' | 'review' | null>(null)
 
@@ -64,7 +64,7 @@ const searchAuthor = searchParams.get('author')
       try {
         const data = await getBookData(id, searchAuthor)
         const img = data?.image || null
-        const userStatus = data?.userStatus || null
+        const userStatus = (data?.userStatus as 'to-read' | 'completed' | 'dropped' | null) || null
         const userRating = data?.userRating || 0
         const title = data?.title || ''
         const author = data?.author || 'Unknown Author'
@@ -710,7 +710,7 @@ return (
           }}
           onSuccess={async () => {
             setShowLoginModal(false);
-            await checkAuth(); // Refresh auth state
+            await getAccessToken(); // Refresh access token
 
             // Execute pending action based on intent
             if (loginIntent === 'review') {
