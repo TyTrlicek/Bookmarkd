@@ -82,6 +82,7 @@ export interface ReviewData {
   avatar_url: string;
   userId?: string;
   updatedAt?: string;
+  rating?: number | null;
 }
 
 export interface UserActivity {
@@ -96,4 +97,29 @@ export interface UserActivity {
   read: boolean;
 };
 
-  
+export interface List {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  isPublic: boolean;
+  isRanked: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user?: { id: string; username: string; avatar_url?: string };
+  _count?: { items: number };
+  previewBooks?: { id: string; title: string; image?: string }[];
+}
+
+export interface ListItem {
+  id: string;
+  listId: string;
+  bookId: string;
+  position: number;
+  createdAt: string;
+  book: BookData;
+}
+
+export interface ListWithItems extends List {
+  items: ListItem[];
+}

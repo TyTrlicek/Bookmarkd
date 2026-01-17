@@ -15,6 +15,7 @@ const userRoute = require('./routes/user')
 const activityRoute = require('./routes/activity')
 const favoriteRoute = require('./routes/favorite')
 const recomendationRoute = require('./routes/reccomendation')
+const listRoute = require('./routes/list')
 const redis = require ('./lib/redis');
 const { cache, TTL } = require('./lib/cache');
 const rankingCache = require('./lib/rankingCache');
@@ -78,6 +79,15 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Security headers middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 app.use(express.json());
 
 // Apply general rate limiting to all routes
@@ -90,6 +100,7 @@ app.use('/api/users', userRoute);
 app.use('/api/activity', activityRoute);
 app.use(favoriteRoute);
 app.use(recomendationRoute)
+app.use('/api/lists', listRoute);
 
 
 app.get('/api/search', async (req, res) => {
@@ -380,6 +391,52 @@ app.get('/api/trending', async (req, res) => {
   }
 });
 
+app.get('/api/recently-rated', async (req, res) => {
+  try {
+    // 1️⃣ Check if cached
+    const cached = await redis.get('recentlyRatedBooks');
+    if (cached) {
+      console.log('Serving recently rated books from cache');
+      return res.json(JSON.parse(cached));
+    }
+
+    // 2️⃣ Query UserBook for entries with ratings, ordered by most recent
+    const recentRatings = await prisma.userBook.findMany({
+      where: { rating: { not: null } },
+      orderBy: { addedAt: 'desc' },
+      take: 50,  // Get more to dedupe
+      select: { bookId: true, addedAt: true }
+    });
+
+    // 3️⃣ Dedupe by bookId (keep first/most recent occurrence)
+    const seenBookIds = new Set();
+    const uniqueBookIds = [];
+    for (const entry of recentRatings) {
+      if (!seenBookIds.has(entry.bookId)) {
+        seenBookIds.add(entry.bookId);
+        uniqueBookIds.push(entry.bookId);
+      }
+      if (uniqueBookIds.length >= 15) break;
+    }
+
+    // 4️⃣ Fetch full book data and maintain order
+    const books = await prisma.book.findMany({
+      where: { id: { in: uniqueBookIds } }
+    });
+    const orderedBooks = uniqueBookIds.map(id => books.find(b => b.id === id));
+
+    // 5️⃣ Cache for 30 minutes
+    await redis.set('recentlyRatedBooks', JSON.stringify(orderedBooks), 'EX', 1800);
+
+    console.log(`Recently rated books calculated and cached (${orderedBooks.length} books)`);
+
+    res.json(orderedBooks);
+  } catch (err) {
+    console.error('Error fetching recently rated books:', err.message);
+    res.status(500).json({ error: 'Failed to fetch recently rated books' });
+  }
+});
+
 app.get('/api/bookdata', attachIfUserExists, async (req, res) => {
   const id = req.query.id;
   const searchAuthor = req.query.searchAuthor;
@@ -600,6 +657,12 @@ const isEnglishEdition = (edition) => {
   );
 };
 
+// Helper function to filter out box sets, omnibus editions, etc.
+const isNotBoxSet = (edition) => {
+  const title = (edition.title || '').toLowerCase();
+  return !(/box\s?set|trilogy|collection|omnibus|complete series|books?\s*\d+\s*-\s*\d+|volume\s*\d+\s*-\s*\d+/i.test(title));
+};
+
 // Helper function to calculate edition priority score
 const calculateEditionPriority = (edition) => {
   let score = 0;
@@ -639,63 +702,38 @@ const calculateEditionPriority = (edition) => {
   return score;
 };
 
-// Fetch more editions and filter/prioritize for English editions
+// Fetch editions to find the best ISBN (cover already set from works level)
 try {
   const editionsRes = await openLibraryAPI.get(`/works/${id}/editions.json?limit=50`);
   let editions = editionsRes.data.entries || [];
 
-  // Filter for English editions only
-  const englishEditions = editions.filter(isEnglishEdition);
+  // Filter for English editions with ISBNs, excluding box sets
+  const validEditions = editions
+    .filter(isEnglishEdition)
+    .filter(isNotBoxSet)
+    .filter(ed => ed.isbn_10?.length || ed.isbn_13?.length);
 
-  console.log(`Found ${editions.length} total editions, ${englishEditions.length} English editions for ${id}`);
+  console.log(`Found ${editions.length} total editions, ${validEditions.length} valid English editions with ISBN for ${id}`);
 
-  if (englishEditions.length > 0) {
+  if (validEditions.length > 0) {
     // Sort by priority score (highest first)
-    englishEditions.sort((a, b) => calculateEditionPriority(b) - calculateEditionPriority(a));
+    validEditions.sort((a, b) => calculateEditionPriority(b) - calculateEditionPriority(a));
 
-    // First pass: Try to find edition with both cover and ISBN
-    for (const ed of englishEditions) {
-      if (ed.covers?.length && (ed.isbn_10?.length || ed.isbn_13?.length)) {
-        coverId = ed.covers[0];
-        // Prefer ISBN-10 for Amazon compatibility
-        isbn = ed.isbn_10?.[0] || ed.isbn_13?.[0];
-        console.log(`Selected edition with cover and ISBN from ${ed.publishers?.[0] || 'unknown publisher'}`);
-        break;
-      }
-    }
-
-    // Second pass: If no cover found yet, take any edition with cover
-    if (!coverId) {
-      for (const ed of englishEditions) {
-        if (ed.covers?.length) {
-          coverId = ed.covers[0];
-          isbn = ed.isbn_10?.[0] || ed.isbn_13?.[0] || null;
-          console.log(`Selected edition with cover (no ISBN) from ${ed.publishers?.[0] || 'unknown publisher'}`);
-          break;
-        }
-      }
-    }
-
-    // Third pass: If still no ISBN, take best edition with ISBN
-    if (!isbn) {
-      for (const ed of englishEditions) {
-        if (ed.isbn_10?.length || ed.isbn_13?.length) {
-          isbn = ed.isbn_10?.[0] || ed.isbn_13?.[0];
-          console.log(`Selected ISBN from ${ed.publishers?.[0] || 'unknown publisher'} (no cover)`);
-          break;
-        }
-      }
-    }
+    // Take the best edition's ISBN (prefer ISBN-10 for Amazon compatibility)
+    const bestEdition = validEditions[0];
+    isbn = bestEdition.isbn_10?.[0] || bestEdition.isbn_13?.[0];
+    console.log(`Selected ISBN ${isbn} from ${bestEdition.publishers?.[0] || 'unknown publisher'} (${bestEdition.title})`);
   } else {
-    console.warn(`No English editions found for ${id}, will use any available edition`);
-    // Fallback: use any edition if no English ones found
-    if (editions.length > 0) {
-      editions.sort((a, b) => calculateEditionPriority(b) - calculateEditionPriority(a));
-      const bestEdition = editions[0];
-      if (bestEdition.covers?.length) {
-        coverId = bestEdition.covers[0];
-      }
-      isbn = bestEdition.isbn_10?.[0] || bestEdition.isbn_13?.[0] || null;
+    console.warn(`No valid English editions with ISBN found for ${id}, trying any edition with ISBN`);
+    // Fallback: use any edition with ISBN if no English ones found
+    const anyWithIsbn = editions
+      .filter(isNotBoxSet)
+      .filter(ed => ed.isbn_10?.length || ed.isbn_13?.length)
+      .sort((a, b) => calculateEditionPriority(b) - calculateEditionPriority(a));
+
+    if (anyWithIsbn.length > 0) {
+      isbn = anyWithIsbn[0].isbn_10?.[0] || anyWithIsbn[0].isbn_13?.[0];
+      console.log(`Fallback: Selected ISBN ${isbn} from ${anyWithIsbn[0].publishers?.[0] || 'unknown publisher'}`);
     }
   }
 } catch (editionErr) {
@@ -848,10 +886,13 @@ app.post('/api/user/booklist', writeLimiter, authenticateUser, async (req, res) 
             }
         });
 
-        // Invalidate user-related caches
-        await cache.invalidateUser(userId);
-        await cache.invalidateBook(book.id);
-        await cache.invalidateGlobal();
+        // Invalidate only the caches that actually changed
+        // (Don't invalidate book data, rankings, search, trending - those didn't change)
+        await cache.del(cache.generateKey('userStats', userId));
+        await cache.del(cache.generateKey('userCollection', userId));
+        await cache.del(cache.generateKey('userActivity', userId));
+        await cache.del(cache.generateKey('notifications', userId));
+        await cache.del('activity:recent');
         console.log(`[BookList] Invalidated caches after book addition for user ${userId}`);;
 
         const result = await prisma.userBook.aggregate({

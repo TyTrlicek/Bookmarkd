@@ -145,9 +145,14 @@ export default function MobileAuthPage() {
       await useAuthStore.getState().initSession()
       setMessage('Profile created successfully!')
       router.push('/')
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create user profile:', err)
-      setMessage('Failed to save user profile. Please try again.')
+      // Check for specific error messages from the backend
+      if (err.response?.data?.error) {
+        setMessage(err.response.data.error)
+      } else {
+        setMessage('Failed to save user profile. Please try again.')
+      }
     } finally {
       setIsUploadingImage(false)
     }

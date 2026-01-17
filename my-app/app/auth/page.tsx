@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 import axios from 'axios'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Footer from '../components/Footer'
 import MobileAuthPage from './MobileAuthPage'
@@ -31,15 +31,70 @@ export default function AuthPage() {
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const [pendingUser, setPendingUser] = useState<any>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isMobile, setIsMobile] = useState(false)
+
+  // Handle OAuth callback with ?setup=true (user needs profile setup)
+  useEffect(() => {
+    const needsSetup = searchParams.get('setup') === 'true'
+    if (needsSetup) {
+      const initSetup = async () => {
+        const { data } = await supabase.auth.getSession()
+        if (data.session?.user) {
+          setPendingUser(data.session.user)
+          setShowProfileSetup(true)
+        } else {
+          // No session, redirect to normal auth
+          router.push('/auth')
+        }
+      }
+      initSetup()
+    }
+  }, [searchParams, router])
 
   // Development login state
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isDevLoginLoading, setIsDevLoginLoading] = useState(false)
   const [showDevLogin, setShowDevLogin] = useState(false)
+  const [usernameError, setUsernameError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
 
   const isDevelopment = process.env.NODE_ENV === 'development'
+
+  // Username validation helper
+  const validateUsername = (value: string): string => {
+    const trimmed = value.trim()
+    if (trimmed.length === 0) return ''
+    if (trimmed.length < 3) return 'Username must be at least 3 characters'
+    if (trimmed.length > 20) return 'Username must be 20 characters or less'
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+      return 'Only letters, numbers, underscores, and dashes allowed'
+    }
+    return ''
+  }
+
+  // Password validation helper
+  const validatePassword = (value: string): string => {
+    if (value.length === 0) return ''
+    if (value.length < 8) return 'Password must be at least 8 characters'
+    return ''
+  }
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setUsername(value)
+    setUsernameError(validateUsername(value))
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPassword(value)
+    setPasswordError(validatePassword(value))
+  }
+
+  const isUsernameValid = username.trim().length >= 3 && !usernameError
+  const isPasswordValid = password.length >= 8
 
   // Development Email/Password Sign In Handler
   const handleDevEmailSignIn = async (e: React.FormEvent) => {
@@ -191,9 +246,29 @@ export default function AuthPage() {
   const uploadImage = async (userId: string): Promise<string | null> => {
     if (!profileImage) return null
 
+    // Validate file extension
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+    const fileExt = profileImage.name.split('.').pop()?.toLowerCase()
+    if (!fileExt || !allowedExtensions.includes(fileExt)) {
+      setMessage('Invalid file type. Please use JPG, PNG, GIF, or WebP.')
+      return null
+    }
+
+    // Validate MIME type matches extension
+    const mimeToExt: Record<string, string[]> = {
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/png': ['png'],
+      'image/gif': ['gif'],
+      'image/webp': ['webp']
+    }
+    const allowedExtsForMime = mimeToExt[profileImage.type]
+    if (!allowedExtsForMime || !allowedExtsForMime.includes(fileExt)) {
+      setMessage('File extension does not match file type.')
+      return null
+    }
+
     setIsUploadingImage(true)
     try {
-      const fileExt = profileImage.name.split('.').pop()
       const fileName = `${userId}-${Date.now()}.${fileExt}`
       const filePath = `avatar/${fileName}`
 
@@ -247,9 +322,14 @@ export default function AuthPage() {
       await useAuthStore.getState().initSession()
       setMessage('Profile created successfully!')
       router.push('/')
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to create user profile:', err)
-      setMessage('Failed to save user profile. Please try again.')
+      // Check for specific error messages from the backend
+      if (err.response?.data?.error) {
+        setMessage(err.response.data.error)
+      } else {
+        setMessage('Failed to save user profile. Please try again.')
+      }
     } finally {
       setIsUploadingImage(false)
     }
@@ -393,7 +473,7 @@ export default function AuthPage() {
   )}
 </button>
 
-                {/* Development Email/Password Login */}
+                {/* Email/Password Login */}
                 {true && (
                   <div className="mb-6">
                     <div className="flex items-center my-4">
@@ -434,12 +514,17 @@ export default function AuthPage() {
                             <input
                               id="dev-password"
                               type="password"
-                              placeholder="Enter your password"
+                              placeholder="Enter your password (min 8 chars)"
                               value={password}
-                              onChange={(e) => setPassword(e.target.value)}
+                              onChange={handlePasswordChange}
                               required
-                              className="w-full px-3 py-2 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 text-sm"
+                              className={`w-full px-3 py-2 bg-[#2C3440] backdrop-blur-sm border rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 text-sm ${
+                                passwordError ? 'border-red-500/50' : 'border-[#3D4451]'
+                              }`}
                             />
+                            {passwordError && (
+                              <p className="text-xs text-red-400 mt-1">{passwordError}</p>
+                            )}
                           </div>
 
                           <div className="flex gap-2">
@@ -458,7 +543,7 @@ export default function AuthPage() {
                             <button
                               type="button"
                               onClick={handleDevEmailSignUp}
-                              disabled={isDevLoginLoading || !email.trim() || !password.trim()}
+                              disabled={isDevLoginLoading || !email.trim() || !isPasswordValid}
                               className="flex-1 bg-stone-600/80 hover:bg-stone-600 text-stone-50 font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                             >
                               Sign Up
@@ -595,20 +680,27 @@ export default function AuthPage() {
                         type="text"
                         placeholder="Enter your username"
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        onChange={handleUsernameChange}
+                        maxLength={20}
                         required
-                        className="w-full pl-10 pr-4 py-3 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50"
+                        className={`w-full pl-10 pr-4 py-3 bg-[#2C3440] backdrop-blur-sm border rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 ${
+                          usernameError ? 'border-red-500/50' : 'border-[#3D4451]'
+                        }`}
                       />
                     </div>
-                    <p className="text-xs text-stone-400 mt-1">
-                      This is how other readers will see you
-                    </p>
+                    {usernameError ? (
+                      <p className="text-xs text-red-400 mt-1">{usernameError}</p>
+                    ) : (
+                      <p className="text-xs text-stone-400 mt-1">
+                        3-20 characters, letters, numbers, underscores, dashes only
+                      </p>
+                    )}
                   </div>
 
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    disabled={isUploadingImage || !username.trim()}
+                    disabled={isUploadingImage || !isUsernameValid}
                     className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-50 font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/30 border border-amber-400/30"
                   >
                     {isUploadingImage ? (

@@ -113,12 +113,12 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-2xl font-bold text-stone-50 mb-4">
+    <div className="w-full overflow-hidden">
+      <h2 className="text-lg sm:text-2xl font-bold text-stone-50 mb-4">
         More by {author}
       </h2>
 
-      <div className="relative">
+      <div className="relative w-full">
         {/* Scroll buttons */}
         {canScrollLeft && (
           <button
@@ -126,7 +126,7 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#14181C]/70 hover:bg-black/90 text-stone-50 p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg"
             aria-label="Scroll left"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         )}
 
@@ -136,14 +136,14 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#14181C]/70 hover:bg-black/90 text-stone-50 p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg"
             aria-label="Scroll right"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         )}
 
         {/* Books container */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
+          className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-4 w-full"
           style={{
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch'
@@ -152,7 +152,7 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
           {books.map((book) => (
             <div
               key={book.id}
-              className="flex-shrink-0 w-32 cursor-pointer group"
+              className="flex-shrink-0 w-28 sm:w-32 cursor-pointer group"
               style={{ scrollSnapAlign: 'start' }}
               onClick={() => handleBookClick(book)}
             >
@@ -174,7 +174,7 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
 
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                  <div className="p-3 w-full">
+                  <div className="p-2 sm:p-3 w-full">
                     <h3 className="text-stone-50 text-xs font-semibold line-clamp-2 mb-1">
                       {book.title}
                     </h3>

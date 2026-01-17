@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabaseClient';
 import axios from 'axios';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
+import useAuthStore from '@/store/authStore';
 
 interface UserActivity {
   id: string;
@@ -96,13 +97,8 @@ const Header = () => {
 
   const markAllAsRead = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    const {
-      data: { session }
-    } = await supabase.auth.getSession();
 
-    const accessToken = session?.access_token;
-
+    const accessToken = await useAuthStore.getState().getAccessToken();
     if (!accessToken) return;
 
     try {
@@ -310,6 +306,7 @@ return (
               <a href="/collection" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">My Collection</a>
             )}
             <a href="/rankings" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Rankings</a>
+            <a href="/lists" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Lists</a>
             {/* <a href="#" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Clubs</a> */}
           </nav>
 
@@ -619,6 +616,13 @@ return (
                 onClick={() => setIsMenuOpen(false)}
               >
                 Rankings
+              </a>
+              <a
+                href="/lists"
+                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Lists
               </a>
             </nav>
           </div>

@@ -127,6 +127,7 @@ const MyCollectionPage = () => {
       })
   
       response.data && setBooks(response.data)
+      
   
       console.log('Books fetched:', response.data)
     } catch (error) {
@@ -136,9 +137,9 @@ const MyCollectionPage = () => {
 
   const getStatusIcon = (status: string) => {
     switch(status) {
-      case 'completed': return <CheckCircle className="w-4 h-4" />
-      case 'to-read': return <Eye className="w-4 h-4" />
-      case 'dropped': return <X className="w-4 h-4" />
+      case 'completed': return <CheckCircle className="w-4 h-4 bg-emerald-500" />
+      case 'to-read': return <Eye className="w-4 h-4 bg-blue-500" />
+      case 'dropped': return <X className="w-4 h-4 bg-red-500" />
       default: return null
     }
   }
@@ -639,7 +640,7 @@ const BookGridItem = ({ book }: {book: BookInList}) => {
             )}
 
             {/* Categories */}
-            {book.book.categories && book.book.categories.length > 0 && (
+            {/* {book.book.categories && book.book.categories.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {book.book.categories.slice(0, 2).map((cat) => (
                   <span key={cat} className="text-xs bg-white/20 text-stone-50 px-2 py-0.5 rounded">
@@ -647,7 +648,7 @@ const BookGridItem = ({ book }: {book: BookInList}) => {
                   </span>
                 ))}
               </div>
-            )}
+            )} */}
 
             {/* Edit Button */}
             <button

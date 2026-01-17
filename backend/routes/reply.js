@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser');
-const { reviewLimiter, voteLimiter, writeLimiter } = require('../middleware/rateLimiting');
+const { reviewLimiter, replyLimiter, voteLimiter, writeLimiter } = require('../middleware/rateLimiting');
 const prisma = require('../lib/prisma');
 
 const router = express.Router();
@@ -53,7 +53,7 @@ router.post('/create-review', reviewLimiter, authenticateUser, async (req, res) 
 });
 
 
-router.post('/create-reply', reviewLimiter, authenticateUser, async (req, res) => {
+router.post('/create-reply', replyLimiter, authenticateUser, async (req, res) => {
     const userId = req.userId;
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -208,8 +208,24 @@ router.get('/reviews/:openLibraryId', async (req, res) => {
           },
         },
       });
-  
-      // 3. Simplified formatting (no recursion needed)
+
+      // 3. Fetch user ratings for all reviewers
+      const userIds = reviews.map(r => r.user.id);
+      const userBooks = await prisma.userBook.findMany({
+        where: {
+          bookId: book.id,
+          userId: { in: userIds },
+        },
+        select: {
+          userId: true,
+          rating: true,
+        },
+      });
+      const ratingsByUserId = Object.fromEntries(
+        userBooks.map(ub => [ub.userId, ub.rating])
+      );
+
+      // 4. Simplified formatting (no recursion needed)
       const formatted = reviews.map((review) => ({
         id: review.id,
         username: review.user.username,
@@ -218,6 +234,7 @@ router.get('/reviews/:openLibraryId', async (req, res) => {
         content: review.content,
         createdAt: review.createdAt,
         helpfulCount: review.helpfulCount,
+        rating: ratingsByUserId[review.user.id] || null,
         replies: review.replies.map((reply) => ({
           id: reply.id,
           content: reply.content,

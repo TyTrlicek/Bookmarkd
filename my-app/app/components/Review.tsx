@@ -1,7 +1,7 @@
 "use client"
 import { supabase } from '@/lib/supabaseClient';
 import axios from 'axios';
-import { Heart, MessageCircle, Plus, ChevronDown, ChevronUp, Send, MoreHorizontal, Edit3, Trash2, Check, X, Flag } from 'lucide-react'
+import { Heart, MessageCircle, Plus, ChevronDown, ChevronUp, Send, MoreHorizontal, Edit3, Trash2, Check, X, Flag, Star } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -573,7 +573,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
     };
 
     return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6 overflow-hidden">
             {loading ? (
                 <div className="text-center py-8">
                     <div className="text-stone-400">Loading reviews...</div>
@@ -611,13 +611,40 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                 )}
 
                                 <div className="flex-1 min-w-0">
-                                    {/* Header with username and dropdown */}
+                                    {/* Header with username, rating, and dropdown */}
                                     <div className="flex items-start justify-between gap-2 mb-3">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span className="font-semibold text-stone-50 truncate">
                                                     {review.username}
                                                 </span>
+                                                {review.rating != null && review.rating > 0 && (
+                                                    <>
+                                                        <div className="flex items-center gap-0.5">
+                                                            {[0, 1, 2, 3, 4].map((starIndex) => {
+                                                                const fillPercentage = Math.max(0, Math.min(1, review.rating! - starIndex));
+                                                                const isHalf = fillPercentage === 0.5;
+                                                                return (
+                                                                    <div key={starIndex} className="relative w-3.5 h-3.5">
+                                                                        <Star className="absolute inset-0 w-3.5 h-3.5 text-stone-600" strokeWidth={1.5} />
+                                                                        {fillPercentage > 0 && (
+                                                                            <div
+                                                                                className="absolute inset-0 overflow-hidden"
+                                                                                style={{
+                                                                                    clipPath: isHalf
+                                                                                        ? 'polygon(0 0, 50% 0, 50% 100%, 0 100%)'
+                                                                                        : 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'
+                                                                                }}
+                                                                            >
+                                                                                <Star className="w-3.5 h-3.5 text-amber-400 fill-current" strokeWidth={1.5} />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </>
+                                                )}
                                                 <span className="text-stone-600">·</span>
                                                 <span className="text-xs text-stone-500">
                                                     {formatDate(review.createdAt)}
@@ -720,7 +747,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                 >
                                                     <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${votedReviews.has(reviewId) ? 'fill-current' : ''}`} />
                                                     <span>{review.helpfulCount}</span>
-                                                    <span className="hidden sm:inline">helpful</span>
+                                                    <span className="hidden sm:inline">Like</span>
                                                 </button>
                                                 <button 
                                                     onClick={() => toggleReplyForm(reviewId)}

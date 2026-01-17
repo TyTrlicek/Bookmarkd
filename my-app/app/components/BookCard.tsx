@@ -23,6 +23,7 @@ interface BookData {
   image?: string
   averageRating?: number
   totalRatings?: number
+  publishedDate?: string
 }
 
 interface BookCardProps {
@@ -172,10 +173,12 @@ const BookCard = ({ book, id }: BookCardProps ) => {
                 <Eye className="w-3 h-3" />
                 <span>{formatMemberCount(book.totalRatings ?? 0)} views</span>
               </div>
-              <div className="flex items-center gap-1 text-xs">
-                <Calendar className="w-3 h-3" />
-                <span>2024</span>
-              </div>
+              {book.publishedDate && (
+                <div className="flex items-center gap-1 text-xs">
+                  <Calendar className="w-3 h-3" />
+                  <span>{book.publishedDate.slice(0, 4)}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

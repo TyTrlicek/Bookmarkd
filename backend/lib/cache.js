@@ -194,7 +194,10 @@ const TTL = {
   OPENLIBRARY_API: 14400,  // 4 hours
   ACTIVITY_FEED: 600,      // 10 minutes
   TRENDING: 3600,          // 1 hour
-  RECOMMENDATIONS: 86400   // 24 hours
+  RECOMMENDATIONS: 86400,  // 24 hours
+  LIST_DETAIL: 1800,       // 30 minutes
+  USER_LISTS: 900,         // 15 minutes
+  POPULAR_LISTS: 3600      // 1 hour
 };
 
 module.exports = {

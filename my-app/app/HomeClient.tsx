@@ -37,11 +37,12 @@ import useAuthStore from '@/store/authStore'
 import { supabase } from '@/lib/supabaseClient'
 import EnhancedHero from './components/EnhancedHero'
 import BookCarouselHero from './components/BookCarouselHero'
-import { UserActivity } from './types/types'
+import { UserActivity, List } from './types/types'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
 import Footer from './components/Footer'
 import { useRouter } from 'next/navigation'
+import ListCard from './components/ListCard'
 
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState('trending')
@@ -51,6 +52,8 @@ const HomePage = () => {
   const [trendingData, setTrendingData] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<UserActivity[]>([]);
   const [reccomendationData, setReccomendationData] = useState<any[]>([]);
+  const [recentlyRatedData, setRecentlyRatedData] = useState<any[]>([]);
+  const [popularLists, setPopularLists] = useState<List[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
   const router = useRouter();
   const { session } = useAuthStore();
@@ -84,6 +87,26 @@ const HomePage = () => {
     }
   }
   fetchTrendingData();
+
+  const fetchRecentlyRatedData = async () => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/recently-rated`);
+      setRecentlyRatedData(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  fetchRecentlyRatedData();
+
+  const fetchPopularLists = async () => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/lists/popular`);
+      setPopularLists(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  fetchPopularLists();
 
   const fetchRecentActivity = async () => {
     try {
@@ -296,6 +319,45 @@ const HomePage = () => {
             />
           </section>
 
+          {/* Recently Rated Section */}
+          <section className="mb-20">
+            <div className="mb-8">
+              <div className="flex items-baseline gap-4 mb-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-rose-500 rounded-full" />
+                  <div className="w-1 h-1 bg-rose-500/50 rounded-full" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">
+                    Recently Rated
+                  </h2>
+                </div>
+              </div>
+              <p className="text-stone-400 text-sm ml-7 mb-4">
+                Fresh ratings from the community
+              </p>
+              <div className="h-px bg-gradient-to-r from-rose-500/30 via-white/10 to-transparent" />
+            </div>
+
+            <FixedHeightBookSection
+              data={recentlyRatedData}
+              isEmpty={!recentlyRatedData || recentlyRatedData.length === 0}
+              emptyStateContent={
+                <div className="flex flex-col items-center justify-center px-4 text-center max-w-md">
+                  <div className="w-16 h-16 bg-gradient-to-br from-rose-500/20 to-rose-600/20 rounded-full flex items-center justify-center mb-6 border border-rose-500/30">
+                    <Star className="w-8 h-8 text-rose-400" />
+                  </div>
+                  <h3 className="text-2xl font-semibold text-stone-50 mb-3">
+                    No Recent Ratings Yet
+                  </h3>
+                  <p className="text-stone-300 text-lg">
+                    Be the first to rate a book!
+                  </p>
+                </div>
+              }
+            />
+          </section>
+
           {/* Recommended Section */}
           <section className="mb-20">
             <div className="mb-8">
@@ -381,6 +443,42 @@ const HomePage = () => {
               }
             />
           </section>
+
+          {/* Popular Lists Section */}
+          {popularLists.length > 0 && (
+            <section className="mb-20">
+              <div className="mb-8">
+                <div className="flex items-baseline gap-4 mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                    <div className="w-1 h-1 bg-purple-500/50 rounded-full" />
+                  </div>
+
+                  <div className="flex-1 flex items-center justify-between">
+                    <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Popular Lists</h2>
+                    <button
+                      onClick={() => router.push('/lists')}
+                      className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
+                    >
+                      View all lists
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-stone-400 text-sm ml-7 mb-4">Curated collections from the community</p>
+
+                <div className="h-px bg-gradient-to-r from-purple-500/30 via-white/10 to-transparent" />
+              </div>
+
+              <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl p-6 border border-[#3D4451]">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {popularLists.slice(0, 5).map((list) => (
+                    <ListCard key={list.id} list={list} />
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Coming Soon Sections */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">

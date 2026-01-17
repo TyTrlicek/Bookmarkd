@@ -1,15 +1,17 @@
 import { BookData } from "@/app/types/types"
-import { supabase } from "@/lib/supabaseClient";
 import useAuthStore from "@/store/authStore";
 import axios from "axios"
 
-export const getBookData = async (id: string, searchAuthor?: string): Promise<BookData | null> => {
+/**
+ * Helper to get access token from auth store
+ * Use this instead of supabase.auth.getSession()
+ */
+export const getAccessToken = async (): Promise<string | null> => {
+  return useAuthStore.getState().getAccessToken();
+};
 
-  const {
-    data: { session }
-  } = await supabase.auth.getSession();
-  
-  const accessToken = session?.access_token;
+export const getBookData = async (id: string, searchAuthor?: string): Promise<BookData | null> => {
+  const accessToken = await getAccessToken();
 
   const headers = accessToken
     ? {

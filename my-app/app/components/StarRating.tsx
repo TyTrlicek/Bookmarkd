@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 
 interface StarRatingProps {
@@ -18,6 +18,15 @@ const StarRating: React.FC<StarRatingProps> = ({
   showValue = false
 }) => {
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile/touch device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    };
+    checkMobile();
+  }, []);
 
   const sizeClasses = {
     small: 'w-4 h-4',
@@ -36,14 +45,39 @@ const StarRating: React.FC<StarRatingProps> = ({
 
   const displayRating = hoveredRating ?? rating;
 
+  // Desktop behavior: left/right half selection
   const handleStarClick = (starIndex: number, isHalf: boolean) => {
     if (readonly) return;
     const newRating = starIndex + (isHalf ? 0.5 : 1);
     onRatingChange(newRating);
   };
 
-  const handleStarHover = (starIndex: number, isHalf: boolean) => {
+  // Mobile behavior: Letterboxd-style cycling (full → half → clear)
+  const handleMobileStarClick = (starIndex: number) => {
     if (readonly) return;
+
+    const fullStarRating = starIndex + 1;
+    const halfStarRating = starIndex + 0.5;
+    const clearedRating = starIndex; // Previous star's full rating
+
+    let newRating: number;
+
+    if (rating === fullStarRating) {
+      // Currently full star → go to half
+      newRating = halfStarRating;
+    } else if (rating === halfStarRating) {
+      // Currently half star → clear (go to previous full)
+      newRating = clearedRating;
+    } else {
+      // Any other state → set to full star
+      newRating = fullStarRating;
+    }
+
+    onRatingChange(newRating);
+  };
+
+  const handleStarHover = (starIndex: number, isHalf: boolean) => {
+    if (readonly || isMobile) return;
     const newRating = starIndex + (isHalf ? 0.5 : 1);
     setHoveredRating(newRating);
   };
@@ -55,9 +89,7 @@ const StarRating: React.FC<StarRatingProps> = ({
 
   const renderStar = (starIndex: number) => {
     const fillPercentage = Math.max(0, Math.min(1, displayRating - starIndex));
-    const isFull = fillPercentage === 1;
     const isHalf = fillPercentage === 0.5;
-    const isEmpty = fillPercentage === 0;
 
     return (
       <div
@@ -65,19 +97,27 @@ const StarRating: React.FC<StarRatingProps> = ({
         className={`relative ${starSize} ${readonly ? '' : 'cursor-pointer'}`}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Left half clickable area */}
-        <div
-          className="absolute left-0 top-0 w-1/2 h-full z-10"
-          onClick={() => handleStarClick(starIndex, true)}
-          onMouseEnter={() => handleStarHover(starIndex, true)}
-        />
-
-        {/* Right half clickable area */}
-        <div
-          className="absolute right-0 top-0 w-1/2 h-full z-10"
-          onClick={() => handleStarClick(starIndex, false)}
-          onMouseEnter={() => handleStarHover(starIndex, false)}
-        />
+        {isMobile ? (
+          // Mobile: single click area for the whole star
+          <div
+            className="absolute inset-0 z-10"
+            onClick={() => handleMobileStarClick(starIndex)}
+          />
+        ) : (
+          // Desktop: left/right half click areas
+          <>
+            <div
+              className="absolute left-0 top-0 w-1/2 h-full z-10"
+              onClick={() => handleStarClick(starIndex, true)}
+              onMouseEnter={() => handleStarHover(starIndex, true)}
+            />
+            <div
+              className="absolute right-0 top-0 w-1/2 h-full z-10"
+              onClick={() => handleStarClick(starIndex, false)}
+              onMouseEnter={() => handleStarHover(starIndex, false)}
+            />
+          </>
+        )}
 
         {/* Empty star (background) */}
         <Star

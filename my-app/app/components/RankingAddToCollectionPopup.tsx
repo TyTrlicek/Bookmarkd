@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Star, Plus, ChevronDown, BookOpen, Clock, CheckCircle2, ListPlus, CheckCheck, Check } from 'lucide-react';
+import { X, Plus, BookOpen, CheckCircle2, XCircle, Check, ListPlus } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation'
+import StarRating from './StarRating';
 
 
 interface RankingAddToCollectionPopupProps {
@@ -24,8 +25,7 @@ export default function RankingAddToCollectionPopup({
   const [rating, setRating] = useState(0);
   const [status, setStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showRatingDropdown, setShowRatingDropdown] = useState(false);
-  
+
   const [mounted, setMounted] = useState(false);
 
   const router = useRouter();
@@ -43,50 +43,35 @@ export default function RankingAddToCollectionPopup({
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 
-  const ratingOptions = [
-    { value: 10, label: 'Masterpiece', description: 'A perfect work of art', color: 'text-purple-400' },
-    { value: 9, label: 'Great', description: 'Exceptional quality', color: 'text-indigo-400' },
-    { value: 8, label: 'Very Good', description: 'Highly impressive', color: 'text-blue-400' },
-    { value: 7, label: 'Good', description: 'Solid and enjoyable', color: 'text-green-400' },
-    { value: 6, label: 'Fine', description: 'Worth reading', color: 'text-yellow-400' },
-    { value: 5, label: 'Average', description: 'Nothing special', color: 'text-orange-400' },
-    { value: 4, label: 'Bad', description: 'Below expectations', color: 'text-red-400' },
-    { value: 3, label: 'Very Bad', description: 'Poor quality', color: 'text-red-500' },
-    { value: 2, label: 'Horrible', description: 'Terrible experience', color: 'text-red-600' },
-    { value: 1, label: 'Appalling', description: 'Absolute worst', color: 'text-red-700' }
-  ];
-
   const statusOptions = [
-    { 
-      value: 'to-read', 
-      label: 'Plan to Read', 
+    {
+      value: 'to-read',
+      label: 'To Read',
       color: 'bg-blue-500/20 text-blue-300 border-blue-400/30',
       icon: BookOpen,
       description: 'Added to reading list'
     },
-    { 
-      value: 'reading', 
-      label: 'Currently Reading', 
-      color: 'bg-amber-500/20 text-amber-300 border-amber-400/30',
-      icon: Clock,
-      description: 'Currently in progress'
-    },
-    { 
-      value: 'completed', 
-      label: 'Completed', 
+    {
+      value: 'completed',
+      label: 'Completed',
       color: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
       icon: CheckCircle2,
       description: 'Finished reading'
+    },
+    {
+      value: 'dropped',
+      label: 'Dropped',
+      color: 'bg-red-500/20 text-red-300 border-red-400/30',
+      icon: XCircle,
+      description: 'Stopped reading'
     }
   ];
-
-  const selectedRating = ratingOptions.find(option => option.value === rating);
 
   const handleSubmit = async () => {
     if (!status) return;
@@ -123,7 +108,6 @@ export default function RankingAddToCollectionPopup({
       setRating(0);
       setStatus('');
       setIsOpen(false);
-      setShowRatingDropdown(false);
 
       onBookAdded?.(openLibraryId, rating, status);
 
@@ -143,7 +127,6 @@ export default function RankingAddToCollectionPopup({
     setIsOpen(false);
     setRating(0);
     setStatus('');
-    setShowRatingDropdown(false);
   };
 
   // Handle backdrop click
@@ -258,73 +241,24 @@ export default function RankingAddToCollectionPopup({
           <div className="sm:p-6 sm:space-y-8 p-3 space-y-4">
             {/* Rating Section */}
             <div className="space-y-4">
-              <label className="text-sm font-semibold text-stone-200 mb-2 flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-400" />
+              <label className="text-sm font-semibold text-stone-200 mb-2 block">
                 Your Rating
               </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowRatingDropdown(!showRatingDropdown)}
-                  className="w-full p-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl hover:border-amber-400/50 transition-all duration-200 flex items-center justify-between backdrop-blur-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    {rating > 0 ? (
-                      <>
-                        <div className="flex items-center gap-1 px-2 py-1 bg-amber-500/20 rounded-full border border-amber-400/30">
-                          <Star size={16} className="text-amber-400 fill-amber-400" />
-                          <span className="font-bold text-amber-200">{rating}</span>
-                        </div>
-                        <div className="text-left">
-                          <div className={`font-medium ${selectedRating?.color}`}>
-                            {selectedRating?.label}
-                          </div>
-                          <div className="text-sm text-stone-400">
-                            {selectedRating?.description}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <span className="text-stone-400">Select a rating</span>
-                    )}
-                  </div>
-                  <ChevronDown size={20} className={`text-amber-400 transition-transform duration-200 ${showRatingDropdown ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Rating Dropdown */}
-                {showRatingDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-[#2C3440] border border-[#3D4451] rounded-xl shadow-xl z-20 max-h-64 overflow-y-auto backdrop-blur-md">
-                    {ratingOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => {
-                          setRating(option.value);
-                          setShowRatingDropdown(false);
-                        }}
-                        className={`w-full p-4 text-left hover:bg-white/10 transition-colors duration-150 border-b border-[#3D4451] last:border-b-0 ${
-                          rating === option.value ? 'bg-white/10' : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2 min-w-[60px]">
-                            <div className="p-1 bg-amber-500/20 rounded border border-amber-400/30">
-                              <Star size={14} className="text-amber-400 fill-amber-400" />
-                            </div>
-                            <span className="font-bold text-amber-200">{option.value}</span>
-                          </div>
-                          <div className="flex-1">
-                            <div className={`font-medium ${option.color}`}>
-                              {option.label}
-                            </div>
-                            <div className="text-sm text-stone-400">
-                              {option.description}
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+              <div className="flex items-center justify-between p-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl backdrop-blur-sm">
+                <StarRating
+                  rating={rating}
+                  onRatingChange={setRating}
+                  size="large"
+                  showValue={true}
+                />
+                {rating > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setRating(0)}
+                    className="text-xs text-stone-400 hover:text-stone-200 underline transition-colors"
+                  >
+                    Clear
+                  </button>
                 )}
               </div>
             </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import useAuthStore from '@/store/authStore'
 import { addPendingBookToCollection, getPendingBookData } from '@/utils/pendingBookUtils'
+import axios from 'axios'
 
 export default function AuthCallback() {
   const router = useRouter()
@@ -26,6 +27,26 @@ export default function AuthCallback() {
         if (data.session) {
           // Update auth store
           useAuthStore.getState().setSession(data.session)
+
+          // Check if user exists in our database
+          setStatus('Checking your profile...')
+          try {
+            await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/me`, {
+              headers: {
+                Authorization: `Bearer ${data.session.access_token}`,
+                'Content-Type': 'application/json',
+              },
+            })
+            // User exists, continue with normal flow
+          } catch (err: any) {
+            if (err.response?.status === 404) {
+              // User doesn't exist in our DB, redirect to profile setup
+              router.push('/auth?setup=true')
+              return
+            }
+            // Other errors - log but continue
+            console.error('Error checking user profile:', err)
+          }
 
           // Check for pending book addition
           const pendingBook = getPendingBookData()

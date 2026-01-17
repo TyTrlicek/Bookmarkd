@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
-import { BookData, User, UserActivity } from '../types/types'
-import { 
-  BookOpen, 
-  Star, 
-  LogOut, 
+import { BookData, User, UserActivity, List } from '../types/types'
+import {
+  BookOpen,
+  Star,
+  LogOut,
   Settings,
   Crown,
   Calendar,
@@ -24,17 +24,21 @@ import {
   Save,
   Camera,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  ListPlus,
+  Plus
 } from 'lucide-react'
 import Header from '../components/Header'
 import useAuthStore from '@/store/authStore'
 import axios from 'axios'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
+import Link from 'next/link'
 import Footer from '../components/Footer'
 import { set } from 'lodash'
 import FavoritesList from '../components/FavoritesList'
 import { useAuth } from '@/hooks/useAuth'
+import ListCard from '../components/ListCard'
 
 export default function AccountPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -60,6 +64,8 @@ export default function AccountPage() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [favoriteBooks, setFavoriteBooks] = useState<BookData[]>([]);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
+  const [userLists, setUserLists] = useState<List[]>([]);
+  const [listsLoading, setListsLoading] = useState(true);
 
   const fetchFavoriteBooks = async () => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -126,7 +132,7 @@ const handleAddFavoriteBook = async (selectedBook: BookData) => {
   if (!accessToken) {
     router.push('/auth');
     return;
-  }    
+  }
 
   try {
     await axios.post(
@@ -144,6 +150,32 @@ const handleAddFavoriteBook = async (selectedBook: BookData) => {
   } catch (error) {
     console.error('Failed to add book to favorites:', error);
     throw error;
+  }
+};
+
+const fetchUserLists = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    setUserLists([]);
+    setListsLoading(false);
+    return;
+  }
+
+  try {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/lists`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    setUserLists(response.data);
+  } catch (error) {
+    console.error('Failed to fetch user lists:', error);
+    setUserLists([]);
+  } finally {
+    setListsLoading(false);
   }
 };
 
@@ -215,12 +247,20 @@ useEffect(() => {
       setFavoriteBooks([]);
     } finally {
       setFavoritesLoading(false);
+    }
+
+    try {
+      // Fetch user lists
+      await fetchUserLists();
+    } catch (error) {
+      console.error('Failed to fetch user lists:', error);
+    } finally {
       setIsLoading(false);
     }
   };
 
   fetchUserData();
-}, [router]);
+}, [isAuthenticated, router]);
 
 
   const handleLogout = async () => {
@@ -315,8 +355,28 @@ useEffect(() => {
   const uploadImage = async (userId: string): Promise<string | null> => {
     if (!newProfileImage) return null
 
+    // Validate file extension
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+    const fileExt = newProfileImage.name.split('.').pop()?.toLowerCase()
+    if (!fileExt || !allowedExtensions.includes(fileExt)) {
+      setEditMessage('Invalid file type. Please use JPG, PNG, GIF, or WebP.')
+      return null
+    }
+
+    // Validate MIME type matches extension
+    const mimeToExt: Record<string, string[]> = {
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/png': ['png'],
+      'image/gif': ['gif'],
+      'image/webp': ['webp']
+    }
+    const allowedExtsForMime = mimeToExt[newProfileImage.type]
+    if (!allowedExtsForMime || !allowedExtsForMime.includes(fileExt)) {
+      setEditMessage('File extension does not match file type.')
+      return null
+    }
+
     try {
-      const fileExt = newProfileImage.name.split('.').pop()
       const fileName = `${userId}-${Date.now()}.${fileExt}`
       const filePath = `avatar/${fileName}`
 
@@ -648,11 +708,11 @@ setUser((prevUser) => ({
       </div>
       <h3 className="text-2xl font-bold text-stone-50 mb-4">No Favorites Yet</h3>
       <p className="text-stone-400 mb-6 max-w-md mx-auto">
-        Start building your collection by adding books you love to your favorites. 
+        Start building your collection by adding books you love to your favorites.
         These will be your go-to recommendations for other readers!
       </p>
-      <button 
-        onClick={() => router.push('/browse')} 
+      <button
+        onClick={() => router.push('/browse')}
         className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-amber-500/25"
       >
         <BookOpen className="w-5 h-5" />
@@ -660,6 +720,62 @@ setUser((prevUser) => ({
       </button>
     </div>
   )} */}
+</section>
+
+{/* My Lists Section */}
+<section className="mt-16 mb-16 bg-[#14181C] px-6 py-4 rounded-3xl border border-[#3D4451] shadow-2xl">
+  <div className="mb-8">
+    <div className="flex items-baseline gap-4 mb-3">
+      <div className="flex items-center gap-1.5">
+        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+        <div className="w-1 h-1 bg-purple-500/50 rounded-full" />
+      </div>
+
+      <div className="flex-1 flex items-center justify-between">
+        <h2 className="text-3xl font-bold text-stone-50 tracking-tight">My Lists</h2>
+        <Link
+          href="/lists/new"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-purple-500/25 text-sm"
+        >
+          <Plus className="w-4 h-4" />
+          Create List
+        </Link>
+      </div>
+    </div>
+
+    <p className="text-stone-400 text-sm ml-7 mb-4">Your curated book collections</p>
+
+    <div className="h-px bg-gradient-to-r from-purple-500/30 via-white/10 to-transparent" />
+  </div>
+
+  {listsLoading ? (
+    <div className="flex items-center justify-center py-12">
+      <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  ) : userLists.length === 0 ? (
+    <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-12 text-center border border-[#3D4451]">
+      <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/20">
+        <ListPlus className="w-10 h-10 text-purple-400" />
+      </div>
+      <h3 className="text-2xl font-bold text-stone-50 mb-4">No Lists Yet</h3>
+      <p className="text-stone-400 mb-6 max-w-md mx-auto">
+        Create your first list to curate and share your favorite book collections!
+      </p>
+      <Link
+        href="/lists/new"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-purple-500/25"
+      >
+        <Plus className="w-5 h-5" />
+        Create Your First List
+      </Link>
+    </div>
+  ) : (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      {userLists.map((list) => (
+        <ListCard key={list.id} list={list} showAuthor={false} />
+      ))}
+    </div>
+  )}
 </section>
 
           {/* Stats Grid */}
@@ -957,6 +1073,7 @@ setUser((prevUser) => ({
           </div>
         </div>
       )}
+
       <Footer />
     </div>
   )

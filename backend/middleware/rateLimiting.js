@@ -48,12 +48,24 @@ const writeLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Very strict for review/reply creation to prevent spam
+// Very strict for review creation to prevent spam
 const reviewLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 3, // Only 3 reviews/replies per 5 minutes
+  max: 3, // Only 3 reviews per 5 minutes
   message: {
     error: 'Review submission rate limit exceeded. Please wait before submitting another review.',
+    retryAfter: '5 minutes'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// More lenient for replies (conversational)
+const replyLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 10, // 10 replies per 5 minutes
+  message: {
+    error: 'Reply rate limit exceeded. Please wait before submitting another reply.',
     retryAfter: '5 minutes'
   },
   standardHeaders: true,
@@ -78,5 +90,6 @@ module.exports = {
   searchLimiter,
   writeLimiter,
   reviewLimiter,
+  replyLimiter,
   voteLimiter
 };

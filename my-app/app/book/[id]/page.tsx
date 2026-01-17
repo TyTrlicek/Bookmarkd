@@ -18,6 +18,8 @@ import MoreByAuthor from '@/app/components/MoreByAuthor'
 import BuyNowButton from '@/app/components/BuyNowButton'
 import LoginModal from '@/app/components/LoginModal'
 import { useAuth } from '@/hooks/useAuth'
+import AddToListPopup from '@/app/components/AddToListPopup'
+import { ListPlus } from 'lucide-react'
 
 const BookPage = () => {
   const params = useParams()
@@ -49,11 +51,12 @@ const searchAuthor = searchParams.get('author')
   const [totalRatings, setTotalRatings] = useState<number | null>(null);
   const [popularityRank, setPopularityRank] = useState<number | null>(null);
   const [ratingRank, setRatingRank] = useState<number | null>(null);
-  const [userStatus, setUserStatus] = useState<string | null>('');
+  const [userStatus, setUserStatus] = useState<'to-read' | 'completed' | 'dropped' | null>(null);
   const [showWriteReview, setShowWriteReview] = useState(false);
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [reviewContent, setReviewContent] = useState('');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [showAddToList, setShowAddToList] = useState(false);
 
 
   useEffect(() => {
@@ -162,37 +165,37 @@ const searchAuthor = searchParams.get('author')
 
 
 return (
-    <div className="min-h-screen bg-gradient-to-b from-[#14181C] via-[#14181C] to-[#14181C]">
+    <div className="min-h-screen bg-gradient-to-b from-[#14181C] via-[#14181C] to-[#14181C] overflow-x-hidden">
       <Header />
 
       {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-8 pb-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-8 pb-16 w-full">
 
         {/* Mobile Book Cover & Quick Actions - Only visible on mobile */}
         <div className="lg:hidden mb-6 space-y-4">
-          {/* Book Cover - Horizontal Layout on Mobile */}
-          <div className="flex gap-4 items-start">
+          {/* Book Cover - Centered on Mobile */}
+          <div className="flex flex-col items-center gap-4">
             {isLoading ? (
-              <div className="w-24 h-36 sm:w-32 sm:h-48 bg-[#2C3440] animate-pulse rounded-lg shadow-xl flex-shrink-0" />
+              <div className="w-48 h-72 bg-[#2C3440] animate-pulse rounded-lg shadow-xl flex-shrink-0" />
             ) : (
               <div className="relative flex-shrink-0">
                 <div className="absolute -inset-0.5 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg blur opacity-75" />
                 <Image
                   priority
-                  width={128}
-                  height={192}
+                  width={192}
+                  height={288}
                   src={image || ''}
                   alt={`Cover for ${title}`}
-                  className="relative w-24 h-36 sm:w-32 sm:h-48 object-cover rounded-lg shadow-xl border border-amber-900/20"
+                  className="relative w-48 h-72 object-cover rounded-lg shadow-xl border border-amber-900/20"
                 />
               </div>
             )}
 
             {/* Mobile Title & Meta */}
-            <div className="flex-1 min-w-0">
+            <div className="w-full text-center">
               <h1 className="text-2xl sm:text-3xl font-bold text-stone-50 mb-2 bg-gradient-to-r from-white to-amber-100 bg-clip-text text-transparent leading-tight">{title}</h1>
               <p className="text-amber-400 font-medium text-sm sm:text-base mb-2">{author}</p>
-              <div className="flex items-center gap-2 text-stone-400 text-xs sm:text-sm flex-wrap">
+              <div className="flex items-center justify-center gap-2 text-stone-400 text-xs sm:text-sm flex-wrap">
                 <span>
                   {publishedDate && publishedDate !== 'Unknown Date'
                     ? (() => {
@@ -239,7 +242,7 @@ return (
           {/* Mobile Status Buttons */}
           <div className="flex flex-col items-center gap-2 p-4 bg-[#2C3440] rounded-xl border border-amber-900/20">
             <BookStatus
-              status={userStatus as 'to-read' | 'completed' | 'dropped' | null}
+              status={userStatus}
               onStatusChange={handleStatusChange}
               disabled={userRating > 0}
               isRated={userRating > 0}
@@ -358,6 +361,24 @@ return (
               title={title}
             />
           )}
+
+          {/* Mobile Add to List Button */}
+          {data?.id && (
+            <button
+              onClick={() => {
+                if (!isAuthenticated) {
+                  setLoginIntent('status');
+                  setShowLoginModal(true);
+                  return;
+                }
+                setShowAddToList(true);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2C3440] hover:bg-[#3D4451] text-stone-50 font-medium rounded-xl border border-purple-500/30 hover:border-purple-500/50 transition-all"
+            >
+              <ListPlus className="w-5 h-5 text-purple-400" />
+              Add to List
+            </button>
+          )}
         </div>
 
         <div className="flex gap-10 items-start">
@@ -411,7 +432,7 @@ return (
             <div className="space-y-2">
               <div className="flex justify-center">
                 <BookStatus
-                  status={userStatus as 'to-read' | 'completed' | 'dropped' | null}
+                  status={userStatus}
                   onStatusChange={handleStatusChange}
                   disabled={userRating > 0}
                   isRated={userRating > 0}
@@ -534,14 +555,32 @@ return (
                 </div>
               )}
             </div>
+
+            {/* Add to List Button */}
+            {data?.id && (
+              <button
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    setLoginIntent('status');
+                    setShowLoginModal(true);
+                    return;
+                  }
+                  setShowAddToList(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2C3440] hover:bg-[#3D4451] text-stone-50 font-medium rounded-xl border border-purple-500/30 hover:border-purple-500/50 transition-all"
+              >
+                <ListPlus className="w-5 h-5 text-purple-400" />
+                Add to List
+              </button>
+            )}
           </div>
 
           {/* Content Column - Right Side */}
-          <div className="flex-1 pb-16">
+          <div className="flex-1 pb-16 w-full min-w-0 overflow-hidden">
 
             {/* Title & Metadata Header - Desktop Only (hidden on mobile since it's in mobile section) */}
-            <div className="hidden lg:block mb-6">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-stone-50 mb-3 bg-gradient-to-r from-white to-amber-100 bg-clip-text text-transparent">{title}</h1>
+            <div className="hidden lg:block mb-6 w-full overflow-hidden">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-stone-50 mb-3 bg-gradient-to-r from-white to-amber-100 bg-clip-text text-transparent break-words">{title}</h1>
               <div className="flex items-center gap-3 text-stone-400 text-sm md:text-base flex-wrap">
                 <span className="text-amber-400 font-medium">{author}</span>
                 <span className="text-stone-600">•</span>
@@ -570,7 +609,7 @@ return (
             </div>
 
             {/* Stats Bar - Responsive Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 p-4 sm:p-5 bg-gradient-to-br from-[#14181C]/80 via-[#14181C]/60 to-[#14181C]/80 rounded-xl border border-amber-900/20 shadow-lg">
+            <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 p-4 sm:p-5 bg-gradient-to-br from-[#14181C]/80 via-[#14181C]/60 to-[#14181C]/80 rounded-xl border border-amber-900/20 shadow-lg overflow-hidden">
               <div className="text-center">
                 <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-amber-400 to-orange-500 bg-clip-text text-transparent">{averageRating?.toFixed(1) ?? 'N/A'}</div>
                 <div className="text-xs text-amber-600/80 uppercase tracking-wide font-semibold">Rating</div>
@@ -590,7 +629,7 @@ return (
             </div>
 
             {/* Description */}
-            <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-[#2C3440] rounded-xl border border-stone-800/50">
+            <div className="w-full mb-6 sm:mb-8 p-4 sm:p-6 bg-[#2C3440] rounded-xl border border-stone-800/50 overflow-hidden">
               <h2 className="text-base sm:text-lg font-semibold text-amber-400 mb-2 sm:mb-3">Synopsis</h2>
               <div className="prose prose-stone max-w-none">
                 {(() => {
@@ -603,7 +642,7 @@ return (
 
                   return (
                     <div>
-                      <p className="text-stone-300 leading-relaxed text-sm sm:text-base">
+                      <p className="text-stone-300 leading-relaxed text-sm sm:text-base break-words">
                         {displayText}
                       </p>
                       {shouldShowButton && (
@@ -622,7 +661,7 @@ return (
 
             {/* Genres */}
             {categories && categories.length > 0 && (
-              <div className="mb-6 sm:mb-8">
+              <div className="w-full mb-6 sm:mb-8 overflow-hidden">
                 <h3 className="text-xs sm:text-sm font-semibold text-amber-400 mb-2 sm:mb-3 uppercase tracking-wider">Genres</h3>
                 <div className="flex flex-wrap gap-2">
                   {categories.map((tag) => (
@@ -636,13 +675,13 @@ return (
 
             {/* More by Author */}
             {author && author !== 'Unknown Author' && data?.id && (
-              <div className="mb-6 sm:mb-8">
+              <div className="w-full mb-8 sm:mb-12 pb-8 border-b border-stone-800/50 overflow-hidden">
                 <MoreByAuthor author={author} currentBookId={data.id} />
               </div>
             )}
 
             {/* Reviews Section - Letterboxd Style */}
-            <div className="mt-8 sm:mt-12">
+            <div className="w-full mt-8 sm:mt-12 pb-8 overflow-hidden">
               <h2 className="text-xl sm:text-2xl font-bold text-stone-50 mb-4 sm:mb-6">Reviews</h2>
               <Review
                 totalRatings={totalRatings}
@@ -683,6 +722,24 @@ return (
           }}
         />
       )}
+
+      {/* Add to List Popup */}
+      {data?.id && (
+        <AddToListPopup
+          isOpen={showAddToList}
+          onClose={() => setShowAddToList(false)}
+          bookId={data.id}
+          bookTitle={title}
+          openLibraryId={data.openLibraryId}
+          bookImage={data.image}
+          bookAuthor={data.author}
+        />
+      )}
+
+      {/* Visual separator before footer */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="border-t border-stone-800/50 mt-12"></div>
+      </div>
 
       <Footer />
     </div>

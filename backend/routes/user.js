@@ -14,6 +14,30 @@ const supabaseAdmin = createClient(
 
 const router = express.Router();
 
+// Username validation helper
+const validateUsername = (username) => {
+  if (!username || typeof username !== 'string') {
+    return { valid: false, error: 'Username is required' };
+  }
+
+  const trimmed = username.trim();
+
+  if (trimmed.length < 3) {
+    return { valid: false, error: 'Username must be at least 3 characters' };
+  }
+
+  if (trimmed.length > 20) {
+    return { valid: false, error: 'Username must be 20 characters or less' };
+  }
+
+  // Only allow alphanumeric, underscore, and dash
+  if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+    return { valid: false, error: 'Username can only contain letters, numbers, underscores, and dashes' };
+  }
+
+  return { valid: true, username: trimmed };
+};
+
 router.get('/me', authenticateUser, async (req, res) => {
     try {
       const userId = req.userId;
@@ -78,22 +102,42 @@ router.get('/me', authenticateUser, async (req, res) => {
     }
   });
 
-  router.put('/update', writeLimiter, authenticateUser, async (req, res) => {
+  router.put('/update', authLimiter, authenticateUser, async (req, res) => {
     const { username, bio, avatar_url } = req.body;
     const userId = req.userId;
-  
+
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-  
+
+    // Validate username if provided
+    if (username !== undefined) {
+      const usernameValidation = validateUsername(username);
+      if (!usernameValidation.valid) {
+        return res.status(400).json({ error: usernameValidation.error });
+      }
+    }
+
+    // Validate avatar_url if provided
+    if (avatar_url !== undefined && avatar_url !== null) {
+      const supabaseUrl = process.env.SUPABASE_URL;
+      if (!avatar_url.startsWith(supabaseUrl)) {
+        return res.status(400).json({ error: 'Invalid avatar URL' });
+      }
+    }
+
     try {
+      const updateData = {};
+      if (username !== undefined) {
+        updateData.username = validateUsername(username).username;
+      }
+      if (avatar_url !== undefined) {
+        updateData.avatar_url = avatar_url;
+      }
+
       await prisma.user.update({
         where: { id: userId },
-        data: {
-          username,
-          // bio,
-          avatar_url,
-        },
+        data: updateData,
       });
 
       // Invalidate user-related caches
@@ -117,32 +161,35 @@ router.get('/me', authenticateUser, async (req, res) => {
 
   router.post('/create', authLimiter, async (req, res) => {
     const { id, email, username, avatar_url } = req.body;
-  
-    if (!id || !email || !username) {
+
+    if (!id || !email) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+
+    // Validate username
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.valid) {
+      return res.status(400).json({ error: usernameValidation.error });
+    }
+
     try {
-      const existingUser = await prisma.user.findUnique({
-        where: { username },
-      });
-  
-      if (existingUser) {
-        return res.status(409).json({ error: 'Username already taken' });
-      }
-  
       const newUser = await prisma.user.create({
         data: {
           id,
           email,
-          username,
+          username: usernameValidation.username,
           avatar_url
         },
       });
-  
+
       console.log(newUser);
-  
+
       return res.status(201).json(newUser);
     } catch (err) {
+      // Handle unique constraint violation (duplicate username)
+      if (err.code === 'P2002' && err.meta?.target?.includes('username')) {
+        return res.status(409).json({ error: 'Username already taken' });
+      }
       console.error(err);
       return res.status(500).json({ error: 'Internal server error' });
     }
@@ -209,10 +256,30 @@ router.get('/me', authenticateUser, async (req, res) => {
       console.error('Failed to delete user from Supabase Auth:', authError);
     }
 
-    // Delete profile image from storage if it exists
-    const { error: storageError } = await supabaseAdmin.storage
-      .from('avatar')
-      .remove([`avatar/${userId}`]);
+    // Delete all avatar files for this user from storage
+    try {
+      const { data: files, error: listError } = await supabaseAdmin.storage
+        .from('avatar')
+        .list('avatar', {
+          search: userId
+        });
+
+      if (!listError && files && files.length > 0) {
+        const filesToDelete = files
+          .filter(f => f.name.startsWith(userId))
+          .map(f => `avatar/${f.name}`);
+
+        if (filesToDelete.length > 0) {
+          await supabaseAdmin.storage
+            .from('avatar')
+            .remove(filesToDelete);
+          console.log(`Deleted ${filesToDelete.length} avatar files for user ${userId}`);
+        }
+      }
+    } catch (storageError) {
+      console.error('Error cleaning up avatar files:', storageError);
+      // Don't fail the whole deletion for storage cleanup issues
+    }
 
     return res.status(200).json({ message: 'Account deleted successfully' });
   } catch (error) {
