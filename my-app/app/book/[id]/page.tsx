@@ -3,7 +3,7 @@
 import { getBookData } from '../../../utils/util'
 import Header from '@/app/components/Header'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 
 
 import StarRating from '@/app/components/StarRating'
@@ -19,9 +19,9 @@ import BuyNowButton from '@/app/components/BuyNowButton'
 import LoginModal from '@/app/components/LoginModal'
 import { useAuth } from '@/hooks/useAuth'
 import AddToListPopup from '@/app/components/AddToListPopup'
-import { ListPlus } from 'lucide-react'
+import { ListPlus, Loader2 } from 'lucide-react'
 
-const BookPage = () => {
+function BookPageContent() {
   const params = useParams()
   const searchParams = useSearchParams();
   const id = decodeURIComponent(params.id as string)
@@ -746,4 +746,20 @@ return (
   )
 }
 
-export default BookPage
+// Loading fallback for Suspense
+function BookPageLoading() {
+  return (
+    <div className="min-h-screen bg-[#14181C] flex items-center justify-center">
+      <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
+    </div>
+  )
+}
+
+// Default export with Suspense boundary for useSearchParams
+export default function BookPage() {
+  return (
+    <Suspense fallback={<BookPageLoading />}>
+      <BookPageContent />
+    </Suspense>
+  )
+}

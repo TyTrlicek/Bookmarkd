@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
-import { 
-  BookOpen, 
+import {
+  BookOpen,
   ArrowRight,
   Users,
   Star,
@@ -13,6 +13,7 @@ import {
   User,
   Upload,
   X,
+  Loader2,
 } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 import axios from 'axios'
@@ -21,7 +22,7 @@ import Image from 'next/image'
 import Footer from '../components/Footer'
 import MobileAuthPage from './MobileAuthPage'
 
-export default function AuthPage() {
+function AuthPageContent() {
   const [message, setMessage] = useState('')
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [username, setUsername] = useState('')
@@ -735,5 +736,23 @@ export default function AuthPage() {
         </div></>}
       </div>
     </div>
+  )
+}
+
+// Loading fallback for Suspense
+function AuthLoading() {
+  return (
+    <div className="min-h-screen bg-[#14181C] flex items-center justify-center">
+      <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
+    </div>
+  )
+}
+
+// Default export with Suspense boundary for useSearchParams
+export default function AuthPage() {
+  return (
+    <Suspense fallback={<AuthLoading />}>
+      <AuthPageContent />
+    </Suspense>
   )
 }
