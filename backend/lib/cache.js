@@ -10,7 +10,10 @@ class CacheManager {
       'userStats': 2000,
       'userCollection': 1000,
       'userProfile': 1000,
-      'recommendations': 500
+      'recommendations': 500,
+      'followers': 1000,
+      'following': 1000,
+      'publicProfile': 1000
     };
     this.initializeMonitoring();
   }
@@ -24,14 +27,9 @@ class CacheManager {
         // Remove the incorrect memory('usage') call since we get memory info from info('memory')
 
         // Extract used memory from info string
-        const usedMemoryMatch = memoryInfo.match(/used_memory:(\d+)/);
-        if (usedMemoryMatch) {
-          const usedMemoryBytes = parseInt(usedMemoryMatch[1]);
-          const usedMemoryMB = Math.round(usedMemoryBytes / 1024 / 1024);
-          console.log(`[Redis] Total used memory: ${usedMemoryMB}MB`);
-        }
+        // Memory monitoring - silent
       } catch (error) {
-        console.error('[Redis] Memory monitoring error:', error);
+        // Memory monitoring failed silently
       }
     }, 300000); // Every 5 minutes
   }
@@ -81,11 +79,10 @@ class CacheManager {
         const keysToRemove = keys.slice(0, Math.floor(maxKeys * 0.1)); // Remove 10% of max
         if (keysToRemove.length > 0) {
           await redis.del(...keysToRemove);
-          console.log(`[Cache] Removed ${keysToRemove.length} old keys from ${namespace} namespace`);
         }
       }
     } catch (error) {
-      console.error(`Error enforcing namespace limit for ${namespace}:`, error);
+      // Namespace limit enforcement failed silently
     }
   }
 
@@ -118,11 +115,9 @@ class CacheManager {
   async cached(key, fetchFunction, ttl = this.defaultTTL) {
     const cached = await this.get(key);
     if (cached) {
-      console.log(`Cache hit for key: ${key}`);
       return cached;
     }
 
-    console.log(`Cache miss for key: ${key}, fetching data...`);
     const data = await fetchFunction();
     await this.set(key, data, ttl);
     return data;
@@ -136,7 +131,10 @@ class CacheManager {
       `userCollection:${userId}`,
       `userProfile:${userId}`,
       `recommendations:${userId}`,
-      `userActivity:${userId}:*`
+      `userActivity:${userId}:*`,
+      `followers:${userId}`,
+      `following:${userId}`,
+      `publicProfile:*`
     ];
 
     let totalDeleted = 0;
@@ -144,7 +142,6 @@ class CacheManager {
       totalDeleted += await this.delPattern(pattern);
     }
 
-    console.log(`Invalidated ${totalDeleted} cache entries for user ${userId}`);
     return totalDeleted;
   }
 
@@ -161,7 +158,6 @@ class CacheManager {
       totalDeleted += await this.delPattern(pattern);
     }
 
-    console.log(`Invalidated ${totalDeleted} cache entries for book ${bookId}`);
     return totalDeleted;
   }
 
@@ -178,7 +174,6 @@ class CacheManager {
       totalDeleted += await this.delPattern(pattern);
     }
 
-    console.log(`Invalidated ${totalDeleted} global cache entries`);
     return totalDeleted;
   }
 }
@@ -197,7 +192,11 @@ const TTL = {
   RECOMMENDATIONS: 86400,  // 24 hours
   LIST_DETAIL: 1800,       // 30 minutes
   USER_LISTS: 900,         // 15 minutes
-  POPULAR_LISTS: 3600      // 1 hour
+  POPULAR_LISTS: 3600,     // 1 hour
+  FOLLOWERS: 300,          // 5 minutes
+  FOLLOWING: 300,          // 5 minutes
+  PUBLIC_PROFILE: 600,     // 10 minutes
+  USER_RECOMMENDATIONS: 3600 // 1 hour
 };
 
 module.exports = {

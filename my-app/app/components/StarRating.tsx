@@ -123,8 +123,8 @@ const StarRating: React.FC<StarRatingProps> = ({
         <Star
           className={`absolute inset-0 ${starSize} ${
             hoveredRating !== null && !readonly
-              ? 'text-amber-400/30'
-              : 'text-stone-600'
+              ? 'text-gold/30'
+              : 'text-ink-faint'
           } transition-colors`}
           strokeWidth={1.5}
         />
@@ -142,8 +142,8 @@ const StarRating: React.FC<StarRatingProps> = ({
             <Star
               className={`${starSize} ${
                 hoveredRating !== null && !readonly
-                  ? 'text-amber-300'
-                  : 'text-amber-400'
+                  ? 'text-gold-soft'
+                  : 'text-gold'
               } fill-current transition-colors`}
               strokeWidth={1.5}
             />
@@ -160,7 +160,7 @@ const StarRating: React.FC<StarRatingProps> = ({
       </div>
 
       {showValue && (
-        <span className="text-sm font-medium text-stone-300">
+        <span className="text-sm font-medium text-ink-soft">
           {displayRating > 0 ? displayRating.toFixed(1) : '—'}
         </span>
       )}

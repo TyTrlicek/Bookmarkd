@@ -349,10 +349,10 @@ const EditListPage = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#14181C]">
+      <div className="min-h-screen bg-canvas">
         <Header />
         <div className="flex items-center justify-center py-32">
-          <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
+          <Loader2 className="w-10 h-10 text-gold animate-spin" />
         </div>
         <Footer />
       </div>
@@ -361,19 +361,19 @@ const EditListPage = () => {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[#14181C]">
+      <div className="min-h-screen bg-canvas">
         <Header />
         <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-          <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <X className="w-10 h-10 text-red-400" />
+          <div className="w-20 h-20 bg-rate-bad/15 rounded-full flex items-center justify-center mx-auto mb-6">
+            <X className="w-10 h-10 text-rate-bad" />
           </div>
-          <h1 className="text-2xl font-bold text-stone-50 mb-3">{loadError}</h1>
-          <p className="text-stone-400 mb-6">
+          <h1 className="font-display text-xl font-semibold text-ink mb-3">{loadError}</h1>
+          <p className="text-ink-mute mb-6">
             You may not have permission to edit this list or it may not exist.
           </p>
           <Link
             href="/lists"
-            className="inline-flex items-center gap-2 px-5 py-3 bg-purple-500 hover:bg-purple-400 text-white font-semibold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-ember hover:bg-ember-strong text-white font-semibold rounded-xl transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Browse Lists
@@ -389,7 +389,7 @@ const EditListPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#14181C]">
+    <div className="min-h-screen bg-canvas">
       <Header />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -398,27 +398,27 @@ const EditListPage = () => {
           <div className="flex items-center gap-4">
             <Link
               href={`/lists/${listId}`}
-              className="inline-flex items-center gap-2 text-stone-400 hover:text-stone-300 transition-colors"
+              className="inline-flex items-center gap-2 text-ink-mute hover:text-ink-soft transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to List
             </Link>
           </div>
-          <h1 className="text-2xl font-bold text-stone-50">Edit List</h1>
+          <h1 className="font-display text-xl font-semibold text-ink">Edit List</h1>
           <div className="w-24" />
         </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Left Column - List Settings */}
-          <div className="bg-[#2C3440] rounded-2xl p-6 border border-[#3D4451]">
-            <h2 className="text-lg font-semibold text-stone-50 mb-6">List Settings</h2>
+          <div className="bg-surface rounded-2xl p-6 border border-line">
+            <h2 className="font-display text-base font-semibold text-ink mb-6">List Settings</h2>
 
             <div className="space-y-5">
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-stone-300 mb-2">
-                  Name <span className="text-red-400">*</span>
+                <label className="block text-sm font-medium text-ink-soft mb-2">
+                  Name <span className="text-rate-bad">*</span>
                 </label>
                 <input
                   type="text"
@@ -426,16 +426,16 @@ const EditListPage = () => {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g., Best Fantasy Books of 2024"
                   maxLength={100}
-                  className="w-full px-4 py-3 bg-[#14181C] border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors placeholder-stone-500 text-stone-50"
+                  className="w-full px-4 py-3 bg-canvas border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink"
                 />
-                <p className="text-xs text-stone-500 mt-1">{title.length}/100</p>
+                <p className="text-xs text-ink0 mt-1">{title.length}/100</p>
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-stone-300 mb-2">
+                <label className="block text-sm font-medium text-ink-soft mb-2">
                   <AlignLeft className="w-4 h-4 inline mr-1" />
-                  Description <span className="text-stone-500">(optional)</span>
+                  Description <span className="text-ink0">(optional)</span>
                 </label>
                 <textarea
                   value={description}
@@ -443,26 +443,26 @@ const EditListPage = () => {
                   placeholder="What's this list about?"
                   maxLength={500}
                   rows={4}
-                  className="w-full px-4 py-3 bg-[#14181C] border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors placeholder-stone-500 text-stone-50 resize-none"
+                  className="w-full px-4 py-3 bg-canvas border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink resize-none"
                 />
-                <p className="text-xs text-stone-500 mt-1">{description.length}/500</p>
+                <p className="text-xs text-ink0 mt-1">{description.length}/500</p>
               </div>
 
               {/* Toggle Options */}
               <div className="space-y-3">
                 {/* Public/Private Toggle */}
-                <div className="flex items-center justify-between p-4 bg-[#14181C] rounded-xl border border-[#3D4451]">
+                <div className="flex items-center justify-between p-4 bg-canvas rounded-xl border border-line">
                   <div className="flex items-center gap-3">
                     {isPublic ? (
-                      <Globe className="w-5 h-5 text-green-400" />
+                      <Globe className="w-5 h-5 text-rate-high" />
                     ) : (
-                      <Lock className="w-5 h-5 text-stone-400" />
+                      <Lock className="w-5 h-5 text-ink-mute" />
                     )}
                     <div>
-                      <p className="text-stone-50 font-medium">
+                      <p className="text-ink font-medium">
                         {isPublic ? 'Public' : 'Private'}
                       </p>
-                      <p className="text-stone-400 text-xs">
+                      <p className="text-ink-mute text-xs">
                         {isPublic
                           ? 'Anyone can view this list'
                           : 'Only you can see this list'}
@@ -473,7 +473,7 @@ const EditListPage = () => {
                     type="button"
                     onClick={() => setIsPublic(!isPublic)}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      isPublic ? 'bg-green-500' : 'bg-stone-600'
+                      isPublic ? 'bg-rate-high' : 'bg-surface-2'
                     }`}
                   >
                     <div
@@ -485,14 +485,14 @@ const EditListPage = () => {
                 </div>
 
                 {/* Ranked Toggle */}
-                <div className="flex items-center justify-between p-4 bg-[#14181C] rounded-xl border border-[#3D4451]">
+                <div className="flex items-center justify-between p-4 bg-canvas rounded-xl border border-line">
                   <div className="flex items-center gap-3">
-                    <Hash className={`w-5 h-5 ${isRanked ? 'text-purple-400' : 'text-stone-400'}`} />
+                    <Hash className={`w-5 h-5 ${isRanked ? 'text-gold' : 'text-ink-mute'}`} />
                     <div>
-                      <p className="text-stone-50 font-medium">
+                      <p className="text-ink font-medium">
                         {isRanked ? 'Ranked List' : 'Unranked List'}
                       </p>
-                      <p className="text-stone-400 text-xs">
+                      <p className="text-ink-mute text-xs">
                         {isRanked
                           ? 'Numbers will be shown'
                           : 'Books displayed without numbers'}
@@ -503,7 +503,7 @@ const EditListPage = () => {
                     type="button"
                     onClick={() => setIsRanked(!isRanked)}
                     className={`relative w-12 h-6 rounded-full transition-colors ${
-                      isRanked ? 'bg-purple-500' : 'bg-stone-600'
+                      isRanked ? 'bg-ember' : 'bg-surface-2'
                     }`}
                   >
                     <div
@@ -518,26 +518,26 @@ const EditListPage = () => {
           </div>
 
           {/* Right Column - Add Books */}
-          <div className="bg-[#2C3440] rounded-2xl p-6 border border-[#3D4451]">
-            <h2 className="text-lg font-semibold text-stone-50 mb-6">Add Books</h2>
+          <div className="bg-surface rounded-2xl p-6 border border-line">
+            <h2 className="font-display text-base font-semibold text-ink mb-6">Add Books</h2>
 
             {/* Search Input */}
             <div className="relative">
               <div className="relative">
                 <Search
                   className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors ${
-                    isSearching ? 'text-purple-400' : 'text-stone-400'
+                    isSearching ? 'text-gold' : 'text-ink-mute'
                   }`}
                 />
                 {isSearching && (
-                  <Loader2 className="w-4 h-4 text-purple-400 absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-gold absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
                 )}
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for books..."
-                  className={`w-full pl-10 py-3 bg-[#14181C] border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors placeholder-stone-500 text-stone-50 ${
+                  className={`w-full pl-10 py-3 bg-canvas border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink ${
                     isSearching ? 'pr-10' : 'pr-4'
                   }`}
                 />
@@ -545,11 +545,11 @@ const EditListPage = () => {
 
               {/* Search Results Dropdown */}
               {(showSearchResults || isSearching) && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-[#14181C] border border-[#3D4451] rounded-xl shadow-xl max-h-80 overflow-y-auto z-20">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-canvas border border-line rounded-xl shadow-xl max-h-80 overflow-y-auto z-20">
                   {isSearching ? (
                     <div className="p-4 text-center">
-                      <Loader2 className="w-5 h-5 text-purple-400 animate-spin mx-auto mb-2" />
-                      <p className="text-stone-400 text-sm">Searching books...</p>
+                      <Loader2 className="w-5 h-5 text-gold animate-spin mx-auto mb-2" />
+                      <p className="text-ink-mute text-sm">Searching books...</p>
                     </div>
                   ) : searchResults.length > 0 ? (
                     searchResults.slice(0, 6).map((book) => {
@@ -561,13 +561,13 @@ const EditListPage = () => {
                         <div
                           key={book.id || book.openLibraryId || book.title}
                           onClick={() => !isAdded && handleAddBook(book)}
-                          className={`p-3 border-b border-[#3D4451] last:border-b-0 flex items-center gap-3 ${
+                          className={`p-3 border-b border-line last:border-b-0 flex items-center gap-3 ${
                             isAdded
                               ? 'opacity-50 cursor-not-allowed'
-                              : 'hover:bg-[#2C3440] cursor-pointer'
+                              : 'hover:bg-surface cursor-pointer'
                           }`}
                         >
-                          <div className="w-10 h-14 bg-[#3D4451] rounded overflow-hidden flex-shrink-0">
+                          <div className="w-10 h-14 bg-surface-2 rounded overflow-hidden flex-shrink-0">
                             {book.image ? (
                               <Image
                                 src={book.image}
@@ -578,30 +578,30 @@ const EditListPage = () => {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <BookOpen className="w-4 h-4 text-stone-500" />
+                                <BookOpen className="w-4 h-4 text-ink0" />
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-stone-50 text-sm font-medium truncate">
+                            <p className="text-ink text-sm font-medium truncate">
                               {book.title}
                             </p>
-                            <p className="text-stone-400 text-xs truncate">
+                            <p className="text-ink-mute text-xs truncate">
                               {book.author || 'Unknown Author'}
                             </p>
                           </div>
                           {isAdded ? (
-                            <span className="text-xs text-stone-500">Added</span>
+                            <span className="text-xs text-ink0">Added</span>
                           ) : (
-                            <Plus className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                            <Plus className="w-5 h-5 text-gold flex-shrink-0" />
                           )}
                         </div>
                       )
                     })
                   ) : (
                     <div className="p-4 text-center">
-                      <BookOpen className="w-8 h-8 text-stone-500 mx-auto mb-2" />
-                      <p className="text-stone-400 text-sm">No books found</p>
+                      <BookOpen className="w-8 h-8 text-ink0 mx-auto mb-2" />
+                      <p className="text-ink-mute text-sm">No books found</p>
                     </div>
                   )}
                 </div>
@@ -609,38 +609,38 @@ const EditListPage = () => {
             </div>
 
             {/* Hint */}
-            <p className="text-stone-500 text-xs mt-3">
+            <p className="text-ink0 text-xs mt-3">
               Search for books by title or author and click to add them to your list.
             </p>
           </div>
         </div>
 
         {/* Books in List Section */}
-        <div className="bg-[#2C3440] rounded-2xl p-6 border border-[#3D4451] mb-8">
+        <div className="bg-surface rounded-2xl p-6 border border-line mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-stone-50">
+            <h2 className="font-display text-base font-semibold text-ink">
               Books in This List ({books.length})
             </h2>
           </div>
 
           {books.length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-purple-400" />
+              <div className="w-16 h-16 bg-gold-dim rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-8 h-8 text-gold" />
               </div>
-              <p className="text-stone-400 mb-2">No books in this list</p>
-              <p className="text-stone-500 text-sm">Use the search above to add books to your list</p>
+              <p className="text-ink-mute mb-2">No books in this list</p>
+              <p className="text-ink0 text-sm">Use the search above to add books to your list</p>
             </div>
           ) : (
             <div className="space-y-3">
               {books.map((book, index) => (
                 <div
                   key={book.id}
-                  className="flex items-center gap-4 p-4 bg-[#14181C] rounded-xl border border-[#3D4451] group"
+                  className="flex items-center gap-4 p-4 bg-canvas rounded-xl border border-line group"
                 >
                   {/* Rank Number */}
                   {isRanked && (
-                    <div className="w-8 h-8 bg-purple-500 text-white font-bold rounded-lg flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="w-8 h-8 bg-ember text-white font-semibold rounded-lg flex items-center justify-center text-sm flex-shrink-0">
                       {index + 1}
                     </div>
                   )}
@@ -650,21 +650,21 @@ const EditListPage = () => {
                     <button
                       onClick={() => handleMoveUp(index)}
                       disabled={index === 0}
-                      className="p-1 text-stone-500 hover:text-stone-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="p-1 text-ink0 hover:text-ink-soft disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleMoveDown(index)}
                       disabled={index === books.length - 1}
-                      className="p-1 text-stone-500 hover:text-stone-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="p-1 text-ink0 hover:text-ink-soft disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
 
                   {/* Book Cover */}
-                  <div className="w-12 h-16 bg-[#3D4451] rounded overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-16 bg-surface-2 rounded overflow-hidden flex-shrink-0">
                     {book.image ? (
                       <Image
                         src={book.image}
@@ -675,15 +675,15 @@ const EditListPage = () => {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="w-5 h-5 text-stone-500" />
+                        <BookOpen className="w-5 h-5 text-ink0" />
                       </div>
                     )}
                   </div>
 
                   {/* Book Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-stone-50 font-medium truncate">{book.title}</p>
-                    <p className="text-stone-400 text-sm truncate">
+                    <p className="text-ink font-medium truncate">{book.title}</p>
+                    <p className="text-ink-mute text-sm truncate">
                       {book.author || 'Unknown Author'}
                     </p>
                   </div>
@@ -691,7 +691,7 @@ const EditListPage = () => {
                   {/* Remove Button */}
                   <button
                     onClick={() => handleRemoveBook(book.id)}
-                    className="p-2 text-stone-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    className="p-2 text-ink0 hover:text-rate-bad hover:bg-rate-bad/10 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -703,7 +703,7 @@ const EditListPage = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 text-sm">
+          <div className="mb-6 p-4 bg-rate-bad/10 border border-rate-bad/30 rounded-xl text-rate-bad text-sm">
             {error}
           </div>
         )}
@@ -712,14 +712,14 @@ const EditListPage = () => {
         <div className="flex items-center justify-end gap-4">
           <Link
             href={`/lists/${listId}`}
-            className="px-6 py-3 border border-[#3D4451] text-stone-300 rounded-xl hover:bg-white/5 transition-colors"
+            className="px-6 py-3 border border-line text-ink-soft rounded-xl hover:bg-overlay transition-colors"
           >
             Cancel
           </Link>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || !title.trim()}
-            className="px-8 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-purple-500/25"
+            className="px-8 py-3 bg-ember text-white hover:bg-ember-strong font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg "
           >
             {isSubmitting ? (
               <Loader2 className="w-5 h-5 animate-spin mx-auto" />

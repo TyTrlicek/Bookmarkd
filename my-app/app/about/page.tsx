@@ -27,7 +27,7 @@ const AboutPage = () => {
       id: 'mission',
       title: 'Our Mission',
       icon: Target,
-      content: `Bookmarkd is a user focused platform for tracking and rating books. Built by a single passionate reader, it's designed as a simpler, faster alternative to bloated reading platforms, helping readers catalog their books, rate favorites, and discover new ones.
+      content: `Bookmarkd is a user focused platform for tracking and rating books. It's designed as a simpler, faster alternative to bloated reading platforms, helping readers catalog their books, rate favorites, and discover new ones.
 
 Inspired by the clean, community-driven experience of Letterboxd, Bookmarkd takes the best parts, ranking systems, structured ratings, and a clear interface and applies them to the world of books.`
     },
@@ -36,8 +36,7 @@ Inspired by the clean, community-driven experience of Letterboxd, Bookmarkd take
       title: 'Why Bookmarkd?',
       icon: Lightbulb,
       content: `• Focused and simple: No distractions, no clutter, just a place to log, rate, and rank books.
-• Rankings that matter: See which books rise to the top and explore personal and global favorites.
-• Built for die-hard readers: Whether you're cataloging your lifetime reads or tracking your current favorites, Bookmarkd scales to your reading habits.`
+• Rankings that matter: See which books rise to the top and explore personal and global favorites.`
     },
 //     {
 //       id: 'features',
@@ -99,10 +98,6 @@ Your feedback shapes the future of Bookmarkd. Whether you've found a bug, have a
           </p>
           
           <div className="flex items-center justify-center gap-6 text-stone-400">
-            <div className="flex items-center gap-2">
-              <Heart className="w-4 h-4 text-red-400" />
-              <span>Built by readers</span>
-            </div>
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-yellow-400" />
               <span>Lightning fast</span>

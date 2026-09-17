@@ -12,7 +12,6 @@ const BuyNowButton: React.FC<BuyNowButtonProps> = ({ isbn, title }) => {
   const BOOKSHOP_TAG = process.env.NEXT_PUBLIC_BOOKSHOP_AFFILIATE_TAG || 'bookmarkd';
 
   const handleBuyClick = (link: string, platform: string) => {
-    console.log(`Buy click: ${platform} for "${title}"`);
     window.open(link, '_blank', 'noopener,noreferrer');
   };
 
@@ -21,8 +20,8 @@ const BuyNowButton: React.FC<BuyNowButtonProps> = ({ isbn, title }) => {
   }
 
   return (
-    <div className="p-4 sm:p-6 bg-[#2C3440] rounded-xl border border-amber-900/20">
-      <h3 className="text-xs sm:text-sm font-semibold text-amber-400 mb-3 sm:mb-4 uppercase tracking-wider flex items-center gap-2">
+    <div className="p-4 sm:p-6 bg-surface rounded-xl border border-line">
+      <h3 className="text-xs sm:text-sm font-semibold text-gold mb-3 sm:mb-4 uppercase tracking-wider flex items-center gap-2">
         <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         Where to Buy
       </h3>
@@ -84,7 +83,7 @@ const BuyNowButton: React.FC<BuyNowButtonProps> = ({ isbn, title }) => {
           <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/80 group-hover:text-white transition-colors flex-shrink-0" />
         </a>
       </div>
-      <p className="text-xs text-stone-500 mt-4 text-center">Affiliate links support our platform</p>
+      <p className="text-xs text-ink-faint mt-4 text-center">Affiliate links support our platform</p>
     </div>
   );
 };

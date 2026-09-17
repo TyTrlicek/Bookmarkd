@@ -41,50 +41,47 @@ const ListsClient = () => {
     }
   }
 
+  const tabClass = (active: boolean) =>
+    `inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+      active ? 'bg-gold-dim text-gold' : 'text-ink-mute hover:text-ink'
+    }`
+
   return (
-    <div className="min-h-screen bg-[#14181C]">
+    <div className="min-h-screen bg-canvas">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="mx-auto max-w-7xl px-6 py-12">
         {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <ListPlus className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold text-stone-50">Lists</h1>
-            </div>
-            <p className="text-stone-400">
-              Discover curated book collections from the community
-            </p>
+            <p className="kicker">Community</p>
+            <h1 className="font-display mt-2 text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl">
+              Lists
+            </h1>
+            <p className="mt-2 text-sm text-ink-mute">Book collections from the community.</p>
           </div>
 
           {isAuthenticated && (
             <Link
               href="/lists/new"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-purple-500/25"
+              className="inline-flex items-center gap-2 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ember-strong"
             >
-              <Plus className="w-5 h-5" />
-              Create List
+              <Plus className="h-4 w-4" />
+              Create list
             </Link>
           )}
         </div>
 
         {/* Sort Tabs */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="mb-8 inline-flex rounded-full border border-line bg-overlay p-1">
           <button
             onClick={() => {
               setSort('recent')
               setPage(1)
             }}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              sort === 'recent'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-stone-400 hover:text-stone-300 hover:bg-white/5'
-            }`}
+            className={tabClass(sort === 'recent')}
           >
-            <Clock className="w-4 h-4" />
+            <Clock className="h-3.5 w-3.5" />
             Recent
           </button>
           <button
@@ -92,13 +89,9 @@ const ListsClient = () => {
               setSort('popular')
               setPage(1)
             }}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              sort === 'popular'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-stone-400 hover:text-stone-300 hover:bg-white/5'
-            }`}
+            className={tabClass(sort === 'popular')}
           >
-            <TrendingUp className="w-4 h-4" />
+            <TrendingUp className="h-3.5 w-3.5" />
             Popular
           </button>
         </div>
@@ -106,30 +99,30 @@ const ListsClient = () => {
         {/* Lists Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
+            <Loader2 className="h-6 w-6 animate-spin text-gold" />
           </div>
         ) : lists.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ListPlus className="w-10 h-10 text-purple-400" />
+          <div className="py-20 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-line bg-overlay">
+              <ListPlus className="h-6 w-6 text-ink-mute" />
             </div>
-            <h2 className="text-2xl font-bold text-stone-50 mb-3">No Lists Yet</h2>
-            <p className="text-stone-400 mb-6 max-w-md mx-auto">
-              Be the first to create a curated book collection for the community!
+            <h2 className="font-display text-xl font-semibold text-ink">No lists yet</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-ink-mute">
+              Be the first to build a collection for the community.
             </p>
             {isAuthenticated && (
               <Link
                 href="/lists/new"
-                className="inline-flex items-center gap-2 px-5 py-3 bg-purple-500 hover:bg-purple-400 text-white font-semibold rounded-xl transition-colors"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ember-strong"
               >
-                <Plus className="w-5 h-5" />
-                Create List
+                <Plus className="h-4 w-4" />
+                Create list
               </Link>
             )}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
               {lists.map((list) => (
                 <ListCard key={list.id} list={list} />
               ))}
@@ -137,25 +130,25 @@ const ListsClient = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 mt-12">
+              <div className="mt-12 flex items-center justify-center gap-4">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#2C3440] hover:bg-[#3D4451] text-stone-300 rounded-lg border border-[#3D4451] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-full border border-line bg-overlay px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-overlay-hover disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="h-4 w-4" />
                   Previous
                 </button>
-                <span className="text-stone-400">
+                <span className="text-sm text-ink-mute">
                   Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#2C3440] hover:bg-[#3D4451] text-stone-300 rounded-lg border border-[#3D4451] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 rounded-full border border-line bg-overlay px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-overlay-hover disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Next
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             )}

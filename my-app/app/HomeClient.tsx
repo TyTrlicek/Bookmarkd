@@ -35,14 +35,16 @@ import Header from './components/Header'
 import axios from 'axios'
 import useAuthStore from '@/store/authStore'
 import { supabase } from '@/lib/supabaseClient'
-import EnhancedHero from './components/EnhancedHero'
 import BookCarouselHero from './components/BookCarouselHero'
 import { UserActivity, List } from './types/types'
 import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
 import Footer from './components/Footer'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import ListCard from './components/ListCard'
+import OnboardingModal from './components/OnboardingModal'
+import OnboardingProgress from './components/OnboardingProgress'
+import DevOnboardingPanel from './components/DevOnboardingPanel'
 
 const HomePage = () => {
   const [activeSection, setActiveSection] = useState('trending')
@@ -55,7 +57,11 @@ const HomePage = () => {
   const [recentlyRatedData, setRecentlyRatedData] = useState<any[]>([]);
   const [popularLists, setPopularLists] = useState<List[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
+  const [devBookCountOverride, setDevBookCountOverride] = useState<number | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { session } = useAuthStore();
 
   useEffect(() => {
@@ -76,6 +82,14 @@ const HomePage = () => {
       authListener?.subscription.unsubscribe();
     };
   }, []);
+
+  // Check for welcome param to show onboarding modal for new users
+  useEffect(() => {
+    const welcomeParam = searchParams.get('welcome');
+    if (welcomeParam === 'true' && session) {
+      setShowOnboardingModal(true);
+    }
+  }, [searchParams, session]);
 
   useEffect (() => {
     const fetchTrendingData = async () => {
@@ -138,6 +152,7 @@ const HomePage = () => {
     },
   });
   setReccomendationData(response.data);
+  console.log('recommendation data', response.data);
     }
     catch (error) {
       console.error(error);
@@ -176,52 +191,170 @@ const HomePage = () => {
 
 }, [])
 
+  // Fetch onboarding status
+  const fetchOnboardingStatus = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const accessToken = session?.access_token;
+      if (!accessToken) return;
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/onboarding-status`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      setHasSeenWelcome(response.data.hasSeenWelcome ?? false);
+    } catch (error) {
+      console.error('Failed to fetch onboarding status:', error);
+    }
+  };
+
+  // Fetch onboarding status when session changes
+  useEffect(() => {
+    if (session) {
+      fetchOnboardingStatus();
+    }
+  }, [session]);
+
+  // Handle onboarding modal close
+  const handleOnboardingClose = async () => {
+    setShowOnboardingModal(false);
+
+    // Remove the welcome param from URL without page reload
+    const url = new URL(window.location.href);
+    url.searchParams.delete('welcome');
+    window.history.replaceState({}, '', url.pathname);
+
+    // Mark welcome as seen in the backend
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const accessToken = session?.access_token;
+      if (accessToken) {
+        await axios.put(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/users/onboarding`,
+          { hasSeenWelcome: true },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        setHasSeenWelcome(true);
+      }
+    } catch (error) {
+      console.error('Failed to update onboarding status:', error);
+    }
+  };
+
+  // Reset onboarding state (dev only)
+  const handleResetOnboarding = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const accessToken = session?.access_token;
+      if (!accessToken) return;
+
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/onboarding/reset`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      setHasSeenWelcome(false);
+      // Refresh user stats to get updated state
+      await fetchOnboardingStatus();
+    } catch (error) {
+      console.error('Failed to reset onboarding state:', error);
+    }
+  };
+
+  // Clear session dismissal (dev only)
+  const handleClearDismissal = () => {
+    sessionStorage.removeItem('onboarding_progress_dismissed');
+  };
+
+  // Section heading — mono kicker + display title
+  const SectionHeader = ({
+    kicker,
+    title,
+    subtitle,
+    accent = 'var(--gold)',
+    action,
+  }: {
+    kicker: string;
+    title: string;
+    subtitle?: string;
+    accent?: string;
+    action?: React.ReactNode;
+  }) => (
+    <div className="mb-7">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p
+            className="font-mono text-[0.7rem] uppercase tracking-[0.22em]"
+            style={{ color: accent }}
+          >
+            {kicker}
+          </p>
+          <h2 className="font-display mt-2 text-2xl font-semibold tracking-[-0.01em] text-ink sm:text-[1.75rem]">
+            {title}
+          </h2>
+        </div>
+        {action}
+      </div>
+      {subtitle && (
+        <p className="mt-1.5 text-sm text-ink-mute">{subtitle}</p>
+      )}
+      <div
+        className="mt-4 h-px w-full"
+        style={{
+          background: `linear-gradient(to right, ${accent}55, var(--line) 40%, transparent)`,
+        }}
+      />
+    </div>
+  )
+
   // Coming Soon Component
-  const ComingSoonSection = ({ icon: Icon, iconColor, title, subtitle, description }: {
+  const ComingSoonSection = ({ icon: Icon, title, subtitle, description }: {
     icon: any;
-    iconColor: string;
+    iconColor?: string;
     title: string;
     subtitle: string;
     description: string;
   }) => (
     <section>
-      <div className="flex items-center gap-3 mb-6">
-        <div className={`w-12 h-12 bg-gradient-to-br ${iconColor} rounded-xl flex items-center justify-center shadow-lg`}>
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-bold text-stone-50">{title}</h2>
-          <p className="text-stone-300">{subtitle}</p>
-        </div>
-      </div>
-      
-      <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl border border-[#3D4451] relative overflow-hidden">
-        {/* Coming Soon Content */}
-        <div className="p-12 text-center relative">
-          {/* Background decoration */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-purple-500/5" />
-          <div className="absolute top-4 right-4">
-            <Sparkles className="w-8 h-8 text-amber-400/30" />
+      <SectionHeader kicker="On the way" title={title} subtitle={subtitle} accent="var(--ink-mute)" />
+      <div className="grain relative overflow-hidden rounded-2xl border border-line bg-surface/60 p-10 text-center">
+        <div className="relative z-10">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl border border-line bg-overlay">
+            <Icon className="h-6 w-6 text-ink-mute" />
           </div>
-          <div className="absolute bottom-4 left-4">
-            <Zap className="w-6 h-6 text-purple-400/30" />
-          </div>
-          
-          {/* Main content */}
-          <div className="relative z-10">
-            <div className="w-20 h-20 bg-gradient-to-br from-amber-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-400/20">
-              <Sparkles className="w-10 h-10 text-amber-400" />
-            </div>
-            
-            <h3 className="text-2xl font-bold text-stone-50 mb-3">Coming Soon</h3>
-            <p className="text-stone-400 mb-6 max-w-md mx-auto leading-relaxed">
-              {description}
-            </p>
-            
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500/20 to-purple-500/20 backdrop-blur-sm rounded-full border border-amber-400/30 text-amber-300 font-medium">
-              <Clock className="w-4 h-4" />
-              Stay tuned for updates
-            </div>
+          <h3 className="font-display text-xl font-semibold text-ink">Coming soon</h3>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-ink-mute">
+            {description}
+          </p>
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-faint">
+            <Clock className="h-3.5 w-3.5" />
+            In progress
           </div>
         </div>
       </div>
@@ -229,25 +362,25 @@ const HomePage = () => {
   )
 
   // Fixed Height Book Section Component
-  const FixedHeightBookSection = ({ 
-    data, 
-    isEmpty = false, 
-    emptyStateContent 
-  }: { 
-    data: any, 
-    isEmpty?: boolean, 
-    emptyStateContent?: React.ReactNode 
+  const FixedHeightBookSection = ({
+    data,
+    isEmpty = false,
+    emptyStateContent
+  }: {
+    data: any,
+    isEmpty?: boolean,
+    emptyStateContent?: React.ReactNode
   }) => (
-    <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl p-6 border border-[#3D4451]">
-      <div className="h-108 relative">
-        {!isEmpty ? (
+    <div className="rounded-2xl border border-line bg-surface/50 p-3 sm:p-4">
+      {!isEmpty ? (
+        <div className="relative h-72 sm:h-108">
           <BookList trendingData={data} />
-        ) : (
-          <div className="h-full flex items-center justify-center">
-            {emptyStateContent}
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex min-h-[240px] items-center justify-center px-6 py-12">
+          {emptyStateContent}
+        </div>
+      )}
     </div>
   )
 
@@ -270,49 +403,30 @@ const HomePage = () => {
         </div>
       )} */}
 
-      {/* Main Content with Dark Theme */}
-      <div className="relative">
-        {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
-
-        
+      {/* Main Content */}
+      <div className="relative bg-canvas">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
           {/* Trending Section */}
           <section className="mb-20">
-            <div className="mb-8">
-              <div className="flex items-baseline gap-4 mb-3">
-                {/* Small accent element */}
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-                  <div className="w-1 h-1 bg-amber-500/50 rounded-full" />
-                </div>
-
-                <div className="flex-1">
-                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Trending Now</h2>
-                </div>
-              </div>
-
-              <p className="text-stone-400 text-sm ml-7 mb-4">Most popular books this week</p>
-
-              {/* Subtle divider with gradient */}
-              <div className="h-px bg-gradient-to-r from-amber-500/30 via-white/10 to-transparent" />
-            </div>
-            
-            {/* Fixed Height Book List Container */}
-            <FixedHeightBookSection 
+            <SectionHeader
+              kicker="Trending now"
+              title="Most read this week"
+              subtitle="What the community is picking up right now"
+              accent="var(--gold)"
+            />
+            <FixedHeightBookSection
               data={trendingData}
               isEmpty={!trendingData || (Array.isArray(trendingData) && trendingData.length === 0)}
               emptyStateContent={
                 <div className="flex flex-col items-center justify-center px-4 text-center max-w-md">
-                  <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mb-6 border border-amber-500/30">
-                    <TrendingUp className="w-8 h-8 text-amber-400" />
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-line bg-overlay">
+                    <TrendingUp className="h-6 w-6 text-gold" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-stone-50 mb-3">
-                    No Trending Books Yet
+                  <h3 className="font-display text-lg font-semibold text-ink">
+                    Nothing trending yet
                   </h3>
-                  <p className="text-stone-300 text-lg">
-                    Check back soon for the latest trending books!
+                  <p className="mt-1.5 text-sm text-ink-mute">
+                    Check back soon for this week&apos;s most-read books.
                   </p>
                 </div>
               }
@@ -321,37 +435,25 @@ const HomePage = () => {
 
           {/* Recently Rated Section */}
           <section className="mb-20">
-            <div className="mb-8">
-              <div className="flex items-baseline gap-4 mb-3">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-rose-500 rounded-full" />
-                  <div className="w-1 h-1 bg-rose-500/50 rounded-full" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">
-                    Recently Rated
-                  </h2>
-                </div>
-              </div>
-              <p className="text-stone-400 text-sm ml-7 mb-4">
-                Fresh ratings from the community
-              </p>
-              <div className="h-px bg-gradient-to-r from-rose-500/30 via-white/10 to-transparent" />
-            </div>
-
+            <SectionHeader
+              kicker="Recently rated"
+              title="Fresh from the community"
+              subtitle="The latest ratings and reviews as they land"
+              accent="var(--hue-rated)"
+            />
             <FixedHeightBookSection
               data={recentlyRatedData}
               isEmpty={!recentlyRatedData || recentlyRatedData.length === 0}
               emptyStateContent={
                 <div className="flex flex-col items-center justify-center px-4 text-center max-w-md">
-                  <div className="w-16 h-16 bg-gradient-to-br from-rose-500/20 to-rose-600/20 rounded-full flex items-center justify-center mb-6 border border-rose-500/30">
-                    <Star className="w-8 h-8 text-rose-400" />
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-line bg-overlay">
+                    <Star className="h-6 w-6" style={{ color: 'var(--hue-rated)' }} />
                   </div>
-                  <h3 className="text-2xl font-semibold text-stone-50 mb-3">
-                    No Recent Ratings Yet
+                  <h3 className="font-display text-lg font-semibold text-ink">
+                    No ratings yet
                   </h3>
-                  <p className="text-stone-300 text-lg">
-                    Be the first to rate a book!
+                  <p className="mt-1.5 text-sm text-ink-mute">
+                    Be the first to rate a book.
                   </p>
                 </div>
               }
@@ -360,85 +462,36 @@ const HomePage = () => {
 
           {/* Recommended Section */}
           <section className="mb-20">
-            <div className="mb-8">
-              <div className="flex items-baseline gap-4 mb-3">
-                {/* Small accent element */}
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                  <div className="w-1 h-1 bg-emerald-500/50 rounded-full" />
-                </div>
-
-                <div className="flex-1">
-                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Recommended for You</h2>
-                </div>
-              </div>
-
-              <p className="text-stone-400 text-sm ml-7 mb-4">Personalized picks based on your taste</p>
-
-              {/* Subtle divider with gradient */}
-              <div className="h-px bg-gradient-to-r from-emerald-500/30 via-white/10 to-transparent" />
-            </div>
-
-            {/* Fixed Height Book List Container */}
-            <FixedHeightBookSection 
+            <SectionHeader
+              kicker="For you"
+              title="Recommended reads"
+              subtitle="Personalized picks based on your shelf"
+              accent="var(--hue-recommended)"
+            />
+            <FixedHeightBookSection
               data={reccomendationData}
               isEmpty={reccomendationData.length === 0}
               emptyStateContent={
                 <div className="flex flex-col items-center justify-center px-4 text-center max-w-md">
-                  {/* Decorative icon */}
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-full flex items-center justify-center mb-6 border border-emerald-500/30">
-                    <Award className="w-8 h-8 text-emerald-400" />
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-line bg-overlay">
+                    <Award className="h-6 w-6" style={{ color: 'var(--hue-recommended)' }} />
                   </div>
-
-                  {/* Conditional messaging */}
-                  <h3 className="text-2xl font-semibold text-stone-50 mb-3">
-                    Want recommended books?
+                  <h3 className="font-display text-lg font-semibold text-ink">
+                    Want tailored picks?
                   </h3>
-
-                  <p className="text-stone-300 text-lg mb-8">
+                  <p className="mt-1.5 mb-6 text-sm text-ink-mute">
                     {!session
-                      ? "Sign in to get personalized book recommendations tailored just for you."
+                      ? "Sign in and we'll build recommendations around what you read."
                       : userStats && userStats.booksInCollection >= 1 && userStats.booksInCollection < 5
-                      ? `Add more books to your collection to unlock personalized recommendations.`
-                      : "Add books to your collection so we can suggest similar books you'll love."
-                    }
+                      ? "Add a few more books to your collection to unlock recommendations."
+                      : "Add books to your collection so we can suggest ones you'll love."}
                   </p>
-
-                  {/* Conditional button */}
-                  {!session ? (
-                    <button 
-                      onClick={() => router.push('/auth')}
-                      className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                      </svg>
-                      Sign In
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => router.push('/browse')}
-                      className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                      Browse Books
-                    </button>
-                  )}
-
-                  {/* Optional secondary action for signed-in users */}
-                  {session && (
-                    <p className="text-stone-400 text-sm mt-4">
-                      Or explore our{' '}
-                      <span 
-                        className="text-emerald-400 hover:text-emerald-300 transition-colors"
-                      >
-                        trending books
-                      </span>{' '}
-                      to get started
-                    </p>
-                  )}
+                  <button
+                    onClick={() => router.push(!session ? '/auth' : '/browse')}
+                    className="inline-flex items-center gap-2 rounded-full bg-ember px-6 py-2.5 text-sm font-semibold text-white transition-colors duration-300 hover:bg-ember-strong"
+                  >
+                    {!session ? 'Sign in' : 'Browse books'}
+                  </button>
                 </div>
               }
             />
@@ -447,30 +500,21 @@ const HomePage = () => {
           {/* Popular Lists Section */}
           {popularLists.length > 0 && (
             <section className="mb-20">
-              <div className="mb-8">
-                <div className="flex items-baseline gap-4 mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-                    <div className="w-1 h-1 bg-purple-500/50 rounded-full" />
-                  </div>
-
-                  <div className="flex-1 flex items-center justify-between">
-                    <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Popular Lists</h2>
-                    <button
-                      onClick={() => router.push('/lists')}
-                      className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
-                    >
-                      View all lists
-                    </button>
-                  </div>
-                </div>
-
-                <p className="text-stone-400 text-sm ml-7 mb-4">Curated collections from the community</p>
-
-                <div className="h-px bg-gradient-to-r from-purple-500/30 via-white/10 to-transparent" />
-              </div>
-
-              <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl p-6 border border-[#3D4451]">
+              <SectionHeader
+                kicker="Popular lists"
+                title="Collections worth browsing"
+                subtitle="Curated shelves from readers across Bookmarkd"
+                accent="var(--hue-lists)"
+                action={
+                  <button
+                    onClick={() => router.push('/lists')}
+                    className="shrink-0 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute transition-colors hover:text-ink"
+                  >
+                    View all
+                  </button>
+                }
+              />
+              <div className="rounded-2xl border border-line bg-surface/50 p-6">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {popularLists.slice(0, 5).map((list) => (
                     <ListCard key={list.id} list={list} />
@@ -542,6 +586,35 @@ const HomePage = () => {
         <Footer />
       </div>
 
+      {/* Onboarding Modal for new users */}
+      <OnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={handleOnboardingClose}
+        username={userStats?.user?.username}
+      />
+
+      {/* Progress indicator for users with < 5 books */}
+      {session && userStats && (devBookCountOverride !== null ? devBookCountOverride : userStats.booksInCollection) < 5 && !showOnboardingModal && (
+        <OnboardingProgress
+          booksInCollection={devBookCountOverride !== null ? devBookCountOverride : userStats.booksInCollection}
+          targetBooks={5}
+        />
+      )}
+
+      {/* Dev panel for testing onboarding (only in development) */}
+      <DevOnboardingPanel
+        isVisible={process.env.NODE_ENV === 'development'}
+        onShowModal={() => setShowOnboardingModal(true)}
+        onResetState={handleResetOnboarding}
+        onClearDismissal={handleClearDismissal}
+        onBookCountOverride={setDevBookCountOverride}
+        currentState={{
+          booksInCollection: userStats?.booksInCollection ?? 0,
+          hasSeenWelcome,
+          showingModal: showOnboardingModal,
+          devBookCountOverride
+        }}
+      />
     </div>
   )}
 

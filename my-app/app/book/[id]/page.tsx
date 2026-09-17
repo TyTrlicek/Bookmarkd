@@ -25,11 +25,9 @@ function BookPageContent() {
   const params = useParams()
   const searchParams = useSearchParams();
   const id = decodeURIComponent(params.id as string)
-const searchAuthor = searchParams.get('author') 
-    ? decodeURIComponent(searchParams.get('author') as string) 
+const searchAuthor = searchParams.get('author')
+    ? decodeURIComponent(searchParams.get('author') as string)
     : 'Unknown Author';
-    console.log('search author', searchAuthor)
-  console.log("Book ID", id);
 
   const router = useRouter()
   const { isAuthenticated, accessToken,getAccessToken } = useAuth()
@@ -165,7 +163,7 @@ const searchAuthor = searchParams.get('author')
 
 
 return (
-    <div className="min-h-screen bg-gradient-to-b from-[#14181C] via-[#14181C] to-[#14181C] overflow-x-hidden">
+    <div className="min-h-screen bg-canvas overflow-x-hidden">
       <Header />
 
       {/* Main Content */}
@@ -176,26 +174,26 @@ return (
           {/* Book Cover - Centered on Mobile */}
           <div className="flex flex-col items-center gap-4">
             {isLoading ? (
-              <div className="w-48 h-72 bg-[#2C3440] animate-pulse rounded-lg shadow-xl flex-shrink-0" />
+              <div className="w-48 h-72 bg-surface animate-pulse rounded-lg shadow-xl flex-shrink-0" />
             ) : (
               <div className="relative flex-shrink-0">
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg blur opacity-75" />
+                <div className="absolute inset-0 " />
                 <Image
                   priority
                   width={192}
                   height={288}
                   src={image || ''}
                   alt={`Cover for ${title}`}
-                  className="relative w-48 h-72 object-cover rounded-lg shadow-xl border border-amber-900/20"
+                  className="relative w-48 h-72 object-cover rounded-lg shadow-xl border border-line"
                 />
               </div>
             )}
 
             {/* Mobile Title & Meta */}
             <div className="w-full text-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-stone-50 mb-2 bg-gradient-to-r from-white to-amber-100 bg-clip-text text-transparent leading-tight">{title}</h1>
-              <p className="text-amber-400 font-medium text-sm sm:text-base mb-2">{author}</p>
-              <div className="flex items-center justify-center gap-2 text-stone-400 text-xs sm:text-sm flex-wrap">
+              <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink mb-2 leading-tight">{title}</h1>
+              <p className="text-gold font-medium text-sm sm:text-base mb-2">{author}</p>
+              <div className="flex items-center justify-center gap-2 text-ink-mute text-xs sm:text-sm flex-wrap">
                 <span>
                   {publishedDate && publishedDate !== 'Unknown Date'
                     ? (() => {
@@ -207,7 +205,7 @@ return (
                 </span>
                 {pageCount && (
                   <>
-                    <span className="text-stone-600">•</span>
+                    <span className="text-ink-faint">•</span>
                     <span>{pageCount}p</span>
                   </>
                 )}
@@ -216,7 +214,7 @@ return (
           </div>
 
           {/* Mobile Rating */}
-          <div className="flex flex-col items-center gap-2 p-4 bg-[#2C3440] rounded-xl border border-amber-900/20">
+          <div className="flex flex-col items-center gap-2 p-4 bg-surface rounded-xl border border-line">
             <StarRating
               rating={userRating}
               onRatingChange={handleRatingChange}
@@ -224,13 +222,13 @@ return (
               showValue={true}
             />
             {!isAuthenticated && (
-              <p className="text-xs text-center text-stone-500">
+              <p className="text-xs text-center text-ink-faint">
                 <button
                   onClick={() => {
                     setLoginIntent('rate');
                     setShowLoginModal(true);
                   }}
-                  className="text-amber-400 hover:text-amber-300 underline"
+                  className="text-gold hover:text-gold-soft underline"
                 >
                   Log in
                 </button>
@@ -240,7 +238,7 @@ return (
           </div>
 
           {/* Mobile Status Buttons */}
-          <div className="flex flex-col items-center gap-2 p-4 bg-[#2C3440] rounded-xl border border-amber-900/20">
+          <div className="flex flex-col items-center gap-2 p-4 bg-surface rounded-xl border border-line">
             <BookStatus
               status={userStatus}
               onStatusChange={handleStatusChange}
@@ -248,13 +246,13 @@ return (
               isRated={userRating > 0}
             />
             {!isAuthenticated && (
-              <p className="text-xs text-center text-stone-500">
+              <p className="text-xs text-center text-ink-faint">
                 <button
                   onClick={() => {
                     setLoginIntent('status');
                     setShowLoginModal(true);
                   }}
-                  className="text-amber-400 hover:text-amber-300 underline"
+                  className="text-gold hover:text-gold-soft underline"
                 >
                   Log in
                 </button>
@@ -273,32 +271,32 @@ return (
               }
               setShowWriteReview(!showWriteReview);
             }}
-            className="w-full px-4 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-medium rounded-xl transition-all shadow-lg"
+            className="w-full px-4 py-3 bg-ember hover:bg-ember-strong text-white font-semibold rounded-full transition-colors"
           >
             {showWriteReview ? 'Cancel Review' : 'Write a Review'}
           </button>
 
           {/* Mobile Write Review Form */}
           {showWriteReview && (
-            <div className="space-y-3 p-4 bg-[#2C3440] rounded-xl border border-amber-900/20">
+            <div className="space-y-3 p-4 bg-surface rounded-xl border border-line">
               <textarea
                 value={reviewContent}
                 onChange={(e) => setReviewContent(e.target.value)}
                 placeholder="Share your thoughts about this book..."
-                className="w-full px-3 py-2 bg-[#14181C] border border-stone-700 rounded-lg text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 text-sm resize-none"
+                className="w-full px-3 py-2 bg-canvas border border-line rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/30 text-sm resize-none"
                 rows={6}
               />
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-xs text-stone-400 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs text-ink-mute cursor-pointer">
                   <input
                     type="checkbox"
                     checked={containsSpoilers}
                     onChange={(e) => setContainsSpoilers(e.target.checked)}
-                    className="rounded border-stone-600 text-amber-600 focus:ring-amber-600"
+                    className="rounded border-line text-ember focus:ring-gold/40"
                   />
                   Contains spoilers
                 </label>
-                <span className="text-xs text-stone-500">{reviewContent.length} characters</span>
+                <span className="text-xs text-ink-faint">{reviewContent.length} characters</span>
               </div>
               <button
                 onClick={async () => {
@@ -347,7 +345,7 @@ return (
                   }
                 }}
                 disabled={!reviewContent.trim()}
-                className="w-full px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-stone-700 disabled:text-stone-500 text-white font-medium rounded-lg transition-all text-sm"
+                className="w-full px-4 py-2 bg-ember hover:bg-ember-strong disabled:opacity-40 text-white font-semibold rounded-full transition-colors text-sm"
               >
                 Post Review
               </button>
@@ -373,9 +371,9 @@ return (
                 }
                 setShowAddToList(true);
               }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2C3440] hover:bg-[#3D4451] text-stone-50 font-medium rounded-xl border border-purple-500/30 hover:border-purple-500/50 transition-all"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface hover:bg-surface-2 text-ink font-medium rounded-xl border border-line hover:border-line-strong transition-all"
             >
-              <ListPlus className="w-5 h-5 text-purple-400" />
+              <ListPlus className="w-5 h-5 text-ink-mute" />
               Add to List
             </button>
           )}
@@ -387,17 +385,17 @@ return (
           <div className="hidden lg:block flex-shrink-0 w-72 space-y-6">
             {/* Book Cover */}
             {isLoading ? (
-              <div className="w-full aspect-[2/3] bg-[#2C3440] animate-pulse rounded-xl shadow-2xl" />
+              <div className="w-full aspect-[2/3] bg-surface animate-pulse rounded-xl shadow-2xl" />
             ) : (
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-300" />
+                <div className="absolute inset-0 " />
                 <Image
                   priority
                   width={288}
                   height={432}
                   src={image || ''}
                   alt={`Cover for ${title}`}
-                  className="relative w-full aspect-[2/3] object-cover rounded-xl shadow-2xl border border-amber-900/20"
+                  className="relative w-full aspect-[2/3] object-cover rounded-xl shadow-2xl border border-line"
                 />
               </div>
             )}
@@ -413,13 +411,13 @@ return (
                 />
               </div>
               {!isAuthenticated && (
-                <p className="text-xs text-center text-stone-500">
+                <p className="text-xs text-center text-ink-faint">
                   <button
                     onClick={() => {
                       setLoginIntent('rate');
                       setShowLoginModal(true);
                     }}
-                    className="text-amber-400 hover:text-amber-300 underline"
+                    className="text-gold hover:text-gold-soft underline"
                   >
                     Log in
                   </button>
@@ -439,13 +437,13 @@ return (
                 />
               </div>
               {!isAuthenticated && (
-                <p className="text-xs text-center text-stone-500">
+                <p className="text-xs text-center text-ink-faint">
                   <button
                     onClick={() => {
                       setLoginIntent('status');
                       setShowLoginModal(true);
                     }}
-                    className="text-amber-400 hover:text-amber-300 underline"
+                    className="text-gold hover:text-gold-soft underline"
                   >
                     Log in
                   </button>
@@ -463,7 +461,7 @@ return (
             )}
 
             {/* Write Review Section */}
-            <div className="p-4 bg-[#2C3440] rounded-xl border border-amber-900/20">
+            <div className="p-4 bg-surface rounded-xl border border-line">
               <button
                 onClick={() => {
                   if (!isAuthenticated) {
@@ -473,7 +471,7 @@ return (
                   }
                   setShowWriteReview(!showWriteReview);
                 }}
-                className="w-full px-4 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-medium rounded-lg transition-all shadow-lg"
+                className="w-full px-4 py-2.5 bg-ember hover:bg-ember-strong text-white font-semibold rounded-full transition-colors"
               >
                 {showWriteReview ? 'Cancel Review' : 'Write a Review'}
               </button>
@@ -484,20 +482,20 @@ return (
                     value={reviewContent}
                     onChange={(e) => setReviewContent(e.target.value)}
                     placeholder="Share your thoughts about this book..."
-                    className="w-full px-3 py-2 bg-[#2C3440] border border-stone-700 rounded-lg text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 text-sm resize-none"
+                    className="w-full px-3 py-2 bg-surface border border-line rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/30 text-sm resize-none"
                     rows={6}
                   />
                   <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-xs text-stone-400 cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs text-ink-mute cursor-pointer">
                       <input
                         type="checkbox"
                         checked={containsSpoilers}
                         onChange={(e) => setContainsSpoilers(e.target.checked)}
-                        className="rounded border-stone-600 text-amber-600 focus:ring-amber-600"
+                        className="rounded border-line text-ember focus:ring-gold/40"
                       />
                       Contains spoilers
                     </label>
-                    <span className="text-xs text-stone-500">{reviewContent.length} characters</span>
+                    <span className="text-xs text-ink-faint">{reviewContent.length} characters</span>
                   </div>
                   <button
                     onClick={async () => {
@@ -548,7 +546,7 @@ return (
                       }
                     }}
                     disabled={!reviewContent.trim()}
-                    className="w-full px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-stone-700 disabled:text-stone-500 text-white font-medium rounded-lg transition-all text-sm"
+                    className="w-full px-4 py-2 bg-ember hover:bg-ember-strong disabled:opacity-40 text-white font-semibold rounded-full transition-colors text-sm"
                   >
                     Post Review
                   </button>
@@ -567,9 +565,9 @@ return (
                   }
                   setShowAddToList(true);
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2C3440] hover:bg-[#3D4451] text-stone-50 font-medium rounded-xl border border-purple-500/30 hover:border-purple-500/50 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface hover:bg-surface-2 text-ink font-medium rounded-xl border border-line hover:border-line-strong transition-all"
               >
-                <ListPlus className="w-5 h-5 text-purple-400" />
+                <ListPlus className="w-5 h-5 text-ink-mute" />
                 Add to List
               </button>
             )}
@@ -580,10 +578,10 @@ return (
 
             {/* Title & Metadata Header - Desktop Only (hidden on mobile since it's in mobile section) */}
             <div className="hidden lg:block mb-6 w-full overflow-hidden">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-stone-50 mb-3 bg-gradient-to-r from-white to-amber-100 bg-clip-text text-transparent break-words">{title}</h1>
-              <div className="flex items-center gap-3 text-stone-400 text-sm md:text-base flex-wrap">
-                <span className="text-amber-400 font-medium">{author}</span>
-                <span className="text-stone-600">•</span>
+              <h1 className="font-display text-3xl md:text-4xl lg:text-5xl font-semibold tracking-[-0.02em] text-ink mb-3 break-words">{title}</h1>
+              <div className="flex items-center gap-3 text-ink-mute text-sm md:text-base flex-wrap">
+                <span className="text-gold font-medium">{author}</span>
+                <span className="text-ink-faint">•</span>
                 <span>
                   {publishedDate && publishedDate !== 'Unknown Date'
                     ? (() => {
@@ -595,42 +593,43 @@ return (
                 </span>
                 {pageCount && (
                   <>
-                    <span className="text-stone-600">•</span>
+                    <span className="text-ink-faint">•</span>
                     <span>{pageCount} pages</span>
                   </>
                 )}
                 {categories && categories.length > 0 && (
                   <>
-                    <span className="text-stone-600">•</span>
-                    <span className="text-stone-500">{categories[0]}</span>
+                    <span className="text-ink-faint">•</span>
+                    <span className="text-ink-faint">{categories[0]}</span>
                   </>
                 )}
               </div>
             </div>
 
             {/* Stats Bar - Responsive Grid */}
-            <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 p-4 sm:p-5 bg-gradient-to-br from-[#14181C]/80 via-[#14181C]/60 to-[#14181C]/80 rounded-xl border border-amber-900/20 shadow-lg overflow-hidden">
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-amber-400 to-orange-500 bg-clip-text text-transparent">{averageRating?.toFixed(1) ?? 'N/A'}</div>
-                <div className="text-xs text-amber-600/80 uppercase tracking-wide font-semibold">Rating</div>
+            <div className="mb-8 grid w-full grid-cols-2 divide-x divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface/50 lg:grid-cols-4 lg:divide-y-0">
+              <div className="p-5">
+                <div className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-mute">Rating</div>
+                <div className="font-display mt-1.5 text-2xl font-semibold text-gold">{averageRating?.toFixed(1) ?? '—'}</div>
               </div>
-              <div className="text-center lg:border-l border-stone-800">
-                <div className="text-2xl sm:text-3xl font-bold text-stone-50">{totalRatings ?? 0}</div>
-                <div className="text-xs text-stone-500 uppercase tracking-wide">Ratings</div>
+              <div className="p-5">
+                <div className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-mute">Ratings</div>
+                <div className="font-display mt-1.5 text-2xl font-semibold text-ink">{totalRatings ?? 0}</div>
               </div>
-              <div className="text-center border-t lg:border-t-0 lg:border-l border-stone-800 pt-3 lg:pt-0">
-                <div className="text-2xl sm:text-3xl font-bold text-stone-50">#{ratingRank}</div>
-                <div className="text-xs text-stone-500 uppercase tracking-wide">Ranked</div>
+              <div className="p-5">
+                <div className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-mute">Ranked</div>
+                <div className="font-display mt-1.5 text-2xl font-semibold text-ink">{ratingRank ? `#${ratingRank}` : '—'}</div>
               </div>
-              <div className="text-center border-t lg:border-t-0 lg:border-l border-stone-800 pt-3 lg:pt-0">
-                <div className="text-2xl sm:text-3xl font-bold text-stone-50">#{popularityRank}</div>
-                <div className="text-xs text-stone-500 uppercase tracking-wide">Popular</div>
+              <div className="p-5">
+                <div className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-mute">Popular</div>
+                <div className="font-display mt-1.5 text-2xl font-semibold text-ink">{popularityRank ? `#${popularityRank}` : '—'}</div>
               </div>
             </div>
 
             {/* Description */}
-            <div className="w-full mb-6 sm:mb-8 p-4 sm:p-6 bg-[#2C3440] rounded-xl border border-stone-800/50 overflow-hidden">
-              <h2 className="text-base sm:text-lg font-semibold text-amber-400 mb-2 sm:mb-3">Synopsis</h2>
+            <div className="mb-8 w-full">
+              <h2 className="font-display text-xl font-semibold text-ink">Synopsis</h2>
+              <div className="mt-3 h-px w-full bg-gradient-to-r from-gold/30 via-line to-transparent" />
               <div className="prose prose-stone max-w-none">
                 {(() => {
                   const desc = description || 'No description available.';
@@ -642,13 +641,13 @@ return (
 
                   return (
                     <div>
-                      <p className="text-stone-300 leading-relaxed text-sm sm:text-base break-words">
+                      <p className="text-ink-soft leading-relaxed text-sm sm:text-base break-words">
                         {displayText}
                       </p>
                       {shouldShowButton && (
                         <button
                           onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                          className="mt-2 sm:mt-3 text-amber-500 hover:text-amber-400 text-xs sm:text-sm font-medium transition-colors"
+                          className="mt-2 sm:mt-3 text-gold hover:text-gold-soft text-xs sm:text-sm font-medium transition-colors"
                         >
                           {isDescriptionExpanded ? 'Show less' : 'Show more'}
                         </button>
@@ -662,10 +661,10 @@ return (
             {/* Genres */}
             {categories && categories.length > 0 && (
               <div className="w-full mb-6 sm:mb-8 overflow-hidden">
-                <h3 className="text-xs sm:text-sm font-semibold text-amber-400 mb-2 sm:mb-3 uppercase tracking-wider">Genres</h3>
+                <h3 className="text-xs sm:text-sm font-mono text-ink-mute mb-2 sm:mb-3 uppercase tracking-widest">Genres</h3>
                 <div className="flex flex-wrap gap-2">
                   {categories.map((tag) => (
-                    <span key={tag} className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-br from-amber-900/30 to-orange-900/20 text-amber-200 text-xs sm:text-sm rounded-lg border border-amber-900/30 hover:border-amber-700/50 hover:bg-amber-900/40 transition-all">
+                    <span key={tag} className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-line bg-overlay px-3 py-1 text-xs text-ink-mute transition-colors hover:border-line-strong">
                       {tag}
                     </span>
                   ))}
@@ -675,14 +674,14 @@ return (
 
             {/* More by Author */}
             {author && author !== 'Unknown Author' && data?.id && (
-              <div className="w-full mb-8 sm:mb-12 pb-8 border-b border-stone-800/50 overflow-hidden">
+              <div className="w-full mb-8 sm:mb-12 pb-8 border-b border-line overflow-hidden">
                 <MoreByAuthor author={author} currentBookId={data.id} />
               </div>
             )}
 
             {/* Reviews Section - Letterboxd Style */}
             <div className="w-full mt-8 sm:mt-12 pb-8 overflow-hidden">
-              <h2 className="text-xl sm:text-2xl font-bold text-stone-50 mb-4 sm:mb-6">Reviews</h2>
+              <h2 className="text-2xl font-semibold text-ink mb-5 font-display">Reviews</h2>
               <Review
                 totalRatings={totalRatings}
                 setShowWriteReview={setShowWriteReview}
@@ -738,7 +737,7 @@ return (
 
       {/* Visual separator before footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="border-t border-stone-800/50 mt-12"></div>
+        <div className="border-t border-line mt-12"></div>
       </div>
 
       <Footer />
@@ -749,8 +748,8 @@ return (
 // Loading fallback for Suspense
 function BookPageLoading() {
   return (
-    <div className="min-h-screen bg-[#14181C] flex items-center justify-center">
-      <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
+    <div className="min-h-screen bg-canvas flex items-center justify-center">
+      <Loader2 className="w-10 h-10 text-gold animate-spin" />
     </div>
   )
 }

@@ -59,7 +59,6 @@ router.get('/', authenticateUser, async (req, res) => {
     const cached = await cache.get(cacheKey);
 
     if (cached) {
-      console.log(`[Lists] Served user lists from cache for user ${req.userId}`);
       return res.json(cached);
     }
 
@@ -91,7 +90,6 @@ router.get('/', authenticateUser, async (req, res) => {
     }));
 
     await cache.set(cacheKey, formattedLists, TTL.USER_LISTS);
-    console.log(`[Lists] Cached user lists for user ${req.userId}`);
 
     res.json(formattedLists);
   } catch (err) {
@@ -211,7 +209,6 @@ router.get('/popular', async (req, res) => {
     const cached = await cache.get(cacheKey);
 
     if (cached) {
-      console.log('[Lists] Served popular lists from cache');
       return res.json(cached);
     }
 
@@ -246,7 +243,6 @@ router.get('/popular', async (req, res) => {
     }));
 
     await cache.set(cacheKey, formattedLists, TTL.POPULAR_LISTS);
-    console.log('[Lists] Cached popular lists');
 
     res.json(formattedLists);
   } catch (err) {
@@ -455,7 +451,6 @@ router.post('/:id/books', writeLimiter, authenticateUser, async (req, res) => {
           },
           select: { id: true }
         });
-        console.log(`[Lists] Created new book ${book.id} from openLibraryId ${openLibraryId}`);
       } catch (createErr) {
         // Book might have been created by another request, try to find it again
         if (createErr.code === 'P2002') {

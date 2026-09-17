@@ -52,12 +52,6 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
             )
           )
     
-          // Here you would make your API calls
-          console.log(`Saving changes for book ${editingBook.bookId}:`, {
-            rating: tempRating,
-            status: effectiveStatus
-          })
-    
           const {
             data: { session }
           } = await supabase.auth.getSession();
@@ -145,10 +139,8 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
             }
           )
 
-          console.log(`Book ${editingBook.bookId} deleted successfully`)
           handleCloseEditPopup()
         } catch (error) {
-          console.error('Error deleting book:', error)
           
           // Rollback the optimistic update by re-adding the book
           const originalBook = books.find(book => book.bookId === editingBook.bookId)
@@ -169,16 +161,16 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
     }
 
     return (
-  <div className="fixed inset-0 bg-[#14181C]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div className="bg-[#14181C] backdrop-blur-lg rounded-xl shadow-2xl border border-[#3D4451] max-w-md w-full max-h-[90vh] overflow-y-auto">
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-canvas-raised rounded-xl  border border-line max-w-md w-full max-h-[90vh] overflow-y-auto">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-[#3D4451]">
-        <h3 className="text-lg font-semibold text-stone-50">Edit Book</h3>
+      <div className="flex items-center justify-between p-6 border-b border-line">
+        <h3 className="font-display text-lg font-semibold text-ink">Edit Book</h3>
         <button
           onClick={handleCloseEditPopup}
-          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+          className="p-2 hover:bg-overlay-hover rounded-lg transition-colors"
         >
-          <X className="w-5 h-5 text-stone-300 hover:text-stone-50" />
+          <X className="w-5 h-5 text-ink-soft hover:text-ink" />
         </button>
       </div>
 
@@ -194,41 +186,41 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
             className="w-16 h-24 object-cover rounded-lg shadow-lg"
           />
           <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-stone-50 mb-1">{editingBook.book.title}</h4>
-            <p className="text-sm text-stone-300">{editingBook.book.author}</p>
+            <h4 className="font-medium text-ink mb-1">{editingBook.book.title}</h4>
+            <p className="text-sm text-ink-soft">{editingBook.book.author}</p>
           </div>
         </div>
 
         {/* Status Section */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-stone-200 mb-3">Reading Status</label>
+          <label className="block text-sm font-medium text-ink-soft mb-3">Reading Status</label>
           <div className="space-y-2">
             {[
               { value: 'to-read', label: 'To Read', icon: Eye, color: 'blue' },
               { value: 'completed', label: 'Completed', icon: CheckCircle, color: 'emerald' },
               { value: 'dropped', label: 'Dropped', icon: XCircle, color: 'red' }
             ].map((status) => (
-              <label key={status.value} className="flex items-center gap-3 p-3 border border-[#3D4451] rounded-lg hover:bg-white/5 cursor-pointer transition-colors backdrop-blur-sm">
+              <label key={status.value} className="flex items-center gap-3 p-3 border border-line rounded-lg hover:bg-overlay cursor-pointer transition-colors backdrop-blur-sm">
                 <input
                   type="radio"
                   name="status"
                   value={status.value}
                   checked={tempStatus === status.value}
                   onChange={(e) => setTempStatus(e.target.value)}
-                  className="text-amber-500 focus:ring-amber-500/50 bg-white/10 border-white/30"
+                  className="accent-gold focus:ring-gold/30 bg-overlay border-line-strong"
                 />
                 <div className={`w-8 h-8 ${
-                  status.color === 'blue' ? 'bg-blue-500/20 text-blue-400' :
-                  status.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400' :
-                  'bg-red-500/20 text-red-400'
+                  status.color === 'blue' ? 'bg-rate-good/15 text-rate-good' :
+                  status.color === 'emerald' ? 'bg-rate-high/15 text-rate-high' :
+                  'bg-rate-bad/15 text-rate-bad'
                 } rounded-lg flex items-center justify-center backdrop-blur-sm border ${
-                  status.color === 'blue' ? 'border-blue-500/30' :
-                  status.color === 'emerald' ? 'border-emerald-500/30' :
-                  'border-red-500/30'
+                  status.color === 'blue' ? 'border-rate-good/40' :
+                  status.color === 'emerald' ? 'border-rate-high/40' :
+                  'border-rate-bad/40'
                 }`}>
                   <status.icon className="w-4 h-4" />
                 </div>
-                <span className="text-sm font-medium text-stone-200">{status.label}</span>
+                <span className="text-sm font-medium text-ink-soft">{status.label}</span>
               </label>
             ))}
           </div>
@@ -236,7 +228,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
 
         {/* Rating Section */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-stone-200 mb-3">Rating</label>
+          <label className="block text-sm font-medium text-ink-soft mb-3">Rating</label>
           <div className="flex items-center justify-between mb-2">
             <StarRating
               rating={tempRating}
@@ -248,7 +240,7 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
               <button
                 type="button"
                 onClick={() => setTempRating(0)}
-                className="text-xs text-stone-400 hover:text-stone-200 underline transition-colors"
+                className="text-xs text-ink-mute hover:text-ink underline transition-colors"
               >
                 Clear rating
               </button>
@@ -258,23 +250,23 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
 
         {/* Delete Confirmation */}
         {showDeleteConfirm && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg backdrop-blur-sm">
-            <h4 className="text-sm font-medium text-red-300 mb-2">Are you sure?</h4>
-            <p className="text-sm text-red-200 mb-4">
+          <div className="mb-6 p-4 bg-red-500/10 border border-rate-bad/40 rounded-lg backdrop-blur-sm">
+            <h4 className="text-sm font-medium text-rate-bad mb-2">Are you sure?</h4>
+            <p className="text-sm text-rate-bad mb-4">
               This will permanently remove "{editingBook.book.title}" from your library. This action cannot be undone.
             </p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handleDeleteBook}
-                className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors shadow-lg"
+                className="px-3 py-1.5 bg-rate-bad text-white text-sm rounded-full hover:opacity-90 transition-colors shadow-lg"
               >
                 Yes, Delete
               </button>
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-3 py-1.5 bg-white/10 text-red-300 text-sm border border-red-500/30 rounded-md hover:bg-white/20 transition-colors backdrop-blur-sm"
+                className="px-3 py-1.5 bg-white/10 text-rate-bad text-sm border border-rate-bad/40 rounded-md hover:bg-overlay-hover transition-colors backdrop-blur-sm"
               >
                 Cancel
               </button>
@@ -284,11 +276,11 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between p-6 border-t border-[#3D4451] bg-[#2C3440]/60 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-6 border-t border-line bg-canvas-raised/95">
         <button
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          className="px-4 py-2 text-red-400 bg-white/5 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors flex items-center gap-2 backdrop-blur-sm"
+          className="px-4 py-2 text-rate-bad bg-overlay border border-rate-bad/40 rounded-lg hover:bg-rate-bad/10 transition-colors flex items-center gap-2 backdrop-blur-sm"
         >
           <Trash2 className="w-4 h-4" />
           Delete
@@ -298,14 +290,14 @@ const EditCollectionPopup = ({showEditPopup, editingBook, setBooks, books, tempS
           <button
             type="button"
             onClick={handleCloseEditPopup}
-            className="px-4 py-2 text-stone-300 bg-white/5 border border-[#3D4451] rounded-lg hover:bg-white/10 transition-colors backdrop-blur-sm"
+            className="px-4 py-2 text-ink-soft bg-overlay border border-line rounded-lg hover:bg-overlay-hover transition-colors backdrop-blur-sm"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSaveChanges}
-            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all flex items-center gap-2 shadow-lg"
+            className="px-4 py-2 bg-ember text-white rounded-full hover:bg-ember-strong transition-colors flex items-center gap-2 shadow-lg"
           >
             <Save className="w-4 h-4" />
             Save

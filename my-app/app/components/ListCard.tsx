@@ -17,16 +17,16 @@ const ListCard: React.FC<ListCardProps> = ({ list, showAuthor = true }) => {
 
   return (
     <Link href={`/lists/${list.id}`}>
-      <div className="group bg-[#2C3440] rounded-xl border border-[#3D4451] hover:border-purple-500/50 transition-all duration-300 overflow-hidden hover:shadow-lg hover:shadow-purple-500/10">
+      <div className="group bg-surface rounded-xl border border-line hover:border-line-strong transition-all duration-300 overflow-hidden ">
         {/* Book Preview Grid */}
-        <div className="aspect-square p-3 bg-[#14181C]">
+        <div className="aspect-square p-3 bg-canvas">
           <div className="grid grid-cols-2 gap-1.5 w-full h-full">
             {[0, 1, 2, 3].map((index) => {
               const book = previewBooks[index]
               return (
                 <div
                   key={index}
-                  className="relative bg-[#2C3440] rounded-md overflow-hidden"
+                  className="relative bg-surface rounded-md overflow-hidden"
                 >
                   {book?.image ? (
                     <Image
@@ -38,7 +38,7 @@ const ListCard: React.FC<ListCardProps> = ({ list, showAuthor = true }) => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-6 h-8 bg-[#3D4451] rounded-sm" />
+                      <div className="w-6 h-8 bg-surface-2 rounded-sm" />
                     </div>
                   )}
                 </div>
@@ -52,13 +52,13 @@ const ListCard: React.FC<ListCardProps> = ({ list, showAuthor = true }) => {
           {/* Badges */}
           <div className="flex items-center gap-2 mb-2">
             {!list.isPublic && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-stone-700/50 text-stone-400 text-xs rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-overlay text-ink-mute text-xs rounded-full">
                 <Lock className="w-3 h-3" />
                 Private
               </span>
             )}
             {list.isRanked && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/20 text-purple-300 text-xs rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-overlay text-ink-mute text-xs rounded-full">
                 <Hash className="w-3 h-3" />
                 Ranked
               </span>
@@ -66,12 +66,12 @@ const ListCard: React.FC<ListCardProps> = ({ list, showAuthor = true }) => {
           </div>
 
           {/* Title */}
-          <h3 className="font-semibold text-stone-50 text-base line-clamp-2 mb-1 group-hover:text-purple-300 transition-colors">
+          <h3 className="font-semibold text-ink text-base line-clamp-2 mb-1 group-hover:text-gold-soft transition-colors">
             {list.title}
           </h3>
 
           {/* Book Count */}
-          <p className="text-stone-400 text-sm mb-3">
+          <p className="text-ink-mute text-sm mb-3">
             {bookCount} {bookCount === 1 ? 'book' : 'books'}
           </p>
 
@@ -87,11 +87,11 @@ const ListCard: React.FC<ListCardProps> = ({ list, showAuthor = true }) => {
                   className="rounded-full object-cover"
                 />
               ) : (
-                <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-6 h-6 bg-gradient-to-br from-surface-2 to-surface-2 rounded-full flex items-center justify-center">
                   <User className="w-3 h-3 text-white" />
                 </div>
               )}
-              <span className="text-stone-400 text-sm truncate">
+              <span className="text-ink-mute text-sm truncate">
                 {list.user.username || 'Anonymous'}
               </span>
             </div>

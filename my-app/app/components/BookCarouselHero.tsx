@@ -1,12 +1,10 @@
 'use client'
 
-import { Canvas, useFrame } from '@react-three/fiber'
-import { useTexture, PerspectiveCamera } from '@react-three/drei'
-import { useEffect, useState, useRef, Suspense } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import axios from 'axios'
-import * as THREE from 'three'
-import { BookOpen, Star, Search, TrendingUp, ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 interface Book {
   id: string
@@ -16,382 +14,224 @@ interface Book {
   averageRating?: number
 }
 
-interface BookCarouselProps {}
+const META = ['Free forever', '3M+ books', 'No credit card']
 
-export default function BookCarouselHero({}: BookCarouselProps) {
-  const [books, setBooks] = useState<Book[]>([])
-  const [loading, setLoading] = useState(true)
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [webGLSupported, setWebGLSupported] = useState(true)
+// Seed covers so the wall always has something to show, even if the
+// trending request is slow or fails. Open Library cover CDN, by ISBN.
+const COVER_FALLBACKS: string[] = [
+  '9780743273565', '9780061120084', '9780141036144', '9780316769488',
+  '9780141439518', '9780618640157', '9780439023528', '9780316015844',
+  '9780545010565', '9781594631931', '9780525478812', '9780062315007',
+  '9780345339683', '9781400079278', '9780679732761', '9780140449136',
+  '9780385333849', '9780375842207', '9780307277671', '9781501173219',
+  '9780553213119', '9780679783268', '9780307387899', '9780446310789',
+].map((isbn) => `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`)
+
+const fallbackBooks: Book[] = COVER_FALLBACKS.map((image, i) => ({
+  id: `seed-${i}`,
+  title: '',
+  author: '',
+  image,
+}))
+
+export default function BookCarouselHero() {
+  const [books, setBooks] = useState<Book[]>(fallbackBooks)
   const router = useRouter()
+  const reduceMotion = useReducedMotion()
 
-  // Check for reduced motion preference
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mediaQuery.matches)
-
-    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
-    mediaQuery.addEventListener('change', handler)
-    return () => mediaQuery.removeEventListener('change', handler)
-  }, [])
-
-  // Check WebGL support
-  useEffect(() => {
-    try {
-      const canvas = document.createElement('canvas')
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-      setWebGLSupported(!!gl)
-    } catch (e) {
-      setWebGLSupported(false)
+    let cancelled = false
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/trending`)
+      .then((res) => {
+        if (cancelled) return
+        const live = (res.data ?? [])
+          .filter((b: Book) => b?.image)
+          .slice(0, 32)
+        if (live.length >= 8) setBooks(live)
+      })
+      .catch((err) => console.error('Failed to fetch trending books:', err))
+    return () => {
+      cancelled = true
     }
   }, [])
 
-  // Fetch trending books
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/trending`)
-        const isMobile = window.innerWidth < 768
-        const bookCount = isMobile ? 15 : 30
-        setBooks(res.data.slice(0, bookCount))
-        setLoading(false)
-      } catch (error) {
-        console.error('Failed to fetch trending books:', error)
-        setLoading(false)
-      }
-    }
-    fetchBooks()
-  }, [])
+  const [rowA, rowB] = useMemo(() => {
+    const mid = Math.ceil(books.length / 2)
+    return [books.slice(0, mid), books.slice(mid)] as const
+  }, [books])
 
-  // Show loading state
-  if (loading) {
-    return <LoadingState />
-  }
+  const { scrollY } = useScroll()
+  const wallY = useTransform(scrollY, [0, 700], [0, reduceMotion ? 0 : -60])
+  const contentY = useTransform(scrollY, [0, 700], [0, reduceMotion ? 0 : 60])
 
-  // Show fallback for reduced motion or no WebGL
-  if (prefersReducedMotion || !webGLSupported || books.length === 0) {
-    return <StaticFallbackHero books={books} />
-  }
-
-  return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#14181C] via-amber-900 to-[#14181C]">
-      {/* 3D Canvas */}
-      <div className="absolute inset-0">
-        <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 0, 3]} fov={60} />
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} intensity={1} />
-          <pointLight position={[-10, -10, -5]} intensity={0.5} color="#fbbf24" />
-
-          <Suspense fallback={null}>
-            <BookCarousel books={books} />
-          </Suspense>
-        </Canvas>
-      </div>
-
-      {/* Gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/80 via-black/40 to-transparent z-10" />
-
-      {/* Main Content - Centered and Clean */}
-      <div className="relative z-20 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl w-full">
-          <div className="text-center space-y-12">
-
-            {/* Hero Heading */}
-            <div className="space-y-6">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
-                <span className="block text-stone-50 mb-2">Your Books,</span>
-                <span className="block bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-                  Your Story
-                </span>
-              </h1>
-
-              <p className="text-xl sm:text-2xl text-stone-400 max-w-3xl mx-auto leading-relaxed font-light">
-                Track, rate, and discover books. Build your personal library and connect with fellow readers.
-              </p>
-            </div>
-
-            {/* CTA Buttons - More prominent */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
-              <button
-                onClick={() => router.push('/auth')}
-                className="group w-full sm:w-auto relative px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/50 hover:-translate-y-1"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  Get Started Free
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-
-              <button
-                onClick={() => router.push('/auth')}
-                className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 text-stone-50 font-medium rounded-xl border border-[#3D4451] hover:border-[#3D4451] transition-all duration-300 backdrop-blur-sm"
-              >
-                Sign In
-              </button>
-            </div>
-
-            {/* Feature Grid - More organized */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto pt-8">
-              {[
-                { icon: Search, label: "Discover", desc: "Millions of books" },
-                { icon: BookOpen, label: "Track", desc: "Your reading list" },
-                { icon: Star, label: "Rate", desc: "Share your thoughts" },
-                { icon: TrendingUp, label: "Explore", desc: "Trending titles" }
-              ].map((feature, index) => (
-                <div
-                  key={index}
-                  className="group p-6 bg-white/5 hover:bg-white/10 backdrop-blur-sm rounded-2xl border border-[#3D4451] hover:border-amber-500/30 transition-all duration-300"
-                >
-                  <div className="w-12 h-12 mb-4 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-6 h-6 text-amber-400" />
-                  </div>
-                  <h3 className="text-stone-50 font-semibold text-lg mb-1">{feature.label}</h3>
-                  <p className="text-stone-400 text-sm">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-stone-500 pt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                <span>Free Forever</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                <span>No Credit Card</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                <span>Join in 30 Seconds</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// 3D Carousel component - Horizontal panning
-function BookCarousel({ books }: { books: Book[] }) {
-  const groupRef = useRef<THREE.Group>(null)
-  const spacing = 1.8
-
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      // Pan horizontally from right to left at slower constant speed
-      groupRef.current.position.x -= delta * 0.8
-
-      // Calculate the width of one full set of books
-      const setWidth = books.length * spacing
-
-      // When we've scrolled past one complete set, reset by exactly one set width
-      // This creates a seamless infinite loop
-      if (groupRef.current.position.x <= -setWidth) {
-        groupRef.current.position.x += setWidth
-      }
-    }
-  })
-
-  // Triple the books array for seamless infinite scrolling
-  const infiniteBooks = [...books, ...books, ...books]
-
-  return (
-    <group ref={groupRef}>
-      {infiniteBooks.map((book, index) => {
-        // Arrange books in a horizontal line
-        const x = index * spacing
-
-        // All books perfectly aligned on Y axis
-        const y = 0
-
-        // Keep Z position close and consistent (just in front of camera)
-        const z = 0
-
-        return (
-          <BookMesh
-            key={`${book.id}-${index}`}
-            position={[x, y, z]}
-            rotation={[0, 0, 0]}
-            imageUrl={book.image}
-            index={index}
-          />
-        )
-      })}
-    </group>
-  )
-}
-
-// Individual book mesh component
-function BookMesh({
-  position,
-  rotation,
-  imageUrl,
-  index
-}: {
-  position: [number, number, number]
-  rotation: [number, number, number]
-  imageUrl: string
-  index: number
-}) {
-  const meshRef = useRef<THREE.Mesh>(null)
-  const [hovered, setHovered] = useState(false)
-
-  // Load texture - Suspense will handle loading states
-  const texture = useTexture(imageUrl)
-
-  // Hover animation only
-  useFrame(() => {
-    if (meshRef.current) {
-      // Subtle scale on hover
-      const targetScale = hovered ? 1.1 : 1
-      meshRef.current.scale.setScalar(
-        THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1)
-      )
-    }
+  const rise = (i: number) => ({
+    initial: { opacity: 0, y: 22 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: reduceMotion ? 0 : 0.65,
+      delay: reduceMotion ? 0 : 0.1 + i * 0.09,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+    },
   })
 
   return (
-    <mesh
-      ref={meshRef}
-      position={position}
-      rotation={rotation}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-    >
-      <planeGeometry args={[1.2, 1.8]} />
-      <meshStandardMaterial
-        map={texture}
-        side={THREE.DoubleSide}
-        transparent
-        opacity={0.9}
+    <section className="grain relative isolate flex min-h-[100svh] items-center overflow-hidden bg-canvas">
+      {/* ---- Backdrop glow + vignette ---- */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(75% 55% at 70% 6%, rgba(224,168,93,0.17), transparent 60%),' +
+            'radial-gradient(55% 45% at 12% 100%, rgba(217,119,6,0.10), transparent 65%)',
+        }}
       />
-    </mesh>
-  )
-}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(125% 100% at 50% 0%, transparent 42%, rgba(0,0,0,0.6) 100%)',
+        }}
+      />
 
-// Loading state component
-function LoadingState() {
-  return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#14181C] via-amber-900 to-[#14181C] flex items-center justify-center">
-      <div className="text-center z-10">
-        <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-stone-50 text-lg">Loading your personalized experience...</p>
-      </div>
-    </section>
-  )
-}
-
-// Static fallback for reduced motion or no WebGL
-function StaticFallbackHero({ books }: { books: Book[] }) {
-  const router = useRouter()
-
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-t from-[#14181C] via-[#14181C] to-amber-900 min-h-screen">
-      {/* Background grid pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'linear-gradient(rgba(251, 191, 36, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(251, 191, 36, 0.1) 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
-        }} />
-      </div>
-
-      <div className="relative z-20 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl w-full">
-          <div className="text-center space-y-12">
-
-            {/* Hero Heading */}
-            <div className="space-y-6">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
-                <span className="block text-stone-50 mb-2">Your Books,</span>
-                <span className="block bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-                  Your Story
-                </span>
-              </h1>
-
-              <p className="text-xl sm:text-2xl text-stone-400 max-w-3xl mx-auto leading-relaxed font-light">
-                Track, rate, and discover books. Build your personal library and connect with fellow readers.
-              </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
-              <button
-                onClick={() => router.push('/auth')}
-                className="group w-full sm:w-auto relative px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-amber-500/50 hover:-translate-y-1"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  Get Started Free
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-orange-700 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-
-              <button
-                onClick={() => router.push('/auth')}
-                className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 text-stone-50 font-medium rounded-xl border border-[#3D4451] hover:border-[#3D4451] transition-all duration-300 backdrop-blur-sm"
-              >
-                Sign In
-              </button>
-            </div>
-
-            {/* Feature Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto pt-8">
-              {[
-                { icon: Search, label: "Discover", desc: "Millions of books" },
-                { icon: BookOpen, label: "Track", desc: "Your reading list" },
-                { icon: Star, label: "Rate", desc: "Share your thoughts" },
-                { icon: TrendingUp, label: "Explore", desc: "Trending titles" }
-              ].map((feature, index) => (
-                <div
-                  key={index}
-                  className="group p-6 bg-white/5 hover:bg-white/10 backdrop-blur-sm rounded-2xl border border-[#3D4451] hover:border-amber-500/30 transition-all duration-300"
-                >
-                  <div className="w-12 h-12 mb-4 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-6 h-6 text-amber-400" />
-                  </div>
-                  <h3 className="text-stone-50 font-semibold text-lg mb-1">{feature.label}</h3>
-                  <p className="text-stone-400 text-sm">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-stone-500 pt-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                <span>Free Forever</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                <span>No Credit Card</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                <span>Join in 30 Seconds</span>
-              </div>
-            </div>
-
-            {/* Book preview grid */}
-            {books.length > 0 && (
-              <div className="mt-16 grid grid-cols-4 md:grid-cols-8 gap-3 max-w-5xl mx-auto opacity-30">
-                {books.slice(0, 8).map((book) => (
-                  <div key={book.id} className="aspect-[2/3] rounded-lg overflow-hidden shadow-lg">
-                    <img
-                      src={book.image}
-                      alt={book.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+      {/* ---- Cover wall ---- */}
+      <motion.div
+        aria-hidden
+        style={{ y: wallY }}
+        className="pointer-events-none absolute inset-y-0 left-0 right-0 -z-[6] flex items-center opacity-50 [perspective:1600px] sm:opacity-80 lg:left-[42%]"
+      >
+        <div className="rail-mask flex w-full flex-col gap-4 [transform:rotateY(-26deg)_rotateX(7deg)_rotateZ(-3deg)] sm:gap-5">
+          <CoverRow books={rowA} direction="left" duration={82} />
+          <CoverRow books={rowB} direction="right" duration={96} />
+          <CoverRow books={rowA} direction="left" duration={112} className="hidden lg:flex" />
         </div>
-      </div>
+      </motion.div>
+
+      {/* scrims for text legibility */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-r from-canvas from-35% via-canvas/92 to-canvas/25 sm:to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 -z-[5] h-32 bg-gradient-to-b from-canvas to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-44 bg-gradient-to-t from-canvas to-transparent"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-0 -z-[5] hidden w-40 bg-gradient-to-l from-canvas to-transparent sm:block"
+      />
+
+      {/* ---- Content ---- */}
+      <motion.div
+        style={{ y: contentY }}
+        className="relative z-10 mx-auto w-full max-w-7xl px-5 py-20 sm:px-8"
+      >
+        <div className="max-w-xl">
+          <motion.p {...rise(0)} className="kicker">
+            A home for everything you read
+          </motion.p>
+
+          <motion.h1
+            {...rise(1)}
+            className="font-display mt-6 text-[clamp(2.15rem,4.4vw,3.35rem)] font-semibold leading-[1.1] tracking-[-0.02em] text-ink"
+          >
+            <span className="block">Every book you&apos;ve read,</span>
+            <span
+              className="mt-1.5 block italic text-gold"
+              style={{ fontVariationSettings: '"WONK" 1' }}
+            >
+              worth remembering.
+            </span>
+          </motion.h1>
+
+          <motion.p
+            {...rise(2)}
+            className="mt-7 max-w-lg text-lg leading-relaxed text-ink-soft"
+          >
+            Track what you&apos;ve read, rate it honestly, and find your next
+            book — alongside a community that cares about books as much as you do.
+          </motion.p>
+
+          <motion.div
+            {...rise(3)}
+            className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
+          >
+            <button
+              onClick={() => router.push('/auth')}
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-ember px-7 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-ember-strong hover:shadow-[0_12px_40px_-10px_rgba(217,119,6,0.55)]"
+            >
+              Start your shelf
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </button>
+            <button
+              onClick={() => router.push('/browse')}
+              className="inline-flex items-center justify-center rounded-full border border-line-strong bg-overlay px-7 py-3.5 text-sm font-medium text-ink backdrop-blur-sm transition-colors duration-300 hover:border-ink-mute hover:bg-overlay-hover"
+            >
+              Explore books
+            </button>
+          </motion.div>
+
+          <motion.ul
+            {...rise(4)}
+            className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-faint"
+          >
+            {META.map((label, i) => (
+              <li key={label} className="flex items-center gap-3">
+                {i > 0 && <span className="text-ink-faint/50">/</span>}
+                {label}
+              </li>
+            ))}
+          </motion.ul>
+        </div>
+      </motion.div>
     </section>
+  )
+}
+
+function CoverRow({
+  books,
+  direction,
+  duration,
+  className = '',
+}: {
+  books: Book[]
+  direction: 'left' | 'right'
+  duration: number
+  className?: string
+}) {
+  if (!books.length) return null
+  const loop = [...books, ...books]
+  return (
+    <div
+      className={`marquee-track ${
+        direction === 'left' ? 'marquee-left' : 'marquee-right'
+      } ${className}`}
+      style={{ ['--marquee-duration' as string]: `${duration}s` }}
+    >
+      {loop.map((book, i) => (
+        <div
+          key={`${book.id}-${i}`}
+          className="mx-2 h-[172px] w-[115px] shrink-0 overflow-hidden rounded-[5px] bg-surface-2 shadow-[0_22px_50px_-18px_rgba(0,0,0,0.85)] ring-1 ring-white/[0.06] sm:h-[200px] sm:w-[133px]"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={book.image}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              ;(e.currentTarget.parentElement as HTMLElement).style.visibility =
+                'hidden'
+            }}
+          />
+        </div>
+      ))}
+    </div>
   )
 }

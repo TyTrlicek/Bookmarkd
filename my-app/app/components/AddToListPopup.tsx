@@ -181,18 +181,18 @@ const AddToListPopup: React.FC<AddToListPopupProps> = ({
   return (
     <>
       <div
-        className="fixed inset-0 bg-[#14181C]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+        className="fixed inset-0 bg-canvas/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
         onClick={onClose}
       >
         <div
-          className="bg-[#14181C] border border-[#3D4451] rounded-2xl max-w-md w-full shadow-2xl max-h-[80vh] flex flex-col"
+          className="bg-canvas border border-line rounded-2xl max-w-md w-full shadow-2xl max-h-[80vh] flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-[#3D4451] flex-shrink-0">
+          <div className="flex items-center justify-between p-5 border-b border-line flex-shrink-0">
             <div>
-              <h3 className="text-lg font-bold text-stone-50">Add to List</h3>
-              <p className="text-stone-400 text-sm truncate max-w-[250px]">
+              <h3 className="text-lg font-bold text-ink">Add to List</h3>
+              <p className="text-ink-mute text-sm truncate max-w-[250px]">
                 {bookTitle}
               </p>
             </div>
@@ -200,7 +200,7 @@ const AddToListPopup: React.FC<AddToListPopupProps> = ({
               onClick={onClose}
               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
             >
-              <X className="w-5 h-5 text-stone-400" />
+              <X className="w-5 h-5 text-ink-mute" />
             </button>
           </div>
 
@@ -208,27 +208,27 @@ const AddToListPopup: React.FC<AddToListPopupProps> = ({
           <div className="flex-1 overflow-y-auto p-4">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-ink-mute animate-spin" />
               </div>
             ) : error ? (
               <div className="text-center py-8">
                 <p className="text-red-400 mb-4">{error}</p>
                 <button
                   onClick={fetchLists}
-                  className="text-purple-400 hover:text-purple-300 text-sm"
+                  className="text-ink-mute hover:text-ink text-sm"
                 >
                   Try again
                 </button>
               </div>
             ) : lists.length === 0 ? (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ListPlus className="w-8 h-8 text-purple-400" />
+                <div className="w-16 h-16 bg-overlay rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ListPlus className="w-8 h-8 text-ink-mute" />
                 </div>
-                <p className="text-stone-400 mb-4">You don't have any lists yet</p>
+                <p className="text-ink-mute mb-4">You don't have any lists yet</p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-400 text-white font-medium rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-ember hover:bg-ember-strong text-white font-semibold rounded-full transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   Create your first list
@@ -247,23 +247,23 @@ const AddToListPopup: React.FC<AddToListPopupProps> = ({
                       disabled={isAdded || isAdding}
                       className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
                         isAdded
-                          ? 'bg-purple-500/10 border-purple-500/30 cursor-default'
-                          : 'bg-[#2C3440] border-[#3D4451] hover:border-purple-500/50'
+                          ? 'bg-overlay border-line-strong cursor-default'
+                          : 'bg-surface border-line hover:border-line-strong'
                       }`}
                     >
                       <div className="text-left">
-                        <p className="font-medium text-stone-50">{list.title}</p>
-                        <p className="text-stone-400 text-sm">
+                        <p className="font-medium text-ink">{list.title}</p>
+                        <p className="text-ink-mute text-sm">
                           {list._count?.items || 0} books
                         </p>
                       </div>
                       <div className="flex-shrink-0">
                         {isAdding ? (
-                          <Loader2 className="w-5 h-5 text-purple-500 animate-spin" />
+                          <Loader2 className="w-5 h-5 text-ink-mute animate-spin" />
                         ) : isAdded ? (
-                          <Check className="w-5 h-5 text-purple-400" />
+                          <Check className="w-5 h-5 text-ink-mute" />
                         ) : (
-                          <Plus className="w-5 h-5 text-stone-400" />
+                          <Plus className="w-5 h-5 text-ink-mute" />
                         )}
                       </div>
                     </button>
@@ -274,10 +274,10 @@ const AddToListPopup: React.FC<AddToListPopupProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-[#3D4451] flex-shrink-0">
+          <div className="p-4 border-t border-line flex-shrink-0">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2C3440] hover:bg-[#3D4451] text-stone-50 font-medium rounded-xl border border-[#3D4451] transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-surface hover:bg-surface-2 text-ink font-medium rounded-xl border border-line transition-colors"
             >
               <Plus className="w-5 h-5" />
               Create New List

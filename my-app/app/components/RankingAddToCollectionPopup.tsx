@@ -53,21 +53,21 @@ export default function RankingAddToCollectionPopup({
     {
       value: 'to-read',
       label: 'To Read',
-      color: 'bg-blue-500/20 text-blue-300 border-blue-400/30',
+      color: 'bg-rate-good/15 text-rate-good border-rate-good/40',
       icon: BookOpen,
       description: 'Added to reading list'
     },
     {
       value: 'completed',
       label: 'Completed',
-      color: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
+      color: 'bg-rate-high/15 text-rate-high border-rate-high/40',
       icon: CheckCircle2,
       description: 'Finished reading'
     },
     {
       value: 'dropped',
       label: 'Dropped',
-      color: 'bg-red-500/20 text-red-300 border-red-400/30',
+      color: 'bg-rate-bad/15 text-rate-bad border-rate-bad/40',
       icon: XCircle,
       description: 'Stopped reading'
     }
@@ -102,8 +102,6 @@ export default function RankingAddToCollectionPopup({
         }
       );
     
-      console.log('Book added response:', res.data);
-      
       // Reset form and close
       setRating(0);
       setStatus('');
@@ -140,40 +138,40 @@ export default function RankingAddToCollectionPopup({
   const TriggerButton = () => {
     if (buttonType === "book-page") {
       return userStatus !== null ? (
-        <button          
-          className="w-full font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 transform bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 shadow-lg cursor-default backdrop-blur-sm"
-        >         
-          <Plus className="w-4 h-4" />         
-          In Collection       
+        <button
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-line-strong bg-overlay px-4 py-3 text-sm font-medium text-ink"
+        >
+          <CheckCircle2 className="h-4 w-4 text-rate-high" />
+          In your collection
         </button>
       ) : (
-        <button          
-          className="w-full font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 transform hover:scale-[1.02] bg-[#2C3440]/80 hover:bg-stone-500/20 text-stone-300 border border-[#3D4451] shadow-md hover:shadow-lg backdrop-blur-sm"         
-          onClick={() => setIsOpen(true)}       
-        >         
-          <Plus className="w-4 h-4" />         
-          Add to Collection       
+        <button
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-ember px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-ember-strong"
+          onClick={() => setIsOpen(true)}
+        >
+          <Plus className="h-4 w-4" />
+          Add to collection
         </button>
       );
     }
 
     if (buttonType === "ranking-laptop") {
       return (
-        <div className="flex items-center justify-center col-span-2">         
+        <div className="col-span-2 flex items-center justify-center">
           {userStatus !== null ? (
-            <button           
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/80 text-white transition mr-12 cursor-default backdrop-blur-sm shadow-md border border-emerald-400/30"           
-              title="In List"         
-            >           
-              <Check className="w-5 h-5" />         
+            <button
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-rate-high/40 bg-rate-high/15 text-rate-high"
+              title="In your collection"
+            >
+              <Check className="h-4 w-4" />
             </button>
           ) : (
-            <button           
-              onClick={() => setIsOpen(true)}           
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white transition mr-12 backdrop-blur-sm shadow-md border border-amber-400/30"           
-              title="Add to List"         
-            >           
-              <ListPlus className="w-5 h-5" />         
+            <button
+              onClick={() => setIsOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-ember text-white transition-colors hover:bg-ember-strong"
+              title="Add to collection"
+            >
+              <ListPlus className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -183,18 +181,18 @@ export default function RankingAddToCollectionPopup({
     // Default mobile ranking button
     return userStatus !== null ? (
       <button
-        className="p-1.5 rounded-full bg-emerald-500/80 text-white shadow-md cursor-default backdrop-blur-sm border border-emerald-400/30"
-        title="In Collection"
+        className="rounded-full border border-rate-high/40 bg-rate-high/15 p-1.5 text-rate-high"
+        title="In your collection"
       >
-        <Check className="w-3 h-3" />
+        <Check className="h-3 w-3" />
       </button>
     ) : (
       <button
-        onClick={() => {setIsOpen(true)}}
-        className="p-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-all text-white shadow-md hover:shadow-lg backdrop-blur-sm"
-        title="Add to List"
+        onClick={() => { setIsOpen(true) }}
+        className="rounded-full bg-ember p-1.5 text-white transition-colors hover:bg-ember-strong"
+        title="Add to collection"
       >
-        <Plus className="w-3 h-3" />
+        <Plus className="h-3 w-3" />
       </button>
     );
   };
@@ -212,39 +210,34 @@ export default function RankingAddToCollectionPopup({
         }}
         onClick={handleBackdropClick}
       >
-        <div 
-          className="bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C] rounded-2xl shadow-2xl w-full max-w-lg mx-4 transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-[#3D4451] backdrop-blur-md"
+        <div
+          className="grain relative mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-canvas-raised shadow-[0_40px_120px_-20px_rgba(0,0,0,0.8)] duration-200 animate-in zoom-in-95"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#14181C]/40 to-stone-500/10 p-6 rounded-t-2xl border-b border-[#3D4451] top-0 z-10 backdrop-blur-md">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-stone-50 mb-1 flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-amber-400/20 border border-amber-400/30">
-                    <Plus className="w-5 h-5 text-amber-400" />
-                  </div>
-                  Add to Collection
-                </h2>
-                <p className="text-sm text-stone-300">Rate and organize your reading</p>
-              </div>
-              <button
-                onClick={handleClose}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200 flex-shrink-0 backdrop-blur-sm"
-              >
-                <X size={20} className="text-stone-400" />
-              </button>
+          <div className="sticky top-0 z-10 flex items-start justify-between border-b border-line bg-canvas-raised/95 p-6 backdrop-blur-md">
+            <div>
+              <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink">
+                Add to collection
+              </h2>
+              <p className="mt-1 text-sm text-ink-mute">Rate it and set a reading status.</p>
             </div>
+            <button
+              onClick={handleClose}
+              className="rounded-full p-2 text-ink-faint transition-colors hover:bg-overlay hover:text-ink"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           {/* Form */}
-          <div className="sm:p-6 sm:space-y-8 p-3 space-y-4">
+          <div className="space-y-6 p-6">
             {/* Rating Section */}
-            <div className="space-y-4">
-              <label className="text-sm font-semibold text-stone-200 mb-2 block">
-                Your Rating
+            <div>
+              <label className="mb-2 block font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">
+                Your rating
               </label>
-              <div className="flex items-center justify-between p-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl backdrop-blur-sm">
+              <div className="flex items-center justify-between rounded-xl border border-line bg-overlay p-4">
                 <StarRating
                   rating={rating}
                   onRatingChange={setRating}
@@ -255,7 +248,7 @@ export default function RankingAddToCollectionPopup({
                   <button
                     type="button"
                     onClick={() => setRating(0)}
-                    className="text-xs text-stone-400 hover:text-stone-200 underline transition-colors"
+                    className="text-xs text-ink-mute underline transition-colors hover:text-ink"
                   >
                     Clear
                   </button>
@@ -264,34 +257,35 @@ export default function RankingAddToCollectionPopup({
             </div>
 
             {/* Status Section */}
-            <div className="space-y-4">
-              <label className="block text-sm font-semibold text-stone-200 mb-2 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-blue-400" />
-                Reading Status
+            <div>
+              <label className="mb-2 flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">
+                <BookOpen className="h-3.5 w-3.5" />
+                Reading status
               </label>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {statusOptions.map((option) => {
                   const Icon = option.icon;
+                  const active = status === option.value;
                   return (
                     <button
                       key={option.value}
                       type="button"
                       onClick={() => setStatus(option.value)}
-                      className={`w-full p-4 rounded-xl border transition-all duration-200 text-left transform hover:scale-[1.02] backdrop-blur-sm ${
-                        status === option.value
-                          ? `${option.color} border-current shadow-lg`
-                          : 'border-[#3D4451] hover:border-white/30 bg-[#2C3440]/60 hover:bg-white/5'
+                      className={`w-full rounded-xl border p-3.5 text-left transition-colors ${
+                        active
+                          ? `${option.color} border-current`
+                          : 'border-line bg-overlay hover:bg-overlay-hover'
                       }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${status === option.value ? 'bg-current/20' : 'bg-white/10'}`}>
-                          <Icon size={18} className={status === option.value ? 'text-current' : 'text-stone-400'} />
+                      <div className="flex items-center gap-3">
+                        <div className={`rounded-lg p-2 ${active ? 'bg-current/15' : 'bg-overlay'}`}>
+                          <Icon size={16} className={active ? 'text-current' : 'text-ink-mute'} />
                         </div>
                         <div className="flex-1">
-                          <div className={`font-semibold ${status === option.value ? 'text-current' : 'text-stone-200'}`}>
+                          <div className={`text-sm font-semibold ${active ? 'text-current' : 'text-ink'}`}>
                             {option.label}
                           </div>
-                          <div className={`text-sm ${status === option.value ? 'text-current opacity-80' : 'text-stone-400'}`}>
+                          <div className={`text-xs ${active ? 'text-current opacity-80' : 'text-ink-mute'}`}>
                             {option.description}
                           </div>
                         </div>
@@ -303,11 +297,11 @@ export default function RankingAddToCollectionPopup({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4 pt-0 sm:pt-6">
+            <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 px-6 py-3 border border-[#3D4451] text-stone-300 rounded-xl hover:bg-white/10 hover:border-white/30 transition-all duration-200 font-medium backdrop-blur-sm"
+                className="flex-1 rounded-full border border-line px-6 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-overlay"
                 disabled={isSubmitting}
               >
                 Cancel
@@ -316,15 +310,15 @@ export default function RankingAddToCollectionPopup({
                 type="button"
                 onClick={handleSubmit}
                 disabled={!status || isSubmitting}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none border border-amber-400/30"
+                className="flex-1 rounded-full bg-ember px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ember-strong disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Adding...
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Adding…
                   </div>
                 ) : (
-                  'Add to Collection'
+                  'Add to collection'
                 )}
               </button>
             </div>

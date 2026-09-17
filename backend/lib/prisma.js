@@ -54,10 +54,8 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 setInterval(async () => {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    console.log('✅ [Prisma] Connection healthy');
   } catch (err) {
-    console.error('🔴 [Prisma] Health check FAILED:', err.message);
-    console.error('[Prisma] This may indicate database connection issues!');
+    // Health check failed silently
   }
 }, 60000); // Every minute
 

@@ -16,11 +16,8 @@ router.get('/unread', authenticateUser, async (req, res) => {
       // Check cache first
       const cached = await cache.get(cacheKey);
       if (cached) {
-        console.log(`[Notifications] Served from cache for user ${userId}`);
         return res.json(cached);
       }
-
-      console.log(`[Notifications] Cache miss for user ${userId}, fetching from database...`);
       const activities = await prisma.userActivity.findMany({
         where: {
           userId,
@@ -35,7 +32,6 @@ router.get('/unread', authenticateUser, async (req, res) => {
 
       // Cache for 5 minutes - notifications don't change frequently
       await cache.set(cacheKey, activities, TTL.MEDIUM);
-      console.log(`[Notifications] Cached notifications for user ${userId} (TTL=${TTL.MEDIUM}s)`);
 
       res.json(activities);
     } catch (error) {
@@ -58,7 +54,6 @@ router.get('/unread', authenticateUser, async (req, res) => {
       const notificationsCacheKey = cache.generateKey('notifications', userId);
       await cache.del(activityCacheKey);
       await cache.del(notificationsCacheKey);
-      console.log(`[Activity] Invalidated activity and notifications cache after mark-read for user ${userId}`);
 
       res.status(200).json({ message: 'Marked as read' });
     } catch (err) {
@@ -79,11 +74,8 @@ router.get('/unread', authenticateUser, async (req, res) => {
     // Try cache first
     const cachedActivity = await cache.get(cacheKey);
     if (cachedActivity) {
-      console.log(`[UserActivity] Served from cache for user ${userId}`);
       return res.status(200).json(cachedActivity);
     }
-
-    console.log(`[UserActivity] Cache miss for user ${userId}, fetching from DB...`);
 
     const activities = await prisma.userActivity.findMany({
       where: { userId },
@@ -93,11 +85,9 @@ router.get('/unread', authenticateUser, async (req, res) => {
 
     // Cache the activity feed
     await cache.set(cacheKey, activities, TTL.ACTIVITY_FEED);
-    console.log(`[UserActivity] Cached activity for user ${userId} (TTL=${TTL.ACTIVITY_FEED}s)`);
 
     return res.status(200).json(activities);
   } catch (err) {
-    console.error('Error fetching user activity:', err);
     return res.status(500).json({ error: 'Server error while fetching activity' });
   }
 });
@@ -111,11 +101,8 @@ router.get('/unread', authenticateUser, async (req, res) => {
     // Try cache first
     const cachedActivity = await cache.get(cacheKey);
     if (cachedActivity) {
-      console.log(`[RecentActivity] Served from cache`);
       return res.status(200).json(cachedActivity);
     }
-
-    console.log(`[RecentActivity] Cache miss, fetching from DB...`);
 
     const activities = await prisma.userActivity.findMany({
       where: {
@@ -127,11 +114,9 @@ router.get('/unread', authenticateUser, async (req, res) => {
 
     // Cache the recent activity feed
     await cache.set(cacheKey, activities, TTL.ACTIVITY_FEED);
-    console.log(`[RecentActivity] Cached recent activity (TTL=${TTL.ACTIVITY_FEED}s)`);
 
     return res.status(200).json(activities);
   } catch (err) {
-    console.error('Error fetching user activity:', err);
     return res.status(500).json({ error: 'Server error while fetching activity' });
   }
 });

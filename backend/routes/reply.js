@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const authenticateUser = require('../middleware/authenticateUser');
+const attachIfUserExists = require('../middleware/attachIfUserExists');
 const { reviewLimiter, replyLimiter, voteLimiter, writeLimiter } = require('../middleware/rateLimiting');
 const prisma = require('../lib/prisma');
 
@@ -382,7 +383,6 @@ router.post('/replies/:replyId/vote', voteLimiter, authenticateUser, async (req,
     let isHelpful;
 
     if (existingVote) {
-      console.log("existing vote")
       // Remove vote
       await prisma.reviewReplyVote.delete({ where: { id: existingVote.id } });
       await prisma.reviewReply.update({
@@ -391,7 +391,6 @@ router.post('/replies/:replyId/vote', voteLimiter, authenticateUser, async (req,
       });
       isHelpful = false;
     } else {
-      console.log("New Vote")
       // Add vote
       await prisma.reviewReplyVote.create({ data: { userId, replyId } });
       await prisma.reviewReply.update({
@@ -406,8 +405,6 @@ router.post('/replies/:replyId/vote', voteLimiter, authenticateUser, async (req,
       where: { id: replyId },
       select: { helpfulCount: true }
     });
-
-    console.log("Updated: ", updatedReply.helpfulCount)
 
     res.json({
       success: true,
@@ -616,7 +613,83 @@ router.delete('/replies/:replyId', writeLimiter, authenticateUser, async (req, r
   }
 });
 
+// GET /api/reviews/:reviewId/voters - Get users who liked a review
+router.get('/reviews/:reviewId/voters', attachIfUserExists, async (req, res) => {
+  const { reviewId } = req.params;
+  const { cursor, limit = 20 } = req.query;
+  const currentUserId = req.userId;
 
-      
+  try {
+    // Check if review exists
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { id: true, helpfulCount: true }
+    });
+
+    if (!review) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+
+    const votes = await prisma.reviewVote.findMany({
+      where: { reviewId },
+      orderBy: { createdAt: 'desc' },
+      take: parseInt(limit) + 1,
+      ...(cursor && {
+        cursor: { id: cursor },
+        skip: 1
+      }),
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatar_url: true,
+            bio: true,
+            _count: {
+              select: {
+                followers: true,
+                following: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const hasMore = votes.length > parseInt(limit);
+    const items = hasMore ? votes.slice(0, -1) : votes;
+
+    // If logged in, check which users the current user is following
+    let followingSet = new Set();
+    if (currentUserId) {
+      const userFollowing = await prisma.follow.findMany({
+        where: {
+          followerId: currentUserId,
+          followingId: { in: items.map(v => v.user.id) }
+        },
+        select: { followingId: true }
+      });
+      followingSet = new Set(userFollowing.map(f => f.followingId));
+    }
+
+    res.json({
+      totalLikes: review.helpfulCount,
+      users: items.map(v => ({
+        id: v.user.id,
+        username: v.user.username,
+        avatar_url: v.user.avatar_url,
+        bio: v.user.bio,
+        followerCount: v.user._count.followers,
+        followingCount: v.user._count.following,
+        isFollowing: followingSet.has(v.user.id),
+        votedAt: v.createdAt
+      })),
+      nextCursor: hasMore ? items[items.length - 1].id : null
+    });
+  } catch (error) {
+    console.error('Error fetching review voters:', error);
+    res.status(500).json({ error: 'Failed to fetch voters' });
+  }
+});
 
 module.exports = router;

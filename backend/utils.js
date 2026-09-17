@@ -87,11 +87,8 @@ async function calculateUserStats(userId) {
   // Try to get cached achievement stats first
   const cachedStats = await cache.get(cacheKey);
   if (cachedStats) {
-    console.log(`[AchievementStats] Served from cache for user ${userId}`);
     return cachedStats;
   }
-
-  console.log(`[AchievementStats] Cache miss for user ${userId}, calculating stats...`);
 
   // Get all user data in parallel
   const [userBooks, reviews] = await Promise.all([
@@ -141,7 +138,6 @@ async function calculateUserStats(userId) {
 
   // Cache the achievement stats for 30 minutes
   await cache.set(cacheKey, stats, TTL.USER_STATS);
-  console.log(`[AchievementStats] Cached stats for user ${userId} (TTL=${TTL.USER_STATS}s)`);
 
   return stats;
 }

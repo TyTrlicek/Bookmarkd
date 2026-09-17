@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Suspense } from "react";
 import HomeClient from "./HomeClient";
 
 export const metadata: Metadata = {
@@ -57,7 +58,9 @@ export default function HomePage() {
           }),
         }}
       />
-      <HomeClient />
+      <Suspense fallback={<div className="min-h-screen bg-[#14181C]" />}>
+        <HomeClient />
+      </Suspense>
     </>
   );
 }

@@ -147,10 +147,10 @@ const ListDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#14181C]">
+      <div className="min-h-screen bg-canvas">
         <Header />
         <div className="flex items-center justify-center py-32">
-          <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
+          <Loader2 className="w-10 h-10 text-gold animate-spin" />
         </div>
         <Footer />
       </div>
@@ -159,19 +159,19 @@ const ListDetailPage = () => {
 
   if (error || !list) {
     return (
-      <div className="min-h-screen bg-[#14181C]">
+      <div className="min-h-screen bg-canvas">
         <Header />
         <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-          <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <X className="w-10 h-10 text-red-400" />
+          <div className="w-20 h-20 bg-rate-bad/15 rounded-full flex items-center justify-center mx-auto mb-6">
+            <X className="w-10 h-10 text-rate-bad" />
           </div>
-          <h1 className="text-2xl font-bold text-stone-50 mb-3">{error || 'List not found'}</h1>
-          <p className="text-stone-400 mb-6">
+          <h1 className="font-display text-xl font-semibold text-ink mb-3">{error || 'List not found'}</h1>
+          <p className="text-ink-mute mb-6">
             The list you're looking for doesn't exist or you don't have permission to view it.
           </p>
           <Link
             href="/lists"
-            className="inline-flex items-center gap-2 px-5 py-3 bg-purple-500 hover:bg-purple-400 text-white font-semibold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-ember hover:bg-ember-strong text-white font-semibold rounded-xl transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Browse Lists
@@ -183,38 +183,38 @@ const ListDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#14181C]">
+    <div className="min-h-screen bg-canvas">
       <Header />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Back Link */}
         <Link
           href="/lists"
-          className="inline-flex items-center gap-2 text-stone-400 hover:text-stone-300 mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-ink-mute hover:text-ink-soft mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Lists
         </Link>
 
         {/* List Header */}
-        <div className="bg-[#2C3440] rounded-2xl p-6 md:p-8 border border-[#3D4451] mb-8">
+        <div className="bg-surface rounded-2xl p-6 md:p-8 border border-line mb-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div className="flex-1">
               {/* Badges */}
               <div className="flex items-center gap-2 mb-3">
                 {list.isPublic ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500/20 text-green-300 text-xs rounded-full">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rate-high/15 text-rate-high text-xs rounded-full">
                     <Globe className="w-3 h-3" />
                     Public
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-700/50 text-stone-400 text-xs rounded-full">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-overlay text-ink-mute text-xs rounded-full">
                     <Lock className="w-3 h-3" />
                     Private
                   </span>
                 )}
                 {list.isRanked && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gold-dim text-gold text-xs rounded-full">
                     <Hash className="w-3 h-3" />
                     Ranked
                   </span>
@@ -222,23 +222,23 @@ const ListDetailPage = () => {
               </div>
 
               {/* Title */}
-              <h1 className="text-3xl md:text-4xl font-bold text-stone-50 mb-3">
+              <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-[-0.02em] text-ink mb-3">
                 {list.title}
               </h1>
 
               {/* Description */}
               {list.description && (
-                <p className="text-stone-300 text-lg mb-4 max-w-2xl">
+                <p className="text-ink-soft text-lg mb-4 max-w-2xl">
                   {list.description}
                 </p>
               )}
 
               {/* Meta */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-stone-400">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-ink-mute">
                 {/* Author */}
                 <Link
                   href={`/user/${list.user?.id}`}
-                  className="flex items-center gap-2 hover:text-stone-300 transition-colors"
+                  className="flex items-center gap-2 hover:text-ink-soft transition-colors"
                 >
                   {list.user?.avatar_url ? (
                     <Image
@@ -249,7 +249,7 @@ const ListDetailPage = () => {
                       className="rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-ember rounded-full flex items-center justify-center">
                       <User className="w-3 h-3 text-white" />
                     </div>
                   )}
@@ -282,14 +282,14 @@ const ListDetailPage = () => {
               <div className="flex items-center gap-3">
                 <Link
                   href={`/lists/${listId}/edit`}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#14181C] hover:bg-[#0D1117] text-stone-300 rounded-lg border border-[#3D4451] transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-overlay hover:bg-overlay-hover text-ink-soft rounded-lg border border-line transition-colors"
                 >
                   <Edit3 className="w-4 h-4" />
                   Edit
                 </Link>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg border border-red-500/30 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-rate-bad/10 hover:bg-rate-bad/20 text-rate-bad rounded-lg border border-rate-bad/30 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete
@@ -302,11 +302,11 @@ const ListDetailPage = () => {
         {/* Books Grid */}
         {list.items.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <BookOpen className="w-10 h-10 text-purple-400" />
+            <div className="w-20 h-20 bg-gold-dim rounded-full flex items-center justify-center mx-auto mb-6">
+              <BookOpen className="w-10 h-10 text-gold" />
             </div>
-            <h2 className="text-xl font-semibold text-stone-50 mb-3">No books yet</h2>
-            <p className="text-stone-400">
+            <h2 className="font-display text-lg font-semibold text-ink mb-3">No books yet</h2>
+            <p className="text-ink-mute">
               {isOwner
                 ? 'Start adding books to your list from any book page.'
                 : 'This list is empty.'}
@@ -317,11 +317,11 @@ const ListDetailPage = () => {
             {list.items.map((item, index) => (
               <div
                 key={item.id}
-                className="group relative bg-[#2C3440] rounded-xl border border-[#3D4451] overflow-hidden hover:border-purple-500/50 transition-all"
+                className="group relative bg-surface rounded-xl border border-line overflow-hidden hover:border-line-strong transition-all"
               >
                 {/* Rank Number */}
                 {list.isRanked && (
-                  <div className="absolute top-2 left-2 z-10 w-8 h-8 bg-purple-500 text-white font-bold rounded-lg flex items-center justify-center text-sm shadow-lg">
+                  <div className="absolute top-2 left-2 z-10 w-8 h-8 bg-ember text-white font-semibold rounded-lg flex items-center justify-center text-sm shadow-lg">
                     {index + 1}
                   </div>
                 )}
@@ -331,7 +331,7 @@ const ListDetailPage = () => {
                   <button
                     onClick={() => handleRemoveBook(item.bookId)}
                     disabled={removingBook === item.bookId}
-                    className="absolute top-2 right-2 z-10 w-8 h-8 bg-red-500/80 hover:bg-red-500 text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 z-10 w-8 h-8 bg-rate-bad/90 hover:bg-rate-bad text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     {removingBook === item.bookId ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -353,8 +353,8 @@ const ListDetailPage = () => {
                         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
                       />
                     ) : (
-                      <div className="w-full h-full bg-[#3D4451] flex items-center justify-center">
-                        <BookOpen className="w-8 h-8 text-stone-500" />
+                      <div className="w-full h-full bg-surface-2 flex items-center justify-center">
+                        <BookOpen className="w-8 h-8 text-ink0" />
                       </div>
                     )}
                   </div>
@@ -363,11 +363,11 @@ const ListDetailPage = () => {
                 {/* Book Info */}
                 <div className="p-3">
                   <Link href={`/book/${item.book.openLibraryId}`}>
-                    <h3 className="font-medium text-stone-50 text-sm line-clamp-2 mb-1 hover:text-purple-300 transition-colors">
+                    <h3 className="font-medium text-ink text-sm line-clamp-2 mb-1 hover:text-gold transition-colors">
                       {item.book.title}
                     </h3>
                   </Link>
-                  <p className="text-stone-400 text-xs truncate">
+                  <p className="text-ink-mute text-xs truncate">
                     {item.book.author || 'Unknown Author'}
                   </p>
                 </div>
@@ -380,19 +380,19 @@ const ListDetailPage = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div
-          className="fixed inset-0 bg-[#14181C]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
           onClick={() => setShowDeleteConfirm(false)}
         >
           <div
-            className="bg-[#14181C] border border-red-500/30 rounded-2xl max-w-md w-full p-6"
+            className="bg-canvas border border-rate-bad/30 rounded-2xl max-w-md w-full p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trash2 className="w-8 h-8 text-red-400" />
+              <div className="w-16 h-16 bg-rate-bad/15 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-8 h-8 text-rate-bad" />
               </div>
-              <h3 className="text-xl font-bold text-stone-50 mb-2">Delete List?</h3>
-              <p className="text-stone-400">
+              <h3 className="font-display text-lg font-semibold text-ink mb-2">Delete List?</h3>
+              <p className="text-ink-mute">
                 Are you sure you want to delete "{list.title}"? This action cannot be undone.
               </p>
             </div>
@@ -400,14 +400,14 @@ const ListDetailPage = () => {
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className="flex-1 px-4 py-3 border border-[#3D4451] text-stone-300 rounded-xl hover:bg-white/5 transition-colors"
+                className="flex-1 px-4 py-3 border border-line text-ink-soft rounded-xl hover:bg-overlay transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteList}
                 disabled={deleting}
-                className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-rate-bad hover:opacity-90 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
               >
                 {deleting ? (
                   <Loader2 className="w-5 h-5 animate-spin mx-auto" />

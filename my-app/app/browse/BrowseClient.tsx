@@ -1,47 +1,29 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { 
-  Search, 
-  Filter, 
-  SortAsc, 
-  SortDesc, 
-  Grid, 
-  List, 
-  Star, 
-  Heart, 
-  BookOpen, 
-  User, 
-  Calendar, 
-  Tag, 
-  ChevronDown, 
-  X, 
-  Coffee, 
-  Bell, 
+import {
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  BookOpen,
+  Calendar,
+  Tag,
+  X,
   Sliders,
-  Eye,
-  Download,
-  Share2,
-  Bookmark,
-  Clock,
-  Award,
-  TrendingUp,
-  Sparkles,
   Globe,
-  Loader2
+  Loader2,
 } from 'lucide-react'
 import Header from '../components/Header'
 import BookCard from '../components/BookCard'
 import { getSearchData } from '@/utils/util'
 import { BookData } from '../types/types'
-import debounce from 'lodash/debounce';
+import debounce from 'lodash/debounce'
 import Footer from '../components/Footer'
 import MobileBookListItem from '../components/MobileBookListItem'
 
 const BrowseClient = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchType, setSearchType] = useState('all')
-  const [viewMode, setViewMode] = useState('grid')
   const [sortBy, setSortBy] = useState('relevance')
   const [sortOrder, setSortOrder] = useState('desc')
   const [selectedGenres, setSelectedGenres] = useState<string[]>([])
@@ -56,14 +38,14 @@ const BrowseClient = () => {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-  const checkMobile = () => {
-    setIsMobile(window.innerWidth < 768)
-  }
-  
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-  return () => window.removeEventListener('resize', checkMobile)
-}, [])
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -75,38 +57,38 @@ const BrowseClient = () => {
 
     setIsLoading(true)
     try {
-      const response = await getSearchData(query);
-      setBooks(response ?? []);
+      const response = await getSearchData(query)
+      setBooks(response ?? [])
       setHasSearched(true)
     } catch (error) {
-      console.error('Error fetching books:', error);
-      setBooks([]);
+      console.error('Error fetching books:', error)
+      setBooks([])
       setHasSearched(true)
     } finally {
       setIsLoading(false)
     }
-  };
+  }
 
   const debouncedSearch = useCallback(
     debounce((query: string) => {
-      handleSearch(query);
+      handleSearch(query)
     }, 500),
     []
-  );
+  )
 
   useEffect(() => {
     if (searchQuery.trim()) {
-      debouncedSearch(searchQuery);
+      debouncedSearch(searchQuery)
     } else {
-      setBooks([]);
+      setBooks([])
       setIsLoading(false)
       setHasSearched(false)
     }
 
     return () => {
-      debouncedSearch.cancel();
-    };
-  }, [searchQuery]);
+      debouncedSearch.cancel()
+    }
+  }, [searchQuery])
 
   // Check for URL parameters on mount
   useEffect(() => {
@@ -114,20 +96,18 @@ const BrowseClient = () => {
     const searchParam = urlParams.get('search')
     if (searchParam) {
       setSearchQuery(searchParam)
-    }
-    else
-    {
+    } else {
       setSearchQuery('')
     }
   }, [])
 
   const genres = [
-    "Contemporary Fiction", "Science Fiction", "Fantasy", "Thriller", "Mystery",
-    "Romance", "Literary Fiction", "Historical Fiction", "Self-Help", "Biography",
-    "Memoir", "Business", "Psychology", "Philosophy", "Health & Fitness"
+    'Contemporary Fiction', 'Science Fiction', 'Fantasy', 'Thriller', 'Mystery',
+    'Romance', 'Literary Fiction', 'Historical Fiction', 'Self-Help', 'Biography',
+    'Memoir', 'Business', 'Psychology', 'Philosophy', 'Health & Fitness',
   ]
 
-  const years = ["2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015", "Before 2015"]
+  const years = ['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', 'Before 2015']
 
   const sortOptions = [
     { value: 'relevance', label: 'Relevance' },
@@ -136,26 +116,15 @@ const BrowseClient = () => {
     { value: 'publishedDate', label: 'Publication Year' },
   ]
 
-  const searchTypes = [
-    { value: 'all', label: 'All Fields' },
-    { value: 'title', label: 'Title' },
-    { value: 'authors', label: 'Author' },
-    { value: 'isbn', label: 'ISBN' }
-  ]
-
   const handleGenreToggle = (genre: string) => {
-    setSelectedGenres(prev => 
-      prev.includes(genre) 
-        ? prev.filter(g => g !== genre)
-        : [...prev, genre]
+    setSelectedGenres((prev) =>
+      prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
     )
   }
 
   const handleYearToggle = (year: string) => {
-    setSelectedYears(prev => 
-      prev.includes(year) 
-        ? prev.filter(y => y !== year)
-        : [...prev, year]
+    setSelectedYears((prev) =>
+      prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year]
     )
   }
 
@@ -167,30 +136,29 @@ const BrowseClient = () => {
 
   const handleSecondarySearch = (term: string) => {
     handleSearch(`${term}.`)
-    // Scroll to top when secondary search is performed
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const sortedBooks = [...books].sort((a, b) => {
     let aValue: any = a[sortBy as keyof BookData]
     let bValue: any = b[sortBy as keyof BookData]
-    
+
     if (sortBy === 'authors') {
       aValue = a.author
       bValue = b.author
     }
-    
+
     if (sortBy === 'publishedDate') {
       aValue = a.publishedDate || '0'
       bValue = b.publishedDate || '0'
     }
-    
+
     if (typeof aValue === 'string') {
-      return sortOrder === 'asc' 
+      return sortOrder === 'asc'
         ? String(aValue).localeCompare(String(bValue))
         : String(bValue).localeCompare(String(aValue))
     }
-    
+
     return sortOrder === 'asc' ? Number(aValue) - Number(bValue) : Number(bValue) - Number(aValue)
   })
 
@@ -198,37 +166,30 @@ const BrowseClient = () => {
   const startIndex = (currentPage - 1) * booksPerPage
   const displayedBooks = sortedBooks.slice(startIndex, startIndex + booksPerPage)
 
+  const activeFilterCount = selectedGenres.length + selectedYears.length + (selectedRating ? 1 : 0)
+
   const LoadingSpinner = () => (
-    <div className="text-center py-20">
-      <div className="relative mb-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-full blur-3xl opacity-60" />
-        <div className="relative w-24 h-24 bg-gradient-to-r from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto shadow-lg border border-amber-400/20 backdrop-blur-sm">
-          <Loader2 className="w-12 h-12 text-amber-400 animate-spin" />
-        </div>
+    <div className="py-24 text-center">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-line bg-overlay">
+        <Loader2 className="h-6 w-6 animate-spin text-gold" />
       </div>
-      <h3 className="text-3xl font-bold text-stone-50 mb-4">Searching for books...</h3>
-      <p className="text-stone-300 text-lg max-w-md mx-auto leading-relaxed">
-        Please wait while we find the best books for you
-      </p>
+      <h3 className="font-display mt-6 text-xl font-semibold text-ink">Searching…</h3>
+      <p className="mt-2 text-sm text-ink-mute">Pulling the best matches from the shelf.</p>
     </div>
   )
 
   const EmptyState = () => (
-    <div className="text-center py-20">
-      <div className="relative mb-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-full blur-3xl opacity-60" />
-        <div className="relative w-24 h-24 bg-gradient-to-r from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto shadow-lg border border-amber-400/20 backdrop-blur-sm">
-          <BookOpen className="w-12 h-12 text-amber-400" />
-        </div>
+    <div className="py-24 text-center">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-line bg-overlay">
+        <BookOpen className="h-6 w-6 text-ink-mute" />
       </div>
-      <h3 className="text-3xl font-bold text-stone-50 mb-4">
-        {hasSearched ? 'No books found' : 'Start searching for books'}
+      <h3 className="font-display mt-6 text-xl font-semibold text-ink">
+        {hasSearched ? 'No books found' : 'Search the collection'}
       </h3>
-      <p className="text-stone-300 text-lg max-w-md mx-auto leading-relaxed">
-        {hasSearched 
-          ? 'Try adjusting your search terms or filters to find what you\'re looking for' 
-          : 'Enter a search term above to discover amazing books from our collection'
-        }
+      <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-ink-mute">
+        {hasSearched
+          ? "Try different terms or loosen your filters."
+          : 'Search by title, author, or ISBN to start building your shelf.'}
       </p>
       {hasSearched && (
         <button
@@ -237,354 +198,319 @@ const BrowseClient = () => {
             setHasSearched(false)
             clearFilters()
           }}
-          className="mt-6 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg"
+          className="mt-6 rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ember-strong"
         >
-          Clear search and start over
+          Clear and start over
         </button>
       )}
     </div>
   )
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-canvas">
       <Header />
 
-      {/* Main Content with Dark Theme */}
-      <div className="relative">
-        {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/40 z-10" />
+      <div className="relative mx-auto max-w-7xl px-6 py-10">
+        {/* Header */}
+        <div className="mb-8">
+          <p className="kicker">Discover</p>
+          <h1 className="font-display mt-2 text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl">
+            Browse books
+          </h1>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-          {/* Search and Filters Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-stone-50 mb-6">Browse Books</h1>
-            
-            {/* Search Bar */}
-            <div className="flex gap-4 mb-6">
-              <div className="flex-1 relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-2xl blur-xl group-hover:opacity-100 opacity-0 transition-all duration-300" />
-                <div className="relative bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-[#3D4451] shadow-lg group-hover:shadow-xl group-hover:border-amber-500/30 transition-all duration-300">
-                  <Search className="w-5 h-5 text-amber-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search books, authors, ISBN..."
-                    className="w-full pl-12 pr-4 py-3 bg-transparent rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-stone-50 placeholder-stone-400"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  {isLoading && (
-                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                      <Loader2 className="w-5 h-5 text-amber-400 animate-spin" />
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* <select
-                className="px-4 py-3 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-[#3D4451] shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-stone-50 font-medium"
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value)}
-              >
-                {searchTypes.map(type => (
-                  <option key={type.value} value={type.value} className="bg-[#2C3440]">{type.label}</option>
-                ))}
-              </select> */}
-            </div>
+          <div className="relative mt-6">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" />
+            <input
+              type="text"
+              placeholder="Search books, authors, ISBN…"
+              className="w-full rounded-full border border-line bg-overlay py-3.5 pl-11 pr-11 text-sm text-ink placeholder-ink-faint transition-colors focus:border-gold/40 focus:outline-none focus:ring-1 focus:ring-gold/30"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {isLoading && (
+              <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gold" />
+            )}
           </div>
+        </div>
 
-          {/* Enhanced Controls Bar - Only show when we have results */}
-          {!isLoading && books.length > 0 && (
-            <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-3xl border border-[#3D4451] shadow-lg p-6 mb-8 md:block hidden">
-              <div className="md:flex hidden items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl hover:from-amber-700 hover:to-amber-800 transition-all duration-200 shadow-lg font-medium"
-                  >
-                    <Sliders className="w-4 h-4" />
-                    Filters
-                    {(selectedGenres.length > 0 || selectedYears.length > 0 || selectedRating) && (
-                      <span className="bg-white/25 backdrop-blur-sm text-stone-50 text-xs px-2.5 py-1 rounded-full font-semibold">
-                        {selectedGenres.length + selectedYears.length + (selectedRating ? 1 : 0)}
-                      </span>
-                    )}
-                  </button>
-                  
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm font-semibold text-stone-300">Sort by:</span>
-                    <select
-                      className="px-4 py-2.5 bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451] focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-stone-50 font-medium"
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                    >
-                      {sortOptions.map(option => (
-                        <option key={option.value} value={option.value} className="bg-[#2C3440]">{option.label}</option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="p-2.5 bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451] hover:bg-white/10 transition-all duration-200"
-                    >
-                      {sortOrder === 'asc' ? <SortAsc className="w-4 h-4 text-stone-300" /> : <SortDesc className="w-4 h-4 text-stone-300" />}
-                    </button>
-                  </div>
-                </div>
+        {/* Controls bar */}
+        {!isLoading && books.length > 0 && (
+          <div className="mb-6 hidden items-center justify-between gap-4 border-y border-line py-4 md:flex">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                  showFilters || activeFilterCount > 0
+                    ? 'border-gold/40 bg-gold-dim text-gold'
+                    : 'border-line bg-overlay text-ink-soft hover:bg-overlay-hover'
+                }`}
+              >
+                <Sliders className="h-3.5 w-3.5" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="rounded-full bg-gold/20 px-1.5 text-xs font-semibold text-gold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
 
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-3 px-4 py-2.5 bg-amber-500/20 backdrop-blur-sm rounded-xl border border-amber-400/20">
-                    <TrendingUp className="w-4 h-4 text-amber-400" />
-                    <span className="text-sm font-semibold text-amber-300">{books.length} results</span>
-                  </div>
-                  {/* <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setViewMode('grid')}
-                      className={`p-3 rounded-xl transition-all duration-200 ${
-                        viewMode === 'grid' 
-                          ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg' 
-                          : 'bg-[#2C3440]/60 backdrop-blur-sm border border-[#3D4451] text-stone-300 hover:bg-white/10 hover:text-stone-50'
-                      }`}
-                    >
-                      <Grid className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('list')}
-                      className={`p-3 rounded-xl transition-all duration-200 ${
-                        viewMode === 'list' 
-                          ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg' 
-                          : 'bg-[#2C3440]/60 backdrop-blur-sm border border-[#3D4451] text-stone-300 hover:bg-white/10 hover:text-stone-50'
-                      }`}
-                    >
-                      <List className="w-4 h-4" />
-                    </button>
-                  </div> */}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Enhanced Filters Panel - Only show when we have results and filters are open */}
-          {!isLoading && books.length > 0 && showFilters && (
-            <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-3xl border border-[#3D4451] shadow-xl p-8 mb-8">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl shadow-lg">
-                    <Filter className="w-5 h-5 text-stone-50" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-stone-50">Filters</h3>
-                </div>
-                <button
-                  onClick={clearFilters}
-                  className="px-5 py-2.5 text-sm text-amber-300 hover:text-amber-200 font-semibold bg-amber-500/20 hover:bg-amber-500/30 rounded-xl transition-all duration-200 border border-amber-400/20"
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">
+                  Sort
+                </span>
+                <select
+                  className="rounded-lg border border-line bg-overlay px-3 py-2 text-sm text-ink focus:border-gold/40 focus:outline-none"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
                 >
-                  Clear All
+                  {sortOptions.map((option) => (
+                    <option key={option.value} value={option.value} className="bg-surface">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="rounded-lg border border-line bg-overlay p-2 text-ink-soft transition-colors hover:bg-overlay-hover"
+                >
+                  {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
                 </button>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                {/* Genre Filter */}
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-500/20 rounded-lg border border-amber-400/20">
-                      <Tag className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <h4 className="font-bold text-stone-50 text-lg">Genre</h4>
-                  </div>
-                  <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-2">
-                    {genres.map(genre => (
-                      <label key={genre} className="flex items-center gap-3 cursor-pointer group p-2 rounded-lg hover:bg-white/5 transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={selectedGenres.includes(genre)}
-                          onChange={() => handleGenreToggle(genre)}
-                          className="w-4 h-4 rounded border-[#3D4451] bg-[#2C3440]/60 text-amber-600 focus:ring-amber-500/50"
-                        />
-                        <span className="text-sm text-stone-300 group-hover:text-amber-300 transition-colors font-medium">{genre}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+            </div>
 
-                {/* Year Filter */}
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-500/20 rounded-lg border border-amber-400/20">
-                      <Calendar className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <h4 className="font-bold text-stone-50 text-lg">Publication Year</h4>
-                  </div>
-                  <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-2">
-                    {years.map(year => (
-                      <label key={year} className="flex items-center gap-3 cursor-pointer group p-2 rounded-lg hover:bg-white/5 transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={selectedYears.includes(year)}
-                          onChange={() => handleYearToggle(year)}
-                          className="w-4 h-4 rounded border-[#3D4451] bg-[#2C3440]/60 text-amber-600 focus:ring-amber-500/50"
-                        />
-                        <span className="text-sm text-stone-300 group-hover:text-amber-300 transition-colors font-medium">{year}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+            <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">
+              {books.length} results
+            </span>
+          </div>
+        )}
 
-                {/* Language Filter */}
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-500/20 rounded-lg border border-amber-400/20">
-                      <Globe className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <h4 className="font-bold text-stone-50 text-lg">Language</h4>
-                  </div>
-                  <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-2">
-                    {Array.from(new Set(books.map(book => book.language))).map(language => (
-                      <label key={language} className="flex items-center gap-3 cursor-pointer group p-2 rounded-lg hover:bg-white/5 transition-colors">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-[#3D4451] bg-[#2C3440]/60 text-amber-600 focus:ring-amber-500/50"
-                        />
-                        <span className="text-sm text-stone-300 group-hover:text-amber-300 transition-colors font-medium">{language?.toUpperCase()}</span>
-                      </label>
-                    ))}
-                  </div>
+        {/* Filters panel */}
+        {!isLoading && books.length > 0 && showFilters && (
+          <div className="mb-8 rounded-2xl border border-line bg-surface/50 p-6">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Filter className="h-4 w-4 text-gold" />
+                <h3 className="font-display text-lg font-semibold text-ink">Filters</h3>
+              </div>
+              <button
+                onClick={clearFilters}
+                className="text-xs font-medium text-gold transition-colors hover:text-gold-soft"
+              >
+                Clear all
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              {/* Genre */}
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Tag className="h-3.5 w-3.5 text-ink-mute" />
+                  <h4 className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">Genre</h4>
+                </div>
+                <div className="custom-scrollbar max-h-64 space-y-1 overflow-y-auto pr-2">
+                  {genres.map((genre) => (
+                    <label
+                      key={genre}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg p-2 text-sm text-ink-soft transition-colors hover:bg-overlay"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedGenres.includes(genre)}
+                        onChange={() => handleGenreToggle(genre)}
+                        className="h-3.5 w-3.5 rounded border-line bg-overlay accent-gold"
+                      />
+                      {genre}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Year */}
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Calendar className="h-3.5 w-3.5 text-ink-mute" />
+                  <h4 className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">
+                    Publication year
+                  </h4>
+                </div>
+                <div className="custom-scrollbar max-h-64 space-y-1 overflow-y-auto pr-2">
+                  {years.map((year) => (
+                    <label
+                      key={year}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg p-2 text-sm text-ink-soft transition-colors hover:bg-overlay"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedYears.includes(year)}
+                        onChange={() => handleYearToggle(year)}
+                        className="h-3.5 w-3.5 rounded border-line bg-overlay accent-gold"
+                      />
+                      {year}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Language */}
+              <div>
+                <div className="mb-3 flex items-center gap-2">
+                  <Globe className="h-3.5 w-3.5 text-ink-mute" />
+                  <h4 className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">Language</h4>
+                </div>
+                <div className="custom-scrollbar max-h-64 space-y-1 overflow-y-auto pr-2">
+                  {Array.from(new Set(books.map((book) => book.language))).map((language) => (
+                    <label
+                      key={language}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg p-2 text-sm text-ink-soft transition-colors hover:bg-overlay"
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-3.5 w-3.5 rounded border-line bg-overlay accent-gold"
+                      />
+                      {language?.toUpperCase()}
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Enhanced Active Filters - Only show when we have results */}
-          {!isLoading && books.length > 0 && (selectedGenres.length > 0 || selectedYears.length > 0 || selectedRating) && (
-            <div className="flex items-center gap-4 mb-8 p-5 bg-amber-500/10 backdrop-blur-sm rounded-2xl border border-amber-400/20 shadow-sm">
-              <span className="text-sm font-bold text-amber-300">Active filters:</span>
-              <div className="flex flex-wrap gap-2">
-                {selectedGenres.map(genre => (
-                  <button
-                    key={genre}
-                    onClick={() => handleGenreToggle(genre)}
-                    className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-300 rounded-xl text-sm hover:bg-amber-500/30 transition-all duration-200 font-semibold shadow-sm hover:shadow-md border border-amber-400/20"
-                  >
-                    {genre}
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+        {/* Active filters */}
+        {!isLoading && books.length > 0 && activeFilterCount > 0 && (
+          <div className="mb-8 flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-mute">Active</span>
+            {selectedGenres.map((genre) => (
+              <button
+                key={genre}
+                onClick={() => handleGenreToggle(genre)}
+                className="flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold-dim px-3 py-1 text-xs font-medium text-gold transition-colors hover:bg-gold/20"
+              >
+                {genre}
+                <X className="h-3 w-3" />
+              </button>
+            ))}
+            {selectedYears.map((year) => (
+              <button
+                key={year}
+                onClick={() => handleYearToggle(year)}
+                className="flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold-dim px-3 py-1 text-xs font-medium text-gold transition-colors hover:bg-gold/20"
+              >
+                {year}
+                <X className="h-3 w-3" />
+              </button>
+            ))}
+            {selectedRating && (
+              <button
+                onClick={() => setSelectedRating('')}
+                className="flex items-center gap-1.5 rounded-full border border-gold/30 bg-gold-dim px-3 py-1 text-xs font-medium text-gold transition-colors hover:bg-gold/20"
+              >
+                {selectedRating}+ stars
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Results */}
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : displayedBooks.length > 0 ? (
+          <>
+            {isMobile ? (
+              <div className="mb-12 space-y-3">
+                {displayedBooks.map((book, index) => (
+                  <MobileBookListItem key={book.openLibraryId || String(index)} book={book} />
                 ))}
-                {selectedYears.map(year => (
-                  <button
-                    key={year}
-                    onClick={() => handleYearToggle(year)}
-                    className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-300 rounded-xl text-sm hover:bg-amber-500/30 transition-all duration-200 font-semibold shadow-sm hover:shadow-md border border-amber-400/20"
-                  >
-                    {year}
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                ))}
-                {selectedRating && (
-                  <button
-                    onClick={() => setSelectedRating('')}
-                    className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-300 rounded-xl text-sm hover:bg-amber-500/30 transition-all duration-200 font-semibold shadow-sm hover:shadow-md border border-amber-400/20"
-                  >
-                    {selectedRating}+ stars
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+
+                {hasSearched && (
+                  <div className="rounded-2xl border border-line bg-surface/50 p-6 text-center">
+                    <p className="mb-4 text-sm text-ink-mute">Can&apos;t find the book you&apos;re looking for?</p>
+                    <button
+                      className="rounded-full border border-line-strong bg-overlay px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-overlay-hover"
+                      onClick={() => handleSecondarySearch(searchQuery)}
+                    >
+                      Try a broader search
+                    </button>
+                  </div>
                 )}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {displayedBooks.map((book, index) => (
+                  <BookCard key={book.openLibraryId || String(index)} book={book} />
+                ))}
 
-          {/* Results */}
-          {isLoading ? (
-            <LoadingSpinner />
-          ) : displayedBooks.length > 0 ? (
-            <>
-              {/* Mobile: List view, Desktop: Grid view */}
-              {isMobile ? (
-                <div className="space-y-3 mb-12">
-                  {displayedBooks.map((book, index) => (
-                    <MobileBookListItem key={book.openLibraryId || String(index)} book={book} />
-                  ))}
-
-                  {/* Can't find book suggestion - Mobile */}
-                  {hasSearched && (
-                    <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl border border-[#3D4451] shadow-lg p-6 text-center">
-                      <p className="text-stone-300 text-sm mb-4">Can't find the book you're looking for?</p>
-                      <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl transition-all duration-200 shadow-lg border border-blue-500/20" onClick={() => handleSecondarySearch(searchQuery)}>
-                        Try Secondary Search
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
-                  {displayedBooks.map((book, index) => (
-                    <BookCard key={book.openLibraryId || String(index)} book={book}/>
-                  ))}
-
-                  {/* Can't find book suggestion - Desktop Grid */}
-                  {hasSearched && (
-                    <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-2xl border border-[#3D4451] shadow-lg p-6 text-center flex flex-col justify-center">
-                      <p className="text-stone-300 text-xs mb-3">Can't find the book you're looking for?</p>
-                      <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg transition-all duration-200 shadow-lg border border-blue-500/20 text-sm" onClick={() => handleSecondarySearch(searchQuery)}>
-                        Try Secondary Search
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Enhanced Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 p-6 bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-[#3D4451] shadow-lg">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-6 py-3 bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451] hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-stone-300 hover:text-stone-50 transition-all duration-200"
-                  >
-                    Previous
-                  </button>
-                  {[...Array(totalPages)].map((_, index) => (
+                {hasSearched && (
+                  <div className="flex flex-col justify-center rounded-2xl border border-line bg-surface/50 p-6 text-center">
+                    <p className="mb-3 text-xs text-ink-mute">Can&apos;t find the book you&apos;re looking for?</p>
                     <button
-                      key={index + 1}
-                      onClick={() => setCurrentPage(index + 1)}
-                      className={`px-4 py-3 rounded-xl border font-semibold transition-all duration-200 ${
-                        currentPage === index + 1
-                          ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-500 shadow-lg'
-                          : 'bg-[#2C3440]/60 backdrop-blur-sm border-[#3D4451] hover:bg-white/10 text-stone-300 hover:text-stone-50'
-                      }`}
+                      className="rounded-full border border-line-strong bg-overlay px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-overlay-hover"
+                      onClick={() => handleSecondarySearch(searchQuery)}
                     >
-                      {index + 1}
+                      Try a broader search
                     </button>
-                  ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 border-t border-line pt-6">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="rounded-full border border-line bg-overlay px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-overlay-hover disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                {[...Array(totalPages)].map((_, index) => (
                   <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-6 py-3 bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451] hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-stone-300 hover:text-stone-50 transition-all duration-200"
+                    key={index + 1}
+                    onClick={() => setCurrentPage(index + 1)}
+                    className={`h-9 w-9 rounded-full border text-sm font-medium transition-colors ${
+                      currentPage === index + 1
+                        ? 'border-gold/40 bg-gold-dim text-gold'
+                        : 'border-line bg-overlay text-ink-soft hover:bg-overlay-hover'
+                    }`}
                   >
-                    Next
+                    {index + 1}
                   </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <EmptyState />
-          )}
-        </div>
-        <Footer />
+                ))}
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="rounded-full border border-line bg-overlay px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:bg-overlay-hover disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <EmptyState />
+        )}
       </div>
+
+      <Footer />
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.05);
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(251, 191, 36, 0.4);
+          background: rgba(224, 168, 93, 0.35);
           border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(251, 191, 36, 0.6);
+          background: rgba(224, 168, 93, 0.55);
         }
-          .line-clamp-2 {
+        .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;

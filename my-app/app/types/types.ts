@@ -123,3 +123,73 @@ export interface ListItem {
 export interface ListWithItems extends List {
   items: ListItem[];
 }
+
+export interface PublicUser {
+  id: string;
+  username: string;
+  avatar_url?: string;
+  bio?: string;
+  followerCount: number;
+  followingCount: number;
+  isFollowing?: boolean;
+}
+
+export interface UserRecommendation extends PublicUser {
+  reason: string;
+}
+
+export interface PublicProfile extends PublicUser {
+  createdAt: string;
+  reviewCount: number;
+  bookCount: number;
+  listCount: number;
+  favoriteBooks?: {
+    id: string;
+    title: string;
+    author: string;
+    image?: string;
+    openLibraryId: string;
+  }[];
+  recentBooks: {
+    id: string;
+    title: string;
+    author: string;
+    image?: string;
+    openLibraryId: string;
+    rating: number;
+    addedAt: string;
+  }[];
+  recentReviews: {
+    id: string;
+    content: string;
+    createdAt: string;
+    helpfulCount: number;
+    book: {
+      id: string;
+      title: string;
+      author: string;
+      image?: string;
+      openLibraryId: string;
+    };
+  }[];
+  publicLists: {
+    id: string;
+    title: string;
+    description?: string;
+    isRanked: boolean;
+    itemCount: number;
+    previewBooks: {
+      id: string;
+      title: string;
+      image?: string;
+    }[];
+  }[];
+}
+
+export interface ReviewVoter extends PublicUser {
+  votedAt: string;
+}
+
+export interface FollowUser extends PublicUser {
+  followedAt: string;
+}

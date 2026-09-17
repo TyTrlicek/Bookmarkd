@@ -45,12 +45,12 @@ const BookCard = ({ book, id }: BookCardProps ) => {
 
   // Function to get score color based on value
   const getScoreColor = (score: number) => {
-    if(score === 0) return 'text-stone-400'
-    if (score >= 4) return 'text-emerald-400'
-    if (score >= 3.25) return 'text-blue-400'
-    if (score >= 2.5) return 'text-amber-400'
-    if (score >= 2) return 'text-orange-400'
-    return 'text-red-400'
+    if(score === 0) return 'text-ink-mute'
+    if (score >= 4) return 'text-rate-high'
+    if (score >= 3.25) return 'text-rate-good'
+    if (score >= 2.5) return 'text-rate-mid'
+    if (score >= 2) return 'text-rate-low'
+    return 'text-rate-bad'
   }
 
   useEffect(() => {
@@ -68,16 +68,11 @@ const BookCard = ({ book, id }: BookCardProps ) => {
 
   if (isLoading) {
     return (
-      <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden shadow-2xl">
-        <div className="aspect-[3/4] bg-gradient-to-br from-stone-700/50 to-[#14181C]/50 animate-pulse relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        </div>
-        <div className="p-4 space-y-3">
-          <div className="h-4 bg-stone-700/60 rounded animate-pulse"></div>
-          <div className="h-3 bg-stone-700/60 rounded animate-pulse w-3/4"></div>
-          <div className="h-3 bg-stone-700/60 rounded animate-pulse w-1/2"></div>
+      <div className="h-[280px] w-[140px] overflow-hidden rounded-lg border border-line bg-surface sm:h-[388px] sm:w-[190px]">
+        <div className="aspect-[3/4] animate-pulse bg-surface-2" />
+        <div className="space-y-2 p-3">
+          <div className="h-3 animate-pulse rounded bg-surface-2" />
+          <div className="h-2.5 w-3/4 animate-pulse rounded bg-surface-2" />
         </div>
       </div>
     )
@@ -85,29 +80,27 @@ const BookCard = ({ book, id }: BookCardProps ) => {
 
   if (!book) {
     return (
-      <div className="bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden shadow-2xl">
-        <div className="aspect-[3/4] bg-gradient-to-br from-stone-700/50 to-[#14181C]/50 flex items-center justify-center">
-          <span className="text-stone-400 text-sm font-medium">Failed to load book data</span>
-        </div>
+      <div className="flex h-[280px] w-[140px] items-center justify-center rounded-lg border border-line bg-surface p-4 text-center text-xs text-ink-mute sm:h-[388px] sm:w-[190px]">
+        Couldn&apos;t load this book
       </div>
     )
   }
 
   return (
-    <div 
-      className="group cursor-pointer relative bg-[#2C3440]/80 backdrop-blur-sm rounded-2xl border border-stone-700/40 overflow-hidden hover:border-amber-500/40 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10 min-h-96 min-w-48 max-w-[190px] max-h-[388px]"
+    <div
+      className="group relative h-[280px] w-[140px] cursor-pointer overflow-hidden rounded-lg border border-line bg-surface transition-all duration-300 hover:border-line-strong hover:-translate-y-1 sm:h-[388px] sm:w-[190px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => handleImageClick((book.openLibraryId ?? ''), book.author)}
     >
       {/* Book Cover */}
-      <div className="aspect-[3/4] max-w-[190] max-h-[253] bg-stone-700/30 relative overflow-hidden">
+      <div className="relative aspect-[3/4] max-h-[187px] max-w-[140px] overflow-hidden bg-surface-2 sm:max-h-[253px] sm:max-w-[190px]">
         {book.image ? (
           <Image
             src={book.image}
             alt={`Cover for ${book.title}`}
             fill
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
@@ -117,10 +110,10 @@ const BookCard = ({ book, id }: BookCardProps ) => {
             }}
           />
         ) : null}
-        
-        {/* Fallback gradient cover */}
-        <div 
-          className={`absolute inset-0 bg-gradient-to-br from-amber-600/80 to-stone-700/80 flex items-center justify-center text-white font-bold text-sm p-4 text-center ${
+
+        {/* Fallback cover */}
+        <div
+          className={`absolute inset-0 flex items-center justify-center bg-surface-2 p-4 text-center font-display text-sm text-ink-soft ${
             book.image ? 'hidden' : 'flex'
           }`}
           style={{ display: book.image ? 'none' : 'flex' }}
@@ -128,8 +121,17 @@ const BookCard = ({ book, id }: BookCardProps ) => {
           {book.title}
         </div>
 
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/60 via-transparent to-[#14181C]/20 opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+        {/* Score chip */}
+        {book.averageRating !== null && book.averageRating !== undefined && book.averageRating > 0 && (
+          <div className="absolute left-2 top-2 rounded-md bg-canvas/80 px-1.5 py-0.5 font-mono text-[0.7rem] font-semibold backdrop-blur-sm">
+            <span className={getScoreColor(book.averageRating)}>
+              {book.averageRating.toFixed(1)}
+            </span>
+          </div>
+        )}
+
+        {/* Bottom scrim */}
+        <div className="absolute inset-0 bg-gradient-to-t from-canvas/70 via-transparent to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-95" />
 
         {/* Quick Actions - Floating on hover */}
         {/* <div className={`absolute top-4 right-4 space-y-2 transition-all duration-300 ${
@@ -163,64 +165,29 @@ const BookCard = ({ book, id }: BookCardProps ) => {
           ></div>
         </div> */}
 
-        {/* Hover overlay with additional info */}
-        <div className={`absolute inset-0 bg-gradient-to-t from-[#14181C]/90 via-black/20 to-transparent flex items-end transition-opacity duration-300 ${
-          isHovered ? 'opacity-100' : 'opacity-0'
-        }`}>
-          <div className="p-4 text-stone-50 w-full">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1 text-xs">
-                <Eye className="w-3 h-3" />
-                <span>{formatMemberCount(book.totalRatings ?? 0)} views</span>
-              </div>
-              {book.publishedDate && (
-                <div className="flex items-center gap-1 text-xs">
-                  <Calendar className="w-3 h-3" />
-                  <span>{book.publishedDate.slice(0, 4)}</span>
-                </div>
-              )}
-            </div>
+        {/* Year on hover */}
+        {book.publishedDate && (
+          <div
+            className={`absolute bottom-2 right-2 rounded bg-canvas/70 px-1.5 py-0.5 font-mono text-[0.65rem] text-ink-soft backdrop-blur-sm transition-opacity duration-300 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {book.publishedDate.slice(0, 4)}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Book Information */}
-      <div className="p-4 space-y-3 bg-gradient-to-b from-[#14181C]/20 to-[#14181C]/40">
-        {/* Title */}
-        <h3 className="font-bold text-stone-50 text-sm leading-tight line-clamp-2 group-hover:text-amber-300 transition-colors duration-200">
+      <div className="space-y-1 p-2.5 sm:p-3.5">
+        <h3 className="line-clamp-2 h-[1.75rem] overflow-hidden text-xs font-medium leading-tight text-ink transition-colors duration-200 group-hover:text-gold-soft sm:h-[2.125rem] sm:text-sm">
           {book.title}
         </h3>
-
-        {/* Author */}
-        <p className="text-stone-400 text-xs font-medium">
-          by {book.author}
-        </p>
-
-        {/* Score & Members */}
-        <div className="flex items-center justify-between pt-1">
-          {book.averageRating !== null && book.averageRating !== undefined && (
-            <div className="flex items-center gap-2">
-              <span className={`text-lg font-bold ${getScoreColor(book.averageRating)}`}>
-                {book.averageRating > 0 ? book.averageRating.toFixed(2) : 'N/A'}
-              </span>
-              <span className="text-xs text-stone-500 uppercase tracking-wide">
-                Score
-              </span>
-            </div>
-          )}
-          
-          <div className="flex items-center gap-1 text-xs text-stone-400">
-            <Users className="w-3 h-3" />
-            <span className="font-medium">{formatMemberCount(book.totalRatings ?? 0)}</span>
-          </div>
+        <p className="truncate text-[0.7rem] text-ink-mute">{book.author}</p>
+        <div className="flex items-center gap-1 pt-0.5 text-[0.7rem] text-ink-faint">
+          <Users className="h-3 w-3" />
+          <span>{formatMemberCount(book.totalRatings ?? 0)}</span>
         </div>
-
-        {/* Subtle bottom glow effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
       </div>
-
-      {/* Card border glow on hover */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-500/10 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
     </div>
   )
 }

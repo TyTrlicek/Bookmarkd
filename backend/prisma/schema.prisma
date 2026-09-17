@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x", "rhel-openssl-3.0.x"]
 }
 
 
@@ -16,6 +16,10 @@ model User {
   createdAt       DateTime       @default(now())
   username        String?        @unique
   avatar_url      String?
+  bio             String?
+  isPrivate       Boolean        @default(false)
+  hasSeenWelcome  Boolean        @default(false)
+  onboardingCompletedAt DateTime?
   favorites       Favorite[]
   reviews         Review[]
   reviewReplies   ReviewReply[]
@@ -27,6 +31,24 @@ model User {
 
   achievements    UserAchievement[]
   reviewReplyVotes ReviewReplyVote[]
+
+  followers       Follow[] @relation("UserFollowing")
+  following       Follow[] @relation("UserFollowers")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String   // User who is following
+  followingId String   // User being followed
+  createdAt   DateTime @default(now())
+
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@index([createdAt])
 }
 
 model Favorite {

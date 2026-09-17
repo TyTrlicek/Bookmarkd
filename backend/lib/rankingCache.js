@@ -13,7 +13,6 @@ class RankingCacheManager {
     if (this.isRunning) return;
 
     this.isRunning = true;
-    console.log('[RankingCache] Starting periodic refresh every 2 hours');
 
     // Initial cache warm-up
     this.refreshAllRankingCaches();
@@ -29,7 +28,6 @@ class RankingCacheManager {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
       this.isRunning = false;
-      console.log('[RankingCache] Stopped periodic refresh');
     }
   }
 
@@ -40,7 +38,6 @@ class RankingCacheManager {
 
   // Refresh all popular ranking cache combinations
   async refreshAllRankingCaches() {
-    console.log('[RankingCache] Starting cache refresh...');
     const startTime = Date.now();
 
     try {
@@ -75,9 +72,8 @@ class RankingCacheManager {
       }
 
       const duration = Date.now() - startTime;
-      console.log(`[RankingCache] Refreshed ${refreshed}/${popularQueries.length} ranking caches in ${duration}ms`);
     } catch (error) {
-      console.error('[RankingCache] Error during cache refresh:', error);
+      // Cache refresh failed silently
     }
   }
 
@@ -141,13 +137,11 @@ class RankingCacheManager {
     const cacheKey = this.generateRankingKey(sort, limit, page, genre, year);
     await redis.set(cacheKey, JSON.stringify(books), 'EX', this.CACHE_TTL);
 
-    console.log(`[RankingCache] Refreshed cache for ${cacheKey}`);
     return books;
   }
 
   // Force refresh a specific ranking query (for manual invalidation)
   async forceRefreshRanking(sort, limit, page, genre, year) {
-    console.log(`[RankingCache] Force refreshing ranking: sort=${sort}, genre=${genre}, year=${year}`);
     return await this.refreshSingleRankingCache({ sort, limit, page, genre, year });
   }
 

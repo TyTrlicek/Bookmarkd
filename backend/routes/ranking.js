@@ -60,10 +60,8 @@ router.get('/api/rankings', attachIfUserExists, async (req, res) => {
     let cached = await redis.get(cacheKey);
     let books;
     if (cached) {
-      console.log(`[Rankings] Served from cache for key=${cacheKey}`);
       books = JSON.parse(cached);
     } else {
-      console.log(`[Rankings] Cache miss for key=${cacheKey}, querying DB`);
 
       // Fetch books
       books = await prisma.book.findMany({
@@ -87,7 +85,6 @@ router.get('/api/rankings', attachIfUserExists, async (req, res) => {
       // Cache for 1 hour
       const cacheTTL = 3600;
       await redis.set(cacheKey, JSON.stringify(books), 'EX', cacheTTL);
-      console.log(`[Rankings] Cached result for key=${cacheKey} (TTL=${cacheTTL}s)`);
     }
 
     // If user is signed in, fetch their ratings separately

@@ -215,11 +215,11 @@ const Header = () => {
 
   const BookListItem = ({ book }: { book: BookData }) => (
     <div 
-      className="p-3 hover:bg-stone-600 cursor-pointer border-b border-stone-500 bg-[#2C3440] last:border-b-0"
+      className="p-3 hover:bg-overlay cursor-pointer border-b border-line bg-surface last:border-b-0"
       onClick={() => handleSearchItemClick((book.openLibraryId ?? ''), book.author)}
     >
       <div className="flex gap-3">
-        <div className="w-12 h-16 bg-stone-100 rounded overflow-hidden flex-shrink-0">
+        <div className="w-12 h-16 bg-surface-2 rounded overflow-hidden flex-shrink-0">
           <Image 
           width={48}
           height={64}
@@ -233,10 +233,10 @@ const Header = () => {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-stone-300 text-sm truncate">
+          <h3 className="font-medium text-ink-soft text-sm truncate">
             {book.title}
           </h3>
-          <p className="text-stone-400 text-xs mb-1">
+          <p className="text-ink-mute text-xs mb-1">
             by {book.author || 'Unknown Author'}
           </p>
         </div>
@@ -247,33 +247,33 @@ const Header = () => {
   const SearchLoadingItem = () => (
     <div className="p-4 text-center">
       <div className="flex items-center justify-center gap-2">
-        <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
-        <span className="text-stone-400 text-sm">Searching books...</span>
+        <Loader2 className="w-4 h-4 text-gold animate-spin" />
+        <span className="text-ink-mute text-sm">Searching books...</span>
       </div>
     </div>
   );
 
   const SearchEmptyState = () => (
     <div className="p-4 text-center">
-      <BookOpen className="w-8 h-8 text-stone-500 mx-auto mb-2" />
-      <p className="text-stone-400 text-sm">No books found</p>
-      <p className="text-stone-500 text-xs">Try a different search term</p>
+      <BookOpen className="w-8 h-8 text-ink-faint mx-auto mb-2" />
+      <p className="text-ink-mute text-sm">No books found</p>
+      <p className="text-ink-faint text-xs">Try a different search term</p>
     </div>
   );
 
   const NotificationItem = ({ notification }: { notification: UserActivity }) => (
-    <div className="p-4 border-b border-stone-100 last:border-b-0 hover:bg-stone-700 transition-colors">
+    <div className="p-4 border-b border-line last:border-b-0 hover:bg-overlay transition-colors">
       <div className="flex items-start gap-3">
         <div className="mt-1">
-          <div className={`w-2 h-2 rounded-full ${notification.read ? 'bg-stone-300' : 'bg-amber-500'}`} />
+          <div className={`w-2 h-2 rounded-full ${notification.read ? "bg-line-strong" : "bg-gold"}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-stone-300 leading-relaxed">
+          <p className="text-sm text-ink-soft leading-relaxed">
             {notification.data?.message}
           </p>
           <div className="flex items-center gap-1 mt-1">
-            <Clock className="w-3 h-3 text-stone-400" />
-            <span className="text-xs text-stone-500">
+            <Clock className="w-3 h-3 text-ink-mute" />
+            <span className="text-xs text-ink-faint">
               {formatTimeAgo(notification.createdAt)}
             </span>
           </div>
@@ -283,7 +283,7 @@ const Header = () => {
   );
 
 return (
-    <header className="bg-[#14181C] border-b border-stone-700 shadow-lg sticky top-0 z-50">
+    <header className="sticky top-0 z-50 border-b border-line bg-canvas/85 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -300,14 +300,14 @@ return (
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-6">
-            <a href="/" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Home</a>
-            <a href="/browse" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Browse</a>
+            <a href="/" className="text-ink-mute hover:text-ink font-medium transition-colors">Home</a>
+            <a href="/browse" className="text-ink-mute hover:text-ink font-medium transition-colors">Browse</a>
             {isAuthenticated && (
-              <a href="/collection" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">My Collection</a>
+              <a href="/collection" className="text-ink-mute hover:text-ink font-medium transition-colors">My Collection</a>
             )}
-            <a href="/rankings" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Rankings</a>
-            <a href="/lists" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Lists</a>
-            {/* <a href="#" className="text-stone-300 hover:text-amber-400 font-medium transition-colors">Clubs</a> */}
+            <a href="/rankings" className="text-ink-mute hover:text-ink font-medium transition-colors">Rankings</a>
+            <a href="/lists" className="text-ink-mute hover:text-ink font-medium transition-colors">Lists</a>
+            <a href="/users" className="text-ink-mute hover:text-ink font-medium transition-colors">Community</a>
           </nav>
 
           {/* Desktop Search */}
@@ -315,18 +315,18 @@ return (
             <div className="relative" ref={searchRef}>
               <div className="relative">
                 <Search className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors ${
-                  isSearchLoading ? 'text-amber-400' : 'text-stone-400'
+                  isSearchLoading ? 'text-gold' : 'text-ink-mute'
                 }`} />
                 {/* Show loading spinner when searching */}
                 {isSearchLoading && (
-                  <Loader2 className="w-4 h-4 text-amber-400 absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-gold absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
                 )}
                 <input
                   type="text"
                   placeholder="Search books, authors..."
                   value={searchQuery}
                   onChange={handleSearchInputChange}
-                  className={`pl-10 py-2 bg-[#2C3440] text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 w-64 transition-all ${
+                  className={`pl-10 py-2 bg-surface text-ink placeholder-ink-faint rounded-lg border border-line focus:outline-none focus:ring-1 focus:ring-gold/40 focus:border-gold/40 w-64 transition-all ${
                     isSearchLoading ? 'pr-10' : 'pr-4'
                   }`}
                 />
@@ -334,7 +334,7 @@ return (
               
               {/* Desktop Search Results Dropdown */}
               {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl max-h-96 overflow-y-auto z-55">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-lg shadow-xl max-h-96 overflow-y-auto z-55">
                   {isSearchLoading ? (
                     <SearchLoadingItem />
                   ) : books.length > 0 ? (
@@ -343,13 +343,13 @@ return (
                         <BookListItem key={book.openLibraryId || index} book={book} />
                       ))}
                       {books.length > 0 && (
-                        <div className="p-2 flex items-center justify-between text-xs border-t border-stone-600">
-                          <span className="text-stone-400">
+                        <div className="p-2 flex items-center justify-between text-xs border-t border-line">
+                          <span className="text-ink-mute">
                             Showing {books.slice(0,5).length} of {books.length} results
                           </span>
                           <Link 
                             href={`/browse?search=${encodeURIComponent(searchQuery)}`}
-                            className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                            className="text-gold hover:text-gold-soft font-medium transition-colors"
                             onClick={() => setShowSearchResults(false)}
                           >
                             View all
@@ -369,11 +369,11 @@ return (
               <div className="relative" ref={notificationsRef}>
                 <button
                   onClick={toggleNotifications}
-                  className="p-2 text-stone-400 hover:text-amber-400 relative transition-colors"
+                  className="p-2 text-ink-mute hover:text-ink relative transition-colors"
                 >
                   <Bell className="w-5 h-5" />
                   {notificationCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[10px] bg-amber-600 text-stone-900 rounded-full flex items-center justify-center font-medium">
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[10px] bg-gold text-canvas rounded-full flex items-center justify-center font-medium">
                       {notificationCount > 99 ? '99+' : notificationCount}
                     </span>
                   )}
@@ -381,14 +381,14 @@ return (
 
                 {/* Notifications Dropdown */}
                 {isNotificationsOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-80 bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl z-55">
-                    <div className="p-4 border-b border-stone-600 bg-[#14181C]">
+                  <div className="absolute right-0 top-full mt-1 w-80 bg-surface border border-line rounded-lg shadow-xl z-55">
+                    <div className="p-4 border-b border-line bg-canvas">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-stone-100">Notifications</h3>
+                        <h3 className="font-semibold text-ink">Notifications</h3>
                         {notificationCount > 0 && (
                           <button
                             onClick={markAllAsRead}
-                            className="text-xs text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1 transition-colors"
+                            className="text-xs text-gold hover:text-gold-soft font-medium flex items-center gap-1 transition-colors"
                           >
                             <CheckCircle className="w-3 h-3" />
                             Mark all read
@@ -400,8 +400,8 @@ return (
                     <div className="max-h-96 overflow-y-auto">
                       {isLoadingNotifications ? (
                         <div className="p-8 text-center">
-                          <div className="animate-spin w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto"></div>
-                          <p className="text-stone-400 text-sm mt-2">Loading notifications...</p>
+                          <div className="animate-spin w-6 h-6 border-2 border-gold border-t-transparent rounded-full mx-auto"></div>
+                          <p className="text-ink-mute text-sm mt-2">Loading notifications...</p>
                         </div>
                       ) : notifications.length > 0 ? (
                         notifications.map((notification) => (
@@ -409,8 +409,8 @@ return (
                         ))
                       ) : (
                         <div className="p-8 text-center">
-                          <Bell className="w-12 h-12 text-stone-600 mx-auto mb-3" />
-                          <p className="text-stone-400 text-sm">No new notifications</p>
+                          <Bell className="w-12 h-12 text-ink-faint mx-auto mb-3" />
+                          <p className="text-ink-mute text-sm">No new notifications</p>
                         </div>
                       )}
                     </div>
@@ -420,13 +420,13 @@ return (
             )}
 
             {isAuthenticated ? (
-              <Link href="/profile" className="p-2 text-stone-400 hover:text-amber-400 transition-colors">
+              <Link href="/profile" className="p-2 text-ink-mute hover:text-ink transition-colors">
                 <User className="w-5 h-5" />
               </Link>
             ) : (
               <Link
                 href="/auth"
-                className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-sm font-medium rounded-lg transition-all"
+                className="px-4 py-2 bg-ember hover:bg-ember-strong text-white text-sm font-semibold rounded-full transition-colors"
               >
                 Sign In
               </Link>
@@ -437,38 +437,38 @@ return (
           <div className="flex items-center gap-2 md:hidden">
             <button
               onClick={toggleSearch}
-              className="p-2 text-stone-400 hover:text-amber-400 transition-colors"
+              className="p-2 text-ink-mute hover:text-ink transition-colors"
             >
               <Search className="w-5 h-5" />
             </button>
             {isAuthenticated && (
               <button
                 onClick={toggleNotifications}
-                className="p-2 text-stone-400 hover:text-amber-400 relative transition-colors"
+                className="p-2 text-ink-mute hover:text-ink relative transition-colors"
               >
                 <Bell className="w-5 h-5" />
                 {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[10px] bg-amber-600 text-stone-900 rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 text-[10px] bg-gold text-canvas rounded-full flex items-center justify-center font-medium">
                     {notificationCount > 99 ? '99+' : notificationCount}
                   </span>
                 )}
               </button>
             )}
             {isAuthenticated ? (
-              <Link href="/profile" className="p-2 text-stone-400 hover:text-amber-400 transition-colors">
+              <Link href="/profile" className="p-2 text-ink-mute hover:text-ink transition-colors">
                 <User className="w-5 h-5" />
               </Link>
             ) : (
               <Link
                 href="/auth"
-                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium rounded-lg transition-all"
+                className="px-3 py-1.5 bg-ember hover:bg-ember-strong text-white text-sm font-semibold rounded-full transition-colors"
               >
                 Sign In
               </Link>
             )}
             <button
               onClick={toggleMenu}
-              className="p-2 text-stone-400 hover:text-amber-400 lg:hidden transition-colors"
+              className="p-2 text-ink-mute hover:text-ink lg:hidden transition-colors"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -481,18 +481,18 @@ return (
             <div className="relative">
               <div className="relative">
                 <Search className={`w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors ${
-                  isSearchLoading ? 'text-amber-400' : 'text-stone-400'
+                  isSearchLoading ? 'text-gold' : 'text-ink-mute'
                 }`} />
                 {/* Show loading spinner when searching */}
                 {isSearchLoading && (
-                  <Loader2 className="w-4 h-4 text-amber-400 absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-gold absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin" />
                 )}
                 <input
                   type="text"
                   placeholder="Search books, authors..."
                   value={searchQuery}
                   onChange={handleSearchInputChange}
-                  className={`w-full pl-10 py-2 bg-[#2C3440] text-stone-200 placeholder-stone-400 rounded-lg border border-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all ${
+                  className={`w-full pl-10 py-2 bg-surface text-ink placeholder-ink-faint rounded-lg border border-line focus:outline-none focus:ring-1 focus:ring-gold/40 focus:border-gold/40 transition-all ${
                     isSearchLoading ? 'pr-10' : 'pr-4'
                   }`}
                   autoFocus
@@ -501,7 +501,7 @@ return (
               
               {/* Mobile Search Results Dropdown */}
               {(showSearchResults || isSearchLoading) && searchQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl max-h-80 overflow-y-auto z-55">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-lg shadow-xl max-h-80 overflow-y-auto z-55">
                   {isSearchLoading ? (
                     <SearchLoadingItem />
                   ) : books.length > 0 ? (
@@ -510,13 +510,13 @@ return (
                         <BookListItem key={book.openLibraryId || index} book={book} />
                       ))}
                       {books.length > 0 && (
-                        <div className="p-2 flex items-center justify-between text-xs border-t border-stone-600">
-                          <span className="text-stone-400">
+                        <div className="p-2 flex items-center justify-between text-xs border-t border-line">
+                          <span className="text-ink-mute">
                             Showing {books.slice(0,5).length} of {books.length} results
                           </span>
                           <Link 
                             href={`/browse?search=${encodeURIComponent(searchQuery)}`}
-                            className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                            className="text-gold hover:text-gold-soft font-medium transition-colors"
                             onClick={() => {
                               setShowSearchResults(false);
                               setIsSearchOpen(false);
@@ -539,14 +539,14 @@ return (
         {/* Mobile Notifications Panel */}
         {isAuthenticated && isNotificationsOpen && (
           <div className="md:hidden mt-3 pb-1" ref={mobileNotificationsRef}>
-            <div className="bg-[#2C3440] border border-stone-600 rounded-lg shadow-xl">
-              <div className="p-4 border-b border-stone-600 bg-[#14181C]">
+            <div className="bg-surface border border-line rounded-lg shadow-xl">
+              <div className="p-4 border-b border-line bg-canvas">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-stone-100">Notifications</h3>
+                  <h3 className="font-semibold text-ink">Notifications</h3>
                   {notificationCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-xs text-amber-400 hover:text-amber-300 font-medium flex items-center gap-1 transition-colors"
+                      className="text-xs text-gold hover:text-gold-soft font-medium flex items-center gap-1 transition-colors"
                     >
                       <CheckCircle className="w-3 h-3" />
                       Mark all read
@@ -558,8 +558,8 @@ return (
               <div className="max-h-80 overflow-y-auto">
                 {isLoadingNotifications ? (
                   <div className="p-8 text-center">
-                    <div className="animate-spin w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto"></div>
-                    <p className="text-stone-400 text-sm mt-2">Loading notifications...</p>
+                    <div className="animate-spin w-6 h-6 border-2 border-gold border-t-transparent rounded-full mx-auto"></div>
+                    <p className="text-ink-mute text-sm mt-2">Loading notifications...</p>
                   </div>
                 ) : notifications.length > 0 ? (
                   notifications.map((notification) => (
@@ -567,8 +567,8 @@ return (
                   ))
                 ) : (
                   <div className="p-8 text-center">
-                    <Bell className="w-12 h-12 text-stone-600 mx-auto mb-3" />
-                    <p className="text-stone-400 text-sm">No new notifications</p>
+                    <Bell className="w-12 h-12 text-ink-faint mx-auto mb-3" />
+                    <p className="text-ink-mute text-sm">No new notifications</p>
                   </div>
                 )}
               </div>
@@ -578,18 +578,18 @@ return (
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden mt-3 pb-3 border-t border-stone-700 pt-3">
+          <div className="lg:hidden mt-3 pb-3 border-t border-line pt-3">
             <nav className="flex flex-col gap-3">
               <a
                 href="/"
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
+                className="text-ink-mute hover:text-ink font-medium py-2 px-3 rounded-lg hover:bg-surface transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </a>
               <a
                 href="/browse"
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
+                className="text-ink-mute hover:text-ink font-medium py-2 px-3 rounded-lg hover:bg-surface transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Browse
@@ -597,7 +597,7 @@ return (
               {isAuthenticated && (
                 <a
                   href="/collection"
-                  className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
+                  className="text-ink-mute hover:text-ink font-medium py-2 px-3 rounded-lg hover:bg-surface transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Collection
@@ -605,24 +605,31 @@ return (
               )}
               {/* <a
                 href="#"
-                className="text-stone-300 hover:text-amber-400 font-medium transition-colors py-2 px-3 rounded-lg hover:bg-[#2C3440]"
+                className="text-ink-mute hover:text-ink font-medium transition-colors py-2 px-3 rounded-lg hover:bg-surface"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Clubs
               </a> */}
               <a
                 href="/rankings"
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
+                className="text-ink-mute hover:text-ink font-medium py-2 px-3 rounded-lg hover:bg-surface transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Rankings
               </a>
               <a
                 href="/lists"
-                className="text-stone-300 hover:text-amber-400 font-medium py-2 px-3 rounded-lg hover:bg-[#2C3440] transition-colors"
+                className="text-ink-mute hover:text-ink font-medium py-2 px-3 rounded-lg hover:bg-surface transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Lists
+              </a>
+              <a
+                href="/users"
+                className="text-ink-mute hover:text-ink font-medium py-2 px-3 rounded-lg hover:bg-surface transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Community
               </a>
             </nav>
           </div>

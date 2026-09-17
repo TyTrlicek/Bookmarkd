@@ -5,8 +5,10 @@ import { Heart, MessageCircle, Plus, ChevronDown, ChevronUp, Send, MoreHorizonta
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ReplyData, ReviewData, User } from '../types/types';
 import { formatDate } from '@/utils/util';
+import ReviewLikesModal from './ReviewLikesModal';
 
 interface BookCardProps {
   totalRatings: number | null;
@@ -44,6 +46,10 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
     const [editReplyContent, setEditReplyContent] = useState('');
     const [showDropdowns, setShowDropdowns] = useState<Set<string>>(new Set());
     const [deletingItems, setDeletingItems] = useState<Set<string>>(new Set());
+
+    // State for ReviewLikesModal
+    const [likesModalReviewId, setLikesModalReviewId] = useState<string | null>(null);
+    const [likesModalCount, setLikesModalCount] = useState(0);
 
     useEffect(() => {
         const fetchReview = async () => {
@@ -146,7 +152,6 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
     };
 
     const reportContent = (itemType: 'review' | 'reply', itemId: string) => {
-        console.log(`Report ${itemType} with ID: ${itemId}`);
         alert('Thank you for reporting this content. We will review it shortly.');
     }
 
@@ -462,8 +467,6 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
             });
 
             if (response.status === 201) {
-                console.log('Review posted successfully!');
-
                 setShowWriteReview(false);
                 setReviewContent('');
                 setContainsSpoilers(false);
@@ -574,14 +577,15 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
     };
 
     return (
+    <>
     <div className="w-full space-y-6 overflow-hidden">
             {loading ? (
                 <div className="text-center py-8">
-                    <div className="text-stone-400">Loading reviews...</div>
+                    <div className="text-ink-mute">Loading reviews...</div>
                 </div>
             ) : filteredReviews.length === 0 ? (
                 <div className="text-center py-12">
-                    <div className="text-stone-500 text-sm">
+                    <div className="text-ink-faint text-sm">
                         No reviews yet. Be the first to write one!
                     </div>
                 </div>
@@ -596,7 +600,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                     const isDeleting = deletingItems.has(reviewId);
 
                     return (
-                        <div key={index} className="pb-6 border-b border-stone-800 last:border-0">
+                        <div key={index} className="pb-6 border-b border-line last:border-0">
                             <div className="flex items-start gap-2 sm:gap-3">
                                 {/* Avatar */}
                                 {review.avatar_url ? (
@@ -605,10 +609,10 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                         height={48}
                                         src={review.avatar_url}
                                         alt={`${review.username}'s profile`}
-                                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 object-cover border border-[#3D4451]"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 object-cover border border-line"
                                     />
                                 ) : (
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-500/10 to-amber-600/10 rounded-full flex-shrink-0" />
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-surface-2 to-surface-2 rounded-full flex-shrink-0" />
                                 )}
 
                                 <div className="flex-1 min-w-0">
@@ -616,9 +620,12 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                     <div className="flex items-start justify-between gap-2 mb-3">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                <span className="font-semibold text-stone-50 truncate">
+                                                <Link
+                                                    href={`/u/${review.username}`}
+                                                    className="font-semibold text-ink truncate hover:text-gold transition-colors"
+                                                >
                                                     {review.username}
-                                                </span>
+                                                </Link>
                                                 {review.rating != null && review.rating > 0 && (
                                                     <>
                                                         <div className="flex items-center gap-0.5">
@@ -627,7 +634,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                 const isHalf = fillPercentage === 0.5;
                                                                 return (
                                                                     <div key={starIndex} className="relative w-3.5 h-3.5">
-                                                                        <Star className="absolute inset-0 w-3.5 h-3.5 text-stone-600" strokeWidth={1.5} />
+                                                                        <Star className="absolute inset-0 w-3.5 h-3.5 text-ink-faint" strokeWidth={1.5} />
                                                                         {fillPercentage > 0 && (
                                                                             <div
                                                                                 className="absolute inset-0 overflow-hidden"
@@ -637,7 +644,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                                         : 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'
                                                                                 }}
                                                                             >
-                                                                                <Star className="w-3.5 h-3.5 text-amber-400 fill-current" strokeWidth={1.5} />
+                                                                                <Star className="w-3.5 h-3.5 text-gold fill-current" strokeWidth={1.5} />
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -646,8 +653,8 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                         </div>
                                                     </>
                                                 )}
-                                                <span className="text-stone-600">·</span>
-                                                <span className="text-xs text-stone-500">
+                                                <span className="text-ink-faint">·</span>
+                                                <span className="text-xs text-ink-faint">
                                                     {formatDate(review.createdAt)}
                                                     {review.updatedAt && review.updatedAt !== review.createdAt && (
                                                         <span className="ml-1">(edited)</span>
@@ -661,18 +668,18 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                             <div className="relative flex-shrink-0">
                                                 <button
                                                     onClick={() => toggleDropdown(reviewId)}
-                                                    className="text-stone-400 hover:text-stone-50 p-1 rounded transition-colors"
+                                                    className="text-ink-mute hover:text-ink p-1 rounded transition-colors"
                                                     disabled={isDeleting}
                                                 >
                                                     <MoreHorizontal className="w-4 h-4" />
                                                 </button>
                                                 {showDropdown && (
-                                                    <div className="absolute right-0 top-full mt-1 bg-black/90 backdrop-blur-sm border border-[#3D4451] rounded-lg shadow-lg z-10 min-w-[120px]">
+                                                    <div className="absolute right-0 top-full mt-1 bg-canvas/95 backdrop-blur-sm border border-line rounded-lg shadow-lg z-10 min-w-[120px]">
                                                         {userOwnsReview(review) ? (
                                                             <>
                                                                 <button
                                                                     onClick={() => startEditingReview(review)}
-                                                                    className="w-full text-left px-3 py-2 text-sm text-stone-300 hover:text-stone-50 hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                                                    className="w-full text-left px-3 py-2 text-sm text-ink-soft hover:text-ink hover:bg-overlay-hover flex items-center gap-2 transition-colors"
                                                                 >
                                                                     <Edit3 className="w-3 h-3" />
                                                                     Edit
@@ -708,7 +715,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                             <textarea
                                                 value={editReviewContent}
                                                 onChange={(e) => setEditReviewContent(e.target.value)}
-                                                className="w-full p-3 bg-[#2C3440]/60 border border-[#3D4451] rounded-lg resize-none text-stone-50 placeholder-stone-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50"
+                                                className="w-full p-3 bg-surface/60 border border-line rounded-lg resize-none text-ink placeholder-ink-faint backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gold/40 focus:border-gold/40"
                                                 rows={4}
                                             />
 
@@ -716,7 +723,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                             <div className="flex justify-end gap-2 flex-wrap">
                                                 <button
                                                     onClick={cancelEditing}
-                                                    className="flex items-center gap-2 px-3 py-2 text-sm text-stone-400 hover:text-stone-50 transition-colors"
+                                                    className="flex items-center gap-2 px-3 py-2 text-sm text-ink-mute hover:text-ink transition-colors"
                                                 >
                                                     <X className="w-4 h-4" />
                                                     <span className="hidden sm:inline">Cancel</span>
@@ -724,7 +731,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                 <button
                                                     onClick={() => saveReviewEdit(reviewId)}
                                                     disabled={!editReviewContent.trim()}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-stone-50 text-sm rounded-lg hover:from-amber-700 hover:to-amber-800 disabled:from-stone-600 disabled:to-stone-600 disabled:cursor-not-allowed transition-all shadow-lg"
+                                                    className="flex items-center gap-2 px-4 py-2 bg-ember text-white text-sm rounded-full hover:bg-ember-strong disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg"
                                                 >
                                                     <Check className="w-4 h-4" />
                                                     Save
@@ -733,26 +740,36 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                         </div>
                                     ) : (
                                         <>
-                                            <p className="text-stone-300 mb-3 leading-relaxed text-sm sm:text-base">
+                                            <p className="text-ink-soft mb-3 leading-relaxed text-sm sm:text-base">
                                                 {review.content}
                                             </p>
                                             <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm flex-wrap">
-                                                <button 
-                                                    onClick={() => handleHelpfulVote(reviewId, 'review')}
-                                                    disabled={votingInProgress.has(reviewId)}
-                                                    className={`flex items-center gap-1 transition-all ${
-                                                        votedReviews.has(reviewId)
-                                                            ? 'text-red-400 hover:text-red-300'
-                                                            : 'text-stone-400 hover:text-stone-50'
-                                                    } ${votingInProgress.has(reviewId) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                >
-                                                    <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${votedReviews.has(reviewId) ? 'fill-current' : ''}`} />
-                                                    <span>{review.helpfulCount}</span>
-                                                    <span className="hidden sm:inline">Like</span>
-                                                </button>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => handleHelpfulVote(reviewId, 'review')}
+                                                        disabled={votingInProgress.has(reviewId)}
+                                                        className={`flex items-center gap-1 transition-all ${
+                                                            votedReviews.has(reviewId)
+                                                                ? 'text-red-400 hover:text-red-300'
+                                                                : 'text-ink-mute hover:text-ink'
+                                                        } ${votingInProgress.has(reviewId) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    >
+                                                        <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${votedReviews.has(reviewId) ? 'fill-current' : ''}`} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setLikesModalReviewId(reviewId);
+                                                            setLikesModalCount(review.helpfulCount);
+                                                        }}
+                                                        className="text-ink-mute hover:text-gold transition-colors"
+                                                    >
+                                                        {review.helpfulCount}
+                                                    </button>
+                                                    <span className="hidden sm:inline text-ink-mute">Like</span>
+                                                </div>
                                                 <button 
                                                     onClick={() => toggleReplyForm(reviewId)}
-                                                    className="flex items-center gap-1 text-stone-400 hover:text-stone-50 transition-colors"
+                                                    className="flex items-center gap-1 text-ink-mute hover:text-ink transition-colors"
                                                 >
                                                     <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
                                                     <span className="hidden sm:inline">Reply</span>
@@ -760,7 +777,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                 {hasReplies && (
                                                     <button
                                                         onClick={() => toggleReplies(reviewId)}
-                                                        className="flex items-center gap-1 text-stone-400 hover:text-amber-400 transition-colors"
+                                                        className="flex items-center gap-1 text-ink-mute hover:text-gold transition-colors"
                                                     >
                                                         {repliesExpanded ? (
                                                             <>
@@ -784,38 +801,38 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
 
                                     {/* Reply Form */}
                                     {replyFormVisible && !isEditing && (
-                                        <div className="mt-4 pt-4 border-t border-[#3D4451]">
+                                        <div className="mt-4 pt-4 border-t border-line">
                                             <div className="flex gap-2 sm:gap-3">
                                                 {user?.avatar_url ? (
                                                     <Image 
                                                         width={32}
                                                         height={32}
-                                                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0 border border-[#3D4451] object-cover" 
+                                                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0 border border-line object-cover" 
                                                         src={user.avatar_url}
                                                         alt="Your profile"
                                                     />
                                                 ) : (
-                                                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20"></div>
+                                                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-surface-2 to-surface-2 rounded-full flex-shrink-0 border border-line"></div>
                                                 )}
                                                 <div className="flex-1 min-w-0">
                                                     <textarea
                                                         value={replyTexts[reviewId] || ''}
                                                         onChange={(e) => handleReplyTextChange(reviewId, e.target.value)}
                                                         placeholder="Write a reply..."
-                                                        className="w-full p-3 bg-[#2C3440]/60 border border-[#3D4451] rounded-lg resize-none text-stone-50 placeholder-stone-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 text-sm"
+                                                        className="w-full p-3 bg-surface/60 border border-line rounded-lg resize-none text-ink placeholder-ink-faint backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gold/40 focus:border-gold/40 text-sm"
                                                         rows={3}
                                                     />
                                                     <div className="flex justify-end gap-2 mt-2 flex-wrap">
                                                         <button
                                                             onClick={() => toggleReplyForm(reviewId)}
-                                                            className="px-3 py-2 text-xs sm:text-sm text-stone-400 hover:text-stone-50 transition-colors"
+                                                            className="px-3 py-2 text-xs sm:text-sm text-ink-mute hover:text-ink transition-colors"
                                                         >
                                                             Cancel
                                                         </button>
                                                         <button
                                                             onClick={() => handleReplySubmit(reviewId)}
                                                             disabled={!replyTexts[reviewId]?.trim()}
-                                                            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-stone-50 text-xs sm:text-sm rounded-lg hover:from-amber-700 hover:to-amber-800 disabled:from-stone-600 disabled:to-stone-600 disabled:cursor-not-allowed transition-all shadow-lg"
+                                                            className="flex items-center gap-2 px-3 py-2 bg-ember text-white text-xs sm:text-sm rounded-full hover:bg-ember-strong disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg"
                                                         >
                                                             <Send className="w-3 h-3 sm:w-4 sm:h-4" />
                                                             Reply
@@ -828,7 +845,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
 
                                     {/* Replies Section */}
                                     {hasReplies && repliesExpanded && !isEditing && (
-                                        <div className="mt-4 pt-4 border-t border-[#3D4451]">
+                                        <div className="mt-4 pt-4 border-t border-line">
                                             <div className="space-y-3">
                                                 {review.replies!.map((reply) => {
                                                     const isEditingReply = editingReply === reply.id;
@@ -843,25 +860,28 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                     height={32}
                                                                     src={reply.avatar_url}
                                                                     alt={`${reply.username}'s profile`}
-                                                                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0 object-cover border border-[#3D4451]"
+                                                                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0 object-cover border border-line"
                                                                 />
                                                             ) : (
-                                                                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex-shrink-0 border border-amber-400/20" />
+                                                                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-surface-2 to-surface-2 rounded-full flex-shrink-0 border border-line" />
                                                             )}
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-start justify-between gap-2 mb-1">
                                                                     <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                                            <span className={`text-sm font-medium truncate ${reply.isOfficial ? 'text-blue-400' : 'text-stone-50'}`}>
+                                                                            <Link
+                                                                                href={`/u/${reply.username}`}
+                                                                                className={`text-sm font-medium truncate hover:text-gold transition-colors ${reply.isOfficial ? 'text-blue-400' : 'text-ink'}`}
+                                                                            >
                                                                                 {reply.username}
-                                                                            </span>
+                                                                            </Link>
                                                                             {reply.isOfficial && (
                                                                                 <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full font-medium border border-blue-400/20 backdrop-blur-sm flex-shrink-0">
                                                                                     Official
                                                                                 </span>
                                                                             )}
                                                                         </div>
-                                                                        <div className="text-xs text-stone-400">
+                                                                        <div className="text-xs text-ink-mute">
                                                                             {formatDate(reply.createdAt)}
                                                                             {reply.updatedAt && reply.updatedAt !== reply.createdAt && (
                                                                                 <span className="ml-1">(edited)</span>
@@ -874,18 +894,18 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                         <div className="relative flex-shrink-0">
                                                                             <button
                                                                                 onClick={() => toggleDropdown(reply.id)}
-                                                                                className="text-stone-400 hover:text-stone-50 p-1 rounded transition-colors"
+                                                                                className="text-ink-mute hover:text-ink p-1 rounded transition-colors"
                                                                                 disabled={isDeletingReply}
                                                                             >
                                                                                 <MoreHorizontal className="w-3 h-3" />
                                                                             </button>
                                                                             {showReplyDropdown && (
-                                                                                <div className="absolute right-0 top-full mt-1 bg-black/90 backdrop-blur-sm border border-[#3D4451] rounded-lg shadow-lg z-10 min-w-[120px]">
+                                                                                <div className="absolute right-0 top-full mt-1 bg-canvas/95 backdrop-blur-sm border border-line rounded-lg shadow-lg z-10 min-w-[120px]">
                                                                                     {userOwnsReply(reply) ? (
                                                                                         <>
                                                                                             <button
                                                                                                 onClick={() => startEditingReply(reply)}
-                                                                                                className="w-full text-left px-3 py-2 text-sm text-stone-300 hover:text-stone-50 hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                                                                                className="w-full text-left px-3 py-2 text-sm text-ink-soft hover:text-ink hover:bg-overlay-hover flex items-center gap-2 transition-colors"
                                                                                             >
                                                                                                 <Edit3 className="w-3 h-3" />
                                                                                                 Edit
@@ -920,13 +940,13 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                         <textarea
                                                                             value={editReplyContent}
                                                                             onChange={(e) => setEditReplyContent(e.target.value)}
-                                                                            className="w-full p-3 bg-[#2C3440]/60 border border-[#3D4451] rounded-lg resize-none text-stone-50 placeholder-stone-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 text-sm"
+                                                                            className="w-full p-3 bg-surface/60 border border-line rounded-lg resize-none text-ink placeholder-ink-faint backdrop-blur-sm focus:outline-none focus:ring-1 focus:ring-gold/40 focus:border-gold/40 text-sm"
                                                                             rows={3}
                                                                         />
                                                                         <div className="flex justify-end gap-2 flex-wrap">
                                                                             <button
                                                                                 onClick={cancelEditing}
-                                                                                className="flex items-center gap-2 px-3 py-1 text-xs text-stone-400 hover:text-stone-50 transition-colors"
+                                                                                className="flex items-center gap-2 px-3 py-1 text-xs text-ink-mute hover:text-ink transition-colors"
                                                                             >
                                                                                 <X className="w-3 h-3" />
                                                                                 <span className="hidden sm:inline">Cancel</span>
@@ -934,7 +954,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                             <button
                                                                                 onClick={() => saveReplyEdit(reply.id)}
                                                                                 disabled={!editReplyContent.trim()}
-                                                                                className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-amber-600 to-amber-700 text-stone-50 text-xs rounded-lg hover:from-amber-700 hover:to-amber-800 disabled:from-stone-600 disabled:to-stone-600 disabled:cursor-not-allowed transition-all shadow-lg"
+                                                                                className="flex items-center gap-2 px-3 py-1 bg-ember text-white text-xs rounded-full hover:bg-ember-strong disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                                                             >
                                                                                 <Check className="w-3 h-3" />
                                                                                 Save
@@ -943,7 +963,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                     </div>
                                                                 ) : (
                                                                     <>
-                                                                        <p className="text-stone-300 text-sm leading-relaxed mb-2">
+                                                                        <p className="text-ink-soft text-sm leading-relaxed mb-2">
                                                                             {reply.content}
                                                                         </p>
                                                                         <div className="flex items-center gap-3 text-xs">
@@ -953,7 +973,7 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                                                                                 className={`flex items-center gap-1 transition-all ${
                                                                                     votedReplies.has(reply.id)
                                                                                         ? 'text-red-400 hover:text-red-300'
-                                                                                        : 'text-stone-400 hover:text-stone-50'
+                                                                                        : 'text-ink-mute hover:text-ink'
                                                                                 } ${votingInProgress.has(reply.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                                             >
                                                                                 <Heart className={`w-3 h-3 ${votedReplies.has(reply.id) ? 'fill-current' : ''}`} />
@@ -976,6 +996,18 @@ const Review = ({ totalRatings, setShowWriteReview, showWriteReview, containsSpo
                 })
             )}
     </div>
+
+    {/* ReviewLikesModal */}
+    {likesModalReviewId && (
+        <ReviewLikesModal
+            reviewId={likesModalReviewId}
+            isOpen={true}
+            onClose={() => setLikesModalReviewId(null)}
+            totalLikes={likesModalCount}
+            currentUserId={user?.id}
+        />
+    )}
+    </>
     );
 }
 

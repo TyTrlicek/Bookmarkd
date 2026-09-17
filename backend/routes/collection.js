@@ -22,11 +22,8 @@ router.get('/collection', authenticateUser, async (req, res) => {
         // Try cache first
         const cachedCollection = await cache.get(cacheKey);
         if (cachedCollection) {
-          console.log(`[Collection] Served from cache for user ${userId}`);
           return res.json(cachedCollection);
         }
-
-        console.log(`[Collection] Cache miss for user ${userId}, fetching from DB...`);
 
         const userBooks = await prisma.userBook.findMany({
           where: { userId },
@@ -37,7 +34,6 @@ router.get('/collection', authenticateUser, async (req, res) => {
 
         // Cache the collection
         await cache.set(cacheKey, userBooks, TTL.USER_COLLECTION);
-        console.log(`[Collection] Cached collection for user ${userId} (TTL=${TTL.USER_COLLECTION}s)`);
 
         res.json(userBooks);
       } catch (error) {
@@ -103,7 +99,6 @@ router.get('/collection', authenticateUser, async (req, res) => {
     await cache.invalidateUser(userId);
     await cache.invalidateBook(existingEntry.bookId);
     await cache.invalidateGlobal();
-    console.log(`[Collection] Invalidated caches after book removal for user ${userId}`);
 
     return res.status(200).json({
       message: 'Book removed from collection successfully',
@@ -195,7 +190,6 @@ router.put('/collection/status', writeLimiter, authenticateUser, async (req, res
 
     // Invalidate user-related caches
     await cache.invalidateUser(userId);
-    console.log(`[Collection] Invalidated user caches after status update for user ${userId}`);
 
     return res.status(200).json({ message: 'Status updated', status });
   } catch (err) {
@@ -293,7 +287,6 @@ router.put('/collection/status', writeLimiter, authenticateUser, async (req, res
     await cache.invalidateUser(userId);
     await cache.invalidateBook(updated.bookId);
     await cache.invalidateGlobal();
-    console.log(`[Collection] Invalidated caches after rating update for user ${userId}`);
 
     return res.status(200).json({ message: 'Rating updated', rating });
   } catch (err) {
@@ -306,9 +299,6 @@ router.put('/collection/comment', writeLimiter, authenticateUser, async (req, re
   try {
     const { comment, bookId } = req.body;
     const userId = req.userId;
-
-    console.log('comment', comment)
-    console.log('bookId', bookId);
 
     const updatedUserBook = await prisma.userBook.update({
       where: {
@@ -327,7 +317,6 @@ router.put('/collection/comment', writeLimiter, authenticateUser, async (req, re
 
     // Invalidate user-related caches
     await cache.invalidateUser(userId);
-    console.log(`[Collection] Invalidated user caches after comment update for user ${userId}`);
 
     res.json(updatedUserBook);
   } catch (error) {

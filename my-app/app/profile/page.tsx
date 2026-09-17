@@ -9,24 +9,19 @@ import {
   Star,
   LogOut,
   Settings,
-  Crown,
-  Calendar,
-  Award,
-  Target,
   BookMarked,
   User as UserIcon,
-  Mail,
-  Shield,
-  Clock,
-  TrendingUp,
   X,
-  Upload,
   Save,
   Camera,
   Trash2,
   AlertTriangle,
   ListPlus,
-  Plus
+  Plus,
+  Users,
+  ExternalLink,
+  Pencil,
+  Check
 } from 'lucide-react'
 import Header from '../components/Header'
 import useAuthStore from '@/store/authStore'
@@ -35,10 +30,10 @@ import { toAmericanDate } from '@/utils/util'
 import Image from 'next/image'
 import Link from 'next/link'
 import Footer from '../components/Footer'
-import { set } from 'lodash'
 import FavoritesList from '../components/FavoritesList'
 import { useAuth } from '@/hooks/useAuth'
 import ListCard from '../components/ListCard'
+import FollowersModal from '../components/FollowersModal'
 
 export default function AccountPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -66,6 +61,13 @@ export default function AccountPage() {
   const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [userLists, setUserLists] = useState<List[]>([]);
   const [listsLoading, setListsLoading] = useState(true);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [bioText, setBioText] = useState('');
+  const [isSavingBio, setIsSavingBio] = useState(false);
 
   const fetchFavoriteBooks = async () => {
   const { data: { session } } = await supabase.auth.getSession();
@@ -197,6 +199,8 @@ useEffect(() => {
       return;
     }
 
+    let userUsername: string | null = null;
+
     try {
       // Fetch user stats
       const statsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/users/stats`, {
@@ -208,16 +212,16 @@ useEffect(() => {
 
       const statsData = statsResponse.data;
 
-
+      userUsername = statsData.user?.username || null;
       setUser(statsData.user);
       setAverageRating(statsData.averageRating.toFixed(2));
       setBooksInCollection(statsData.booksInCollection);
       setReviewsWritten(statsData.reviewsWritten);
 
       setEditForm({
-        username: statsData.username || '',
-        bio: statsData.bio || '',
-        avatar_url: statsData.avatar_url || ''
+        username: statsData.user?.username || '',
+        bio: statsData.user?.bio || '',
+        avatar_url: statsData.user?.avatar_url || ''
       });
     } catch (error) {
       console.error('Failed to fetch user stats:', error);
@@ -254,6 +258,25 @@ useEffect(() => {
       await fetchUserLists();
     } catch (error) {
       console.error('Failed to fetch user lists:', error);
+    }
+
+    try {
+      // Fetch follower/following counts
+      if (userUsername) {
+        const profileResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/users/u/${userUsername}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        setFollowerCount(profileResponse.data.followerCount || 0);
+        setFollowingCount(profileResponse.data.followingCount || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch follow counts:', error);
     } finally {
       setIsLoading(false);
     }
@@ -264,7 +287,6 @@ useEffect(() => {
 
 
   const handleLogout = async () => {
-    console.log('Logging out user...')
     await supabase.auth.signOut()
     useAuthStore.getState().clearSession()
     router.push('/auth')
@@ -282,6 +304,48 @@ useEffect(() => {
     }
     setNewProfileImage(null)
     setNewProfileImagePreview(null)
+  }
+
+  const handleStartEditBio = () => {
+    setBioText(user?.bio || '')
+    setIsEditingBio(true)
+  }
+
+  const handleCancelEditBio = () => {
+    setIsEditingBio(false)
+    setBioText('')
+  }
+
+  const handleSaveBio = async () => {
+    if (!user) return
+
+    setIsSavingBio(true)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+
+      if (!accessToken) {
+        setIsSavingBio(false)
+        return
+      }
+
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/users/update`, {
+        bio: bioText
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      setUser(prev => prev ? { ...prev, bio: bioText } : null)
+      setIsEditingBio(false)
+    } catch (error) {
+      console.error('Failed to update bio:', error)
+    } finally {
+      setIsSavingBio(false)
+    }
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -444,6 +508,7 @@ useEffect(() => {
 setUser((prevUser) => ({
   ...prevUser,
   username: editForm.username,
+  bio: editForm.bio,
   avatar_url: newAvatarUrl,
 }) as User);
       setEditMessage('Profile updated successfully!')
@@ -466,20 +531,20 @@ setUser((prevUser) => ({
   }
 
   const userStats = [
-    { label: "Books in Collection", value: booksInCollection, icon: BookMarked, color: "from-blue-500 to-blue-600" },
-    { label: "Books Rated This Year", value: reviewsWritten || 0, icon: BookOpen, color: "from-amber-500 to-amber-600" },
-    { label: "Average Book Rating", value: (averageRating || 0), icon: Star, color: "from-emerald-500 to-emerald-600" }
+    { label: "Books in Collection", value: booksInCollection, icon: BookMarked, color: "text-rate-good" },
+    { label: "Books Rated This Year", value: reviewsWritten || 0, icon: BookOpen, color: "text-gold" },
+    { label: "Average Book Rating", value: (averageRating || 0), icon: Star, color: "text-rate-high" }
   ]
 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#14181C] via-[#14181C] to-amber-900 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
         <div className="text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse shadow-2xl">
-            <BookOpen className="w-10 h-10 text-white" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-line bg-overlay">
+            <BookOpen className="h-6 w-6 animate-pulse text-gold" />
           </div>
-          <p className="text-stone-300 text-xl">Loading your profile</p>
+          <p className="text-sm text-ink-mute">Loading your profile…</p>
         </div>
       </div>
     )
@@ -487,11 +552,8 @@ setUser((prevUser) => ({
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#14181C] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full mb-4"></div>
-          <p className="text-stone-50">Loading...</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" />
       </div>
     );
   }
@@ -501,7 +563,7 @@ setUser((prevUser) => ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]">
+    <div className="min-h-screen bg-canvas">
       {/* Header */}
       <Header />
 
@@ -510,9 +572,9 @@ setUser((prevUser) => ({
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
         {/* Profile Section */}
         <section className="mb-16">
-          <div className="bg-[#2C3440] backdrop-blur-sm rounded-3xl p-10 mb-10 border border-[#3D4451] shadow-2xl">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-amber-400/30 shadow-2xl">
+          <div className="mb-10 rounded-3xl border border-line bg-surface/50 p-8 md:p-10">
+            <div className="flex flex-col items-center gap-8 md:flex-row">
+              <div className="h-28 w-28 flex-shrink-0 overflow-hidden rounded-full border border-line-strong">
                 {user?.avatar_url ? (
                   <Image 
                   width={128}
@@ -522,39 +584,117 @@ setUser((prevUser) => ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                    <UserIcon className="w-16 h-16 text-white" />
+                  <div className="flex h-full w-full items-center justify-center bg-overlay">
+                    <UserIcon className="h-12 w-12 text-ink-mute" />
                   </div>
                 )}
               </div>
-              <div className="text-center md:text-left flex-1">
-                <h2 className="text-4xl font-bold text-stone-50 mb-3">
-                  Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">{user?.username}</span>!
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="font-display text-3xl font-semibold tracking-[-0.02em] text-ink">
+                  Welcome back,{' '}
+                  <span className="italic text-gold" style={{ fontVariationSettings: '"WONK" 1' }}>
+                    {user?.username}
+                  </span>
                 </h2>
-                {user?.bio && (
-                  <p className="text-xl text-stone-300 mb-4 max-w-2xl leading-relaxed">
-                    {user.bio}
-                  </p>
-                )}
-                <div className="flex flex-col sm:flex-row items-center gap-6 text-stone-400">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-5 h-5" />
-                    <span>{user?.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    <span>Member since {new Date(user?.createdAt || '').getFullYear()}</span>
-                  </div>
-                  {/* <div className="flex items-center gap-2">
-                    <Crown className="w-5 h-5 text-amber-400" />
-                    <span className="text-amber-300 font-medium">Premium Reader</span>
-                  </div> */}
+
+                {/* Followers/Following */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 text-ink-mute mb-4">
+                  <button
+                    onClick={() => setShowFollowersModal(true)}
+                    className="flex items-center gap-2 hover:text-gold transition-colors"
+                  >
+                    <Users className="w-5 h-5" />
+                    <span><span className="font-semibold text-ink">{followerCount}</span> followers</span>
+                  </button>
+                  <button
+                    onClick={() => setShowFollowingModal(true)}
+                    className="flex items-center gap-2 hover:text-gold transition-colors"
+                  >
+                    <span><span className="font-semibold text-ink">{followingCount}</span> following</span>
+                  </button>
+                </div>
+
+                {/* Inline Bio Section */}
+                <div className="max-w-2xl">
+                  {isEditingBio ? (
+                    <div className="space-y-3">
+                      <textarea
+                        value={bioText}
+                        onChange={(e) => setBioText(e.target.value)}
+                        placeholder="Write something about yourself..."
+                        maxLength={500}
+                        rows={3}
+                        className="w-full px-4 py-3 bg-canvas-raised border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink text-lg resize-none"
+                        autoFocus
+                      />
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-ink0">{bioText.length}/500</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleCancelEditBio}
+                            disabled={isSavingBio}
+                            className="px-4 py-2 text-sm text-ink-mute hover:text-ink transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSaveBio}
+                            disabled={isSavingBio}
+                            className="flex items-center gap-2 px-4 py-2 bg-ember text-white hover:bg-ember-strong font-medium rounded-lg text-sm transition-all disabled:opacity-50"
+                          >
+                            {isSavingBio ? (
+                              <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <>
+                                <Check className="w-4 h-4" />
+                                Save
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="group">
+                      {user?.bio ? (
+                        <div className="flex items-start gap-2">
+                          <p className="text-lg md:text-xl text-ink-soft leading-relaxed flex-1">
+                            {user.bio}
+                          </p>
+                          <button
+                            onClick={handleStartEditBio}
+                            className="p-2 text-ink0 hover:text-gold hover:bg-overlay-hover rounded-lg transition-all md:opacity-0 md:group-hover:opacity-100 flex-shrink-0"
+                            title="Edit bio"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleStartEditBio}
+                          className="flex items-center gap-2 text-ink0 hover:text-gold transition-colors text-base md:text-lg py-2"
+                        >
+                          <Plus className="w-5 h-5" />
+                          Add a bio
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-4">
-                <button 
+              <div className="flex flex-wrap gap-4">
+                {user?.username && (
+                  <Link
+                    href={`/u/${user.username}`}
+                    className="group flex items-center gap-2 rounded-full border border-line-strong bg-overlay px-5 py-2.5 text-sm font-medium text-ink-soft transition-colors hover:bg-overlay-hover"
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    View Public Profile
+                  </Link>
+                )}
+                <button
                   onClick={handleEditProfile}
-                  className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-stone-50 rounded-xl border border-[#3D4451] transition-all backdrop-blur-sm group"
+                  className="flex items-center gap-2 px-6 py-3 bg-overlay hover:bg-overlay-hover text-ink rounded-xl border border-line transition-all backdrop-blur-sm group"
                 >
                   <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
                   Edit Profile
@@ -562,7 +702,7 @@ setUser((prevUser) => ({
 
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black rounded-xl transition-all font-bold shadow-lg hover:shadow-amber-500/25"
+                  className="flex items-center gap-2 px-6 py-3 bg-ember text-white hover:bg-ember-strong rounded-xl transition-all font-bold shadow-lg "
                 >
                   <LogOut className="w-5 h-5" />
                   Logout
@@ -573,32 +713,32 @@ setUser((prevUser) => ({
 
           {/* Delete Account Modal */}
 {showDeleteModal && (
-  <div className="fixed inset-0 bg-[#14181C]/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowDeleteModal(false)}>
-    <div className="bg-[#14181C] border border-red-500/30 rounded-3xl max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowDeleteModal(false)}>
+    <div className="bg-canvas-raised border border-rate-bad/30 rounded-3xl max-w-md w-full " onClick={(e) => e.stopPropagation()}>
       {/* Modal Header */}
-      <div className="flex items-center justify-between p-8 border-b border-red-500/20">
+      <div className="flex items-center justify-between p-8 border-b border-rate-bad/30">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
-            <AlertTriangle className="w-6 h-6 text-red-400" />
+          <div className="w-12 h-12 bg-rate-bad/15 rounded-xl flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-rate-bad" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-stone-50">Delete Account</h3>
-            <p className="text-red-400 text-sm">This action cannot be undone</p>
+            <h3 className="font-display text-xl font-semibold text-ink">Delete Account</h3>
+            <p className="text-rate-bad text-sm">This action cannot be undone</p>
           </div>
         </div>
         <button
           onClick={() => setShowDeleteModal(false)}
-          className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-overlay-hover transition-colors"
         >
-          <X className="w-6 h-6 text-stone-400" />
+          <X className="w-6 h-6 text-ink-mute" />
         </button>
       </div>
 
       {/* Modal Content */}
       <div className="p-8 space-y-6">
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
-          <h4 className="text-red-300 font-semibold mb-3">What will be deleted:</h4>
-          <ul className="text-red-200 text-sm space-y-2">
+        <div className="bg-rate-bad/10 border border-rate-bad/30 rounded-xl p-6">
+          <h4 className="text-rate-bad font-semibold mb-3">What will be deleted:</h4>
+          <ul className="text-rate-bad text-sm space-y-2">
             <li>• Your profile and account information</li>
             <li>• All your book collections and ratings</li>
             <li>• All your reviews and comments</li>
@@ -608,7 +748,7 @@ setUser((prevUser) => ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-300 mb-3">
+          <label className="block text-sm font-medium text-ink-soft mb-3">
             Type "DELETE" to confirm:
           </label>
           <input
@@ -616,7 +756,7 @@ setUser((prevUser) => ({
             placeholder="DELETE"
             value={deleteConfirmText}
             onChange={(e) => setDeleteConfirmText(e.target.value)}
-            className="w-full px-4 py-3 bg-[#2C3440]/80 border border-red-500/30 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors placeholder-stone-500 text-stone-50"
+            className="w-full px-4 py-3 bg-surface border border-rate-bad/30 rounded-xl focus:ring-1 focus:ring-rate-bad/40 focus:border-rate-bad/50 transition-colors placeholder-ink-faint text-ink"
           />
         </div>
 
@@ -625,14 +765,14 @@ setUser((prevUser) => ({
           <button
             onClick={() => setShowDeleteModal(false)}
             disabled={isDeleting}
-            className="flex-1 px-6 py-3 border border-white/30 text-stone-300 rounded-xl hover:bg-white/10 transition-colors"
+            className="flex-1 px-6 py-3 border border-line-strong text-ink-soft rounded-xl hover:bg-overlay-hover transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleDeleteAccount}
             disabled={isDeleting || deleteConfirmText !== 'DELETE'}
-            className="flex-1 bg-red-500 hover:bg-red-600 text-stone-50 font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-rate-bad hover:opacity-90 text-ink font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDeleting ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -650,24 +790,24 @@ setUser((prevUser) => ({
 )}
 
 {/* Favorite Books Section */}
-<section className="mt-16 mb-16 bg-[#14181C] px-6 py-4 rounded-3xl border border-[#3D4451] shadow-2xl">
+<section className="mt-16 mb-16 bg-canvas-raised px-6 py-4 rounded-3xl border border-line ">
   <div className="mb-8">
     <div className="flex items-baseline gap-4 mb-3">
       {/* Small accent element */}
       <div className="flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-        <div className="w-1 h-1 bg-purple-500/50 rounded-full" />
+        <div className="w-1.5 h-1.5 bg-hue-lists rounded-full" />
+        <div className="w-1 h-1 bg-hue-lists/50 rounded-full" />
       </div>
 
       <div className="flex-1">
-        <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Favorite Books</h2>
+        <h2 className="font-display text-2xl font-semibold tracking-[-0.01em] text-ink">Favorite Books</h2>
       </div>
     </div>
 
-    <p className="text-stone-400 text-sm ml-7 mb-4">Your personal favorites</p>
+    <p className="text-ink-mute text-sm ml-7 mb-4">Your personal favorites</p>
 
     {/* Subtle divider with gradient */}
-    <div className="h-px bg-gradient-to-r from-purple-500/30 via-white/10 to-transparent" />
+    <div className="h-px bg-gradient-to-r from-hue-lists/30 via-line to-transparent" />
   </div>
 
   {/* Desktop: Grid Layout */}
@@ -702,18 +842,18 @@ setUser((prevUser) => ({
 
   {/* Empty State */}
   {/* {!favoritesLoading && favoriteBooks.length === 0 && (
-    <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-12 text-center border border-[#3D4451]">
-      <div className="w-20 h-20 bg-gradient-to-br from-amber-500/20 to-amber-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-400/20">
-        <BookMarked className="w-10 h-10 text-amber-400" />
+    <div className="bg-surface backdrop-blur-sm rounded-2xl p-12 text-center border border-line">
+      <div className="w-20 h-20 bg-overlay rounded-full flex items-center justify-center mx-auto mb-6 border border-line">
+        <BookMarked className="w-10 h-10 text-gold" />
       </div>
-      <h3 className="text-2xl font-bold text-stone-50 mb-4">No Favorites Yet</h3>
-      <p className="text-stone-400 mb-6 max-w-md mx-auto">
+      <h3 className="font-display text-xl font-semibold text-ink mb-4">No Favorites Yet</h3>
+      <p className="text-ink-mute mb-6 max-w-md mx-auto">
         Start building your collection by adding books you love to your favorites.
         These will be your go-to recommendations for other readers!
       </p>
       <button
         onClick={() => router.push('/browse')}
-        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold rounded-xl transition-all shadow-lg hover:shadow-amber-500/25"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-ember text-white hover:bg-ember-strong font-bold rounded-xl transition-all shadow-lg "
       >
         <BookOpen className="w-5 h-5" />
         Discover Books
@@ -723,19 +863,19 @@ setUser((prevUser) => ({
 </section>
 
 {/* My Lists Section */}
-<section className="mt-16 mb-16 bg-[#14181C] px-6 py-4 rounded-3xl border border-[#3D4451] shadow-2xl">
+<section className="mt-16 mb-16 bg-canvas-raised px-6 py-4 rounded-3xl border border-line ">
   <div className="mb-8">
     <div className="flex items-baseline gap-4 mb-3">
       <div className="flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-        <div className="w-1 h-1 bg-purple-500/50 rounded-full" />
+        <div className="w-1.5 h-1.5 bg-hue-lists rounded-full" />
+        <div className="w-1 h-1 bg-hue-lists/50 rounded-full" />
       </div>
 
       <div className="flex-1 flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-stone-50 tracking-tight">My Lists</h2>
+        <h2 className="font-display text-2xl font-semibold tracking-[-0.01em] text-ink">My Lists</h2>
         <Link
           href="/lists/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-purple-500/25 text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-ember text-white hover:bg-ember-strong font-medium rounded-lg transition-all shadow-lg  text-sm"
         >
           <Plus className="w-4 h-4" />
           Create List
@@ -743,27 +883,27 @@ setUser((prevUser) => ({
       </div>
     </div>
 
-    <p className="text-stone-400 text-sm ml-7 mb-4">Your curated book collections</p>
+    <p className="text-ink-mute text-sm ml-7 mb-4">Your book collections</p>
 
-    <div className="h-px bg-gradient-to-r from-purple-500/30 via-white/10 to-transparent" />
+    <div className="h-px bg-gradient-to-r from-hue-lists/30 via-line to-transparent" />
   </div>
 
   {listsLoading ? (
     <div className="flex items-center justify-center py-12">
-      <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-gold border-t-transparent" />
     </div>
   ) : userLists.length === 0 ? (
-    <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-12 text-center border border-[#3D4451]">
-      <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-purple-400/20">
-        <ListPlus className="w-10 h-10 text-purple-400" />
+    <div className="bg-surface backdrop-blur-sm rounded-2xl p-12 text-center border border-line">
+      <div className="w-20 h-20 bg-overlay rounded-full flex items-center justify-center mx-auto mb-6 border border-hue-lists/20">
+        <ListPlus className="w-10 h-10 text-hue-lists" />
       </div>
-      <h3 className="text-2xl font-bold text-stone-50 mb-4">No Lists Yet</h3>
-      <p className="text-stone-400 mb-6 max-w-md mx-auto">
-        Create your first list to curate and share your favorite book collections!
+      <h3 className="font-display text-xl font-semibold text-ink mb-4">No Lists Yet</h3>
+      <p className="text-ink-mute mb-6 max-w-md mx-auto">
+        Create your first list to create and share your favorite book collections!
       </p>
       <Link
         href="/lists/new"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-purple-500/25"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-ember text-white hover:bg-ember-strong font-bold rounded-xl transition-all shadow-lg "
       >
         <Plus className="w-5 h-5" />
         Create Your First List
@@ -779,14 +919,12 @@ setUser((prevUser) => ({
 </section>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {userStats.map((stat, index) => (
-              <div key={index} className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 text-center border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all group shadow-lg">
-                <div className={`w-16 h-16 bg-gradient-to-br ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
-                  <stat.icon className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-stone-50 mb-2 group-hover:text-amber-200 transition-colors">{stat.value}</div>
-                <div className="text-sm text-stone-400">{stat.label}</div>
+              <div key={index} className="rounded-2xl border border-line bg-surface/50 p-6 text-center">
+                <stat.icon className={`mx-auto mb-3 h-6 w-6 ${stat.color}`} />
+                <div className="font-display text-2xl font-semibold text-ink">{stat.value}</div>
+                <div className="mt-0.5 text-xs text-ink-mute">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -800,29 +938,29 @@ setUser((prevUser) => ({
               <div className="flex items-baseline gap-4 mb-3">
                 {/* Small accent element */}
                 <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                  <div className="w-1 h-1 bg-blue-500/50 rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-rate-good rounded-full" />
+                  <div className="w-1 h-1 bg-rate-good/50 rounded-full" />
                 </div>
 
                 <div className="flex-1">
-                  <h2 className="text-3xl font-bold text-stone-50 tracking-tight">Recent Activity</h2>
+                  <h2 className="font-display text-2xl font-semibold tracking-[-0.01em] text-ink">Recent Activity</h2>
                 </div>
               </div>
 
-              <p className="text-stone-400 text-sm ml-7 mb-4">Your recent activity</p>
+              <p className="text-ink-mute text-sm ml-7 mb-4">Your recent activity</p>
 
               {/* Subtle divider with gradient */}
-              <div className="h-px bg-gradient-to-r from-blue-500/30 via-white/10 to-transparent" />
+              <div className="h-px bg-gradient-to-r from-rate-good/30 via-line to-transparent" />
             </div>
             
-            <div className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] shadow-lg max-h-144 overflow-y-auto no-scrollbar">
+            <div className="bg-surface backdrop-blur-sm rounded-2xl p-8 border border-line shadow-lg max-h-144 overflow-y-auto no-scrollbar">
               <div className="space-y-6">
                 {recentActivity.map((activity, index) => (
                   <div 
                     key={activity.id || index} 
-                    className="flex items-start gap-4 py-4 border-b border-[#3D4451] last:border-b-0 group"
+                    className="flex items-start gap-4 py-4 border-b border-line last:border-b-0 group"
                   >
-                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500/20 to-amber-600/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-amber-400/20">
+                    <div className="w-12 h-12 bg-overlay backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-line">
                       {activity.data.avatar_url ? (
                         <Image
                           width={48}
@@ -840,16 +978,16 @@ setUser((prevUser) => ({
                           className="w-full h-full rounded-full flex-shrink-0 object-cover"
                         />
                       ) : (
-                        <UserIcon className="w-6 h-6 text-amber-400" />
+                        <UserIcon className="w-6 h-6 text-gold" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="space-y-1">
-                        <p className="text-stone-50 text-sm leading-relaxed group-hover:text-amber-100 transition-colors">
+                        <p className="text-ink text-sm leading-relaxed group-hover:text-gold-soft transition-colors">
                           <span className="font-medium">{activity.data.message}</span>
                         </p>
                       </div>
-                      <p className="text-xs text-stone-500 mt-2">
+                      <p className="text-xs text-ink0 mt-2">
                         {toAmericanDate(activity.createdAt)}
                       </p>
                     </div>
@@ -861,30 +999,30 @@ setUser((prevUser) => ({
 
         {/* Quick Actions */}
         {/* <section className="mt-16">
-          <h2 className="text-3xl font-bold text-stone-50 mb-8">Quick Actions</h2>
+          <h2 className="text-3xl font-bold text-ink mb-8">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <button className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all text-left group shadow-lg">
+            <button className="bg-surface backdrop-blur-sm rounded-2xl p-8 border border-line hover:bg-surface transition-all text-left group shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <BookOpen className="w-8 h-8 text-stone-50" />
+                <BookOpen className="w-8 h-8 text-ink" />
               </div>
-              <h3 className="font-semibold text-stone-50 mb-3 text-xl group-hover:text-amber-200 transition-colors">Add New Book</h3>
-              <p className="text-stone-400 text-sm">Track a new book you're reading</p>
+              <h3 className="font-semibold text-ink mb-3 text-xl group-hover:text-gold-soft transition-colors">Add New Book</h3>
+              <p className="text-ink-mute text-sm">Track a new book you're reading</p>
             </button>
 
-            <button className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all text-left group shadow-lg">
+            <button className="bg-surface backdrop-blur-sm rounded-2xl p-8 border border-line hover:bg-surface transition-all text-left group shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <Star className="w-8 h-8 text-stone-50" />
+                <Star className="w-8 h-8 text-ink" />
               </div>
-              <h3 className="font-semibold text-stone-50 mb-3 text-xl group-hover:text-amber-200 transition-colors">Write Review</h3>
-              <p className="text-stone-400 text-sm">Share your thoughts on a book</p>
+              <h3 className="font-semibold text-ink mb-3 text-xl group-hover:text-gold-soft transition-colors">Write Review</h3>
+              <p className="text-ink-mute text-sm">Share your thoughts on a book</p>
             </button>
 
-            <button className="bg-[#2C3440] backdrop-blur-sm rounded-2xl p-8 border border-[#3D4451] hover:bg-[#2C3440]/80 transition-all text-left group shadow-lg">
+            <button className="bg-surface backdrop-blur-sm rounded-2xl p-8 border border-line hover:bg-surface transition-all text-left group shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <TrendingUp className="w-8 h-8 text-stone-50" />
+                <TrendingUp className="w-8 h-8 text-ink" />
               </div>
-              <h3 className="font-semibold text-stone-50 mb-3 text-xl group-hover:text-amber-200 transition-colors">View Stats</h3>
-              <p className="text-stone-400 text-sm">Detailed reading analytics</p>
+              <h3 className="font-semibold text-ink mb-3 text-xl group-hover:text-gold-soft transition-colors">View Stats</h3>
+              <p className="text-ink-mute text-sm">Detailed reading analytics</p>
             </button>
           </div>
         </section> */}
@@ -892,24 +1030,24 @@ setUser((prevUser) => ({
 
       {/* Edit Profile Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-[#14181C]/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowEditModal(false)}>
-          <div className="bg-[#14181C] border border-[#3D4451] rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto no-scrollbar shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowEditModal(false)}>
+          <div className="bg-canvas-raised border border-line rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto no-scrollbar " onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-8 border-b border-[#3D4451]">
+            <div className="flex items-center justify-between p-8 border-b border-line">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-ember rounded-xl flex items-center justify-center shadow-lg">
                   <Settings className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-stone-50">Edit Profile</h3>
-                  <p className="text-stone-400 text-sm">Update your profile information</p>
+                  <h3 className="font-display text-xl font-semibold text-ink">Edit Profile</h3>
+                  <p className="text-ink-mute text-sm">Update your profile information</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/10 transition-colors border border-[#3D4451]"
+                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-overlay-hover transition-colors border border-line"
               >
-                <X className="w-6 h-6 text-stone-400" />
+                <X className="w-6 h-6 text-ink-mute" />
               </button>
             </div>
 
@@ -917,13 +1055,13 @@ setUser((prevUser) => ({
             <div className="p-8 space-y-8">
               {/* Profile Picture Section */}
               <div>
-                <label className="block text-sm font-medium text-stone-300 mb-4">
+                <label className="block text-sm font-medium text-ink-soft mb-4">
                   Profile Picture
                 </label>
                 <div className="flex items-center gap-6">
                   {/* Current/Preview Image */}
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#3D4451]">
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-line">
                       {newProfileImagePreview ? (
                         <Image 
                           width={96}
@@ -941,7 +1079,7 @@ setUser((prevUser) => ({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                        <div className="w-full h-full bg-ember flex items-center justify-center">
                           <UserIcon className="w-10 h-10 text-white" />
                         </div>
                       )}
@@ -950,7 +1088,7 @@ setUser((prevUser) => ({
                       <button
                         type="button"
                         onClick={removeNewImage}
-                        className="absolute -top-1 -right-1 w-7 h-7 bg-red-500 hover:bg-red-600 text-stone-50 rounded-full flex items-center justify-center transition-colors shadow-lg"
+                        className="absolute -top-1 -right-1 w-7 h-7 bg-rate-bad hover:opacity-90 text-ink rounded-full flex items-center justify-center transition-colors shadow-lg"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -961,7 +1099,7 @@ setUser((prevUser) => ({
                   <div className="flex-1">
                     <label
                       htmlFor="editProfileImage"
-                      className="inline-flex items-center gap-2 px-6 py-3 border border-white/30 rounded-xl hover:bg-white/10 cursor-pointer transition-colors text-sm text-stone-50 backdrop-blur-sm"
+                      className="inline-flex items-center gap-2 px-6 py-3 border border-line-strong rounded-xl hover:bg-overlay-hover cursor-pointer transition-colors text-sm text-ink backdrop-blur-sm"
                     >
                       <Camera className="w-5 h-5" />
                       {newProfileImage ? 'Change Photo' : 'Upload New Photo'}
@@ -973,7 +1111,7 @@ setUser((prevUser) => ({
                       onChange={handleImageChange}
                       className="hidden"
                     />
-                    <p className="text-xs text-stone-500 mt-2">
+                    <p className="text-xs text-ink0 mt-2">
                       JPG, PNG, or GIF up to 5MB
                     </p>
                   </div>
@@ -982,7 +1120,7 @@ setUser((prevUser) => ({
 
               {/* Username Field */}
               <div>
-                <label htmlFor="editUsername" className="block text-sm font-medium text-stone-300 mb-3">
+                <label htmlFor="editUsername" className="block text-sm font-medium text-ink-soft mb-3">
                   Username
                 </label>
                 <div className="relative">
@@ -993,9 +1131,9 @@ setUser((prevUser) => ({
                     value={editForm.username}
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
                     maxLength={20}
-                    className="w-full px-4 py-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-stone-50 backdrop-blur-sm"
+                    className="w-full px-4 py-4 bg-surface border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink backdrop-blur-sm"
                   />
-                  <p className="text-xs text-stone-500 mt-2">
+                  <p className="text-xs text-ink0 mt-2">
                     {editForm.username.length}/20 characters
                   </p>
                 </div>
@@ -1004,9 +1142,9 @@ setUser((prevUser) => ({
               
 
               {/* Bio Field */}
-              {/* <div>
-                <label htmlFor="editBio" className="block text-sm font-medium text-stone-300 mb-3">
-                  Bio <span className="text-stone-500">(Optional)</span>
+              <div>
+                <label htmlFor="editBio" className="block text-sm font-medium text-ink-soft mb-3">
+                  Bio <span className="text-ink0">(Optional)</span>
                 </label>
                 <textarea
                   id="editBio"
@@ -1014,20 +1152,20 @@ setUser((prevUser) => ({
                   value={editForm.bio}
                   onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                   rows={4}
-                  maxLength={200}
-                  className="w-full px-4 py-4 bg-[#2C3440]/80 border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors placeholder-stone-500 text-stone-50 backdrop-blur-sm resize-none"
+                  maxLength={500}
+                  className="w-full px-4 py-4 bg-surface border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink backdrop-blur-sm resize-none"
                 />
-                <p className="text-xs text-stone-500 mt-2">
-                  {editForm.bio.length}/200 characters
+                <p className="text-xs text-ink0 mt-2">
+                  {editForm.bio.length}/500 characters
                 </p>
-              </div> */}
+              </div>
 
               {/* Message Display */}
               {editMessage && (
                 <div className={`p-4 rounded-xl flex items-center gap-3 border ${
                   editMessage.includes('Success') || editMessage.includes('successfully')
-                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' 
-                    : 'bg-red-500/10 text-red-300 border-red-500/30'
+                    ? 'bg-rate-high/10 text-rate-high border-rate-high/30' 
+                    : 'bg-rate-bad/10 text-rate-bad border-rate-bad/30'
                 }`}>
                   <span className="text-sm">{editMessage}</span>
                 </div>
@@ -1038,14 +1176,14 @@ setUser((prevUser) => ({
                 <button
                   onClick={() => setShowEditModal(false)}
                   disabled={isSaving}
-                  className="flex-1 px-4 py-2 border border-white/30 text-stone-300 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 backdrop-blur-sm"
+                  className="flex-1 px-4 py-2 border border-line-strong text-ink-soft rounded-xl hover:bg-overlay-hover transition-colors disabled:opacity-50 backdrop-blur-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving || !editForm.username.trim()}
-                  className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-2 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-amber-500/25"
+                  className="flex-1 bg-ember text-white hover:bg-ember-strong font-bold py-2 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg "
                 >
                   {isSaving ? (
                     <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -1063,7 +1201,7 @@ setUser((prevUser) => ({
                 setShowDeleteModal(true)
                 
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-xl border border-red-500/30 transition-all backdrop-blur-sm group"
+              className="flex items-center gap-2 px-6 py-3 bg-rate-bad/15 hover:bg-rate-bad/25 text-rate-bad hover:text-rate-bad rounded-xl border border-rate-bad/30 transition-all backdrop-blur-sm group"
             >
               <Trash2 className="w-5 h-5 hidden sm:block" />
               Delete Account
@@ -1072,6 +1210,28 @@ setUser((prevUser) => ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Followers Modal */}
+      {user && (
+        <FollowersModal
+          userId={user.id}
+          type="followers"
+          isOpen={showFollowersModal}
+          onClose={() => setShowFollowersModal(false)}
+          currentUserId={user.id}
+        />
+      )}
+
+      {/* Following Modal */}
+      {user && (
+        <FollowersModal
+          userId={user.id}
+          type="following"
+          isOpen={showFollowingModal}
+          onClose={() => setShowFollowingModal(false)}
+          currentUserId={user.id}
+        />
       )}
 
       <Footer />

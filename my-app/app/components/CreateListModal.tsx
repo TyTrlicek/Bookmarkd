@@ -71,33 +71,33 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-[#14181C]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
       onClick={onClose}
     >
       <div
-        className="bg-[#14181C] border border-[#3D4451] rounded-2xl max-w-md w-full shadow-2xl"
+        className="bg-canvas-raised border border-line rounded-2xl max-w-md w-full "
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#3D4451]">
+        <div className="flex items-center justify-between p-6 border-b border-line">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-ember rounded-xl flex items-center justify-center">
               <ListPlus className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-stone-50">
+              <h3 className="font-display text-lg font-semibold text-ink">
                 {isEditMode ? 'Edit List' : 'Create New List'}
               </h3>
-              <p className="text-stone-400 text-sm">
-                {isEditMode ? 'Update your list details' : 'Curate your own book collection'}
+              <p className="text-ink-mute text-sm">
+                {isEditMode ? 'Update your list details' : 'Make your own book collection'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-overlay transition-colors"
           >
-            <X className="w-5 h-5 text-stone-400" />
+            <X className="w-5 h-5 text-ink-mute" />
           </button>
         </div>
 
@@ -105,8 +105,8 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-stone-300 mb-2">
-              List Title <span className="text-red-400">*</span>
+            <label className="block text-sm font-medium text-ink-soft mb-2">
+              List Title <span className="text-rate-bad">*</span>
             </label>
             <input
               type="text"
@@ -114,16 +114,16 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Best Fantasy Books of 2024"
               maxLength={100}
-              className="w-full px-4 py-3 bg-[#2C3440] border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors placeholder-stone-500 text-stone-50"
+              className="w-full px-4 py-3 bg-overlay border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink"
             />
-            <p className="text-xs text-stone-500 mt-1">{title.length}/100</p>
+            <p className="text-xs text-ink0 mt-1">{title.length}/100</p>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-stone-300 mb-2">
+            <label className="block text-sm font-medium text-ink-soft mb-2">
               <AlignLeft className="w-4 h-4 inline mr-1" />
-              Description <span className="text-stone-500">(optional)</span>
+              Description <span className="text-ink0">(optional)</span>
             </label>
             <textarea
               value={description}
@@ -131,26 +131,26 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
               placeholder="What's this list about?"
               maxLength={500}
               rows={3}
-              className="w-full px-4 py-3 bg-[#2C3440] border border-[#3D4451] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors placeholder-stone-500 text-stone-50 resize-none"
+              className="w-full px-4 py-3 bg-overlay border border-line rounded-xl focus:ring-1 focus:ring-gold/30 focus:border-gold/40 transition-colors placeholder-ink-faint text-ink resize-none"
             />
-            <p className="text-xs text-stone-500 mt-1">{description.length}/500</p>
+            <p className="text-xs text-ink0 mt-1">{description.length}/500</p>
           </div>
 
           {/* Toggle Options */}
           <div className="space-y-3">
             {/* Public/Private Toggle */}
-            <div className="flex items-center justify-between p-4 bg-[#2C3440] rounded-xl border border-[#3D4451]">
+            <div className="flex items-center justify-between p-4 bg-overlay rounded-xl border border-line">
               <div className="flex items-center gap-3">
                 {isPublic ? (
-                  <Globe className="w-5 h-5 text-green-400" />
+                  <Globe className="w-5 h-5 text-rate-high" />
                 ) : (
-                  <Lock className="w-5 h-5 text-stone-400" />
+                  <Lock className="w-5 h-5 text-ink-mute" />
                 )}
                 <div>
-                  <p className="text-stone-50 font-medium">
+                  <p className="text-ink font-medium">
                     {isPublic ? 'Public' : 'Private'}
                   </p>
-                  <p className="text-stone-400 text-xs">
+                  <p className="text-ink-mute text-xs">
                     {isPublic
                       ? 'Anyone can view this list'
                       : 'Only you can see this list'}
@@ -161,7 +161,7 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
                 type="button"
                 onClick={() => setIsPublic(!isPublic)}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
-                  isPublic ? 'bg-green-500' : 'bg-stone-600'
+                  isPublic ? 'bg-rate-high' : 'bg-surface-2'
                 }`}
               >
                 <div
@@ -173,14 +173,14 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
             </div>
 
             {/* Ranked Toggle */}
-            <div className="flex items-center justify-between p-4 bg-[#2C3440] rounded-xl border border-[#3D4451]">
+            <div className="flex items-center justify-between p-4 bg-overlay rounded-xl border border-line">
               <div className="flex items-center gap-3">
-                <Hash className={`w-5 h-5 ${isRanked ? 'text-purple-400' : 'text-stone-400'}`} />
+                <Hash className={`w-5 h-5 ${isRanked ? 'text-gold' : 'text-ink-mute'}`} />
                 <div>
-                  <p className="text-stone-50 font-medium">
+                  <p className="text-ink font-medium">
                     {isRanked ? 'Ranked List' : 'Unranked List'}
                   </p>
-                  <p className="text-stone-400 text-xs">
+                  <p className="text-ink-mute text-xs">
                     {isRanked
                       ? 'Books will be numbered'
                       : 'Books displayed without numbers'}
@@ -191,7 +191,7 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
                 type="button"
                 onClick={() => setIsRanked(!isRanked)}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
-                  isRanked ? 'bg-purple-500' : 'bg-stone-600'
+                  isRanked ? 'bg-ember' : 'bg-surface-2'
                 }`}
               >
                 <div
@@ -205,7 +205,7 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
 
           {/* Error Message */}
           {error && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-300 text-sm">
+            <div className="p-3 bg-rate-bad/10 border border-rate-bad/30 rounded-xl text-rate-bad text-sm">
               {error}
             </div>
           )}
@@ -216,14 +216,14 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-4 py-3 border border-[#3D4451] text-stone-300 rounded-xl hover:bg-white/5 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-3 border border-line text-ink-soft rounded-xl hover:bg-overlay transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-purple-500/25"
+              className="flex-1 px-4 py-3 bg-ember text-white hover:bg-ember-strong font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg "
             >
               {isSubmitting ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />

@@ -3,11 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import {
-  BookOpen,
   ArrowRight,
-  Users,
-  Star,
-  Heart,
   AlertCircle,
   CheckCircle,
   User,
@@ -19,7 +15,6 @@ import useAuthStore from '@/store/authStore'
 import axios from 'axios'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import Footer from '../components/Footer'
 import MobileAuthPage from './MobileAuthPage'
 
 function AuthPageContent() {
@@ -57,7 +52,6 @@ function AuthPageContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isDevLoginLoading, setIsDevLoginLoading] = useState(false)
-  const [showDevLogin, setShowDevLogin] = useState(false)
   const [usernameError, setUsernameError] = useState('')
   const [passwordError, setPasswordError] = useState('')
 
@@ -319,10 +313,10 @@ function AuthPageContent() {
         avatar_url: avatarUrl,
       })
 
-      // Initialize session and redirect
+      // Initialize session and redirect with welcome flag for new users
       await useAuthStore.getState().initSession()
       setMessage('Profile created successfully!')
-      router.push('/')
+      router.push('/?welcome=true')
     } catch (err: any) {
       console.error('Failed to create user profile:', err)
       // Check for specific error messages from the backend
@@ -337,17 +331,10 @@ function AuthPageContent() {
   }
 
   const features = [
-    { icon: BookOpen, text: "Track All Of Your Books" },
-    { icon: Users, text: "Get Personalized Recommendations" },
-    { icon: Star, text: "See What Others Rate Your Favorite Books" },
-    { icon: Heart, text: "Discover your next favorite read" },
-  ]
-
-  const stats = [
-    { value: "2M+", label: "Books Available" },
-    { value: "500K+", label: "Authors" },
-    { value: "10K+", label: "Active Readers" },
-    { value: "24/7", label: "Book Discovery" }
+    'Track every book you read',
+    'Rate and review honestly',
+    'Get picks based on your shelf',
+    'Follow readers you trust',
   ]
 
   useEffect(() => {
@@ -360,380 +347,293 @@ function AuthPageContent() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  const isSuccessMsg =
+    message.includes('Success') || message.includes('successfully') || message.includes('created')
+
+  if (isMobile) return <MobileAuthPage />
+
   return (
-    <div className="min-h-screen bg-gradient-to-t from-[#14181C] via-[#14181C] to-[#14181C]">
-      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-
-        {isMobile && 
-        <MobileAuthPage />
-        }
-
-        {/* Left Side - Branding & Features */}
-        {!isMobile && <>
-        <div className="bg-gradient-to-br from-[#2C3440]/80 via-[#14181C]/60 to-[#2C3440]/80 p-8 lg:p-12 flex flex-col justify-center backdrop-blur-sm border-r border-[#3D4451]">
-          <div className="max-w-md mx-auto lg:mx-0">
-            {/* Logo & Title */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="relative">
-                <Image src="/brand-logo.png" width={64} height={64} alt="logo" className='rounded-full'/>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-stone-50">Bookmarkd</h1>
-                <p className="text-stone-300 text-sm">Keep track of your books effortlessly</p>
-              </div>
-            </div>
-
-            {/* Main Heading */}
-            <div className="mb-10">
-              <h2 className="text-3xl lg:text-4xl font-bold text-stone-50 mb-4">
-                {showProfileSetup ? 'Complete Your Profile' : 'Join Bookmarkd Today!'}
-              </h2>
-              <p className="text-lg text-stone-300">
-                {showProfileSetup 
-                  ? 'Just one more step to personalize your reading experience.'
-                  : 'Join a community of readers who are discovering, tracking, and rating their favorite books with just one click.'
-                }
-              </p>
-            </div>
-
-            {/* Features */}
-            <div className="space-y-4 mb-10">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#2C3440] backdrop-blur-sm rounded-lg flex items-center justify-center shadow-sm border border-[#3D4451]">
-                    <feature.icon className="w-4 h-4 text-amber-400" />
-                  </div>
-                  <span className="text-stone-200">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-6">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center p-4 bg-[#2C3440]/60 backdrop-blur-sm rounded-xl border border-[#3D4451]">
-                  <div className="text-2xl font-bold text-stone-50">{stat.value}</div>
-                  <div className="text-sm text-stone-300">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+    <div className="grid min-h-screen bg-canvas lg:grid-cols-[1.05fr_1fr]">
+      {/* ---- Left: brand panel ---- */}
+      <div className="grain relative hidden overflow-hidden border-r border-line lg:flex lg:flex-col lg:justify-between lg:p-14">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              'radial-gradient(70% 50% at 78% 0%, rgba(224,168,93,0.18), transparent 58%),' +
+              'radial-gradient(60% 50% at 5% 100%, rgba(217,119,6,0.12), transparent 62%)',
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 -z-[5] flex items-center gap-3 pr-4 opacity-[0.16] [mask-image:linear-gradient(to_bottom,transparent,#000_18%,#000_82%,transparent)]"
+        >
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-[360px] w-16 rounded-sm"
+              style={{
+                transform: `translateY(${(i % 2) * 48 - 24}px) rotate(-4deg)`,
+                background: `linear-gradient(180deg, var(--surface-2), var(--surface)) padding-box`,
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06), 0 30px 60px -30px #000',
+              }}
+            />
+          ))}
         </div>
 
-        <div className="p-8 lg:p-12 flex flex-col justify-center bg-gradient-to-br from-[#14181C]/80 to-[#14181C]/90 backdrop-blur-md">
-          <div className="max-w-md mx-auto w-full">
-            {!showProfileSetup ? (
-              /* Google Sign In Section */
-              <>
-                {/* Form Header */}
-                <div className="text-center mb-8">
-                  <div className="relative mx-auto mb-6">
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-400/30 to-amber-500/30 rounded-full blur-xl" />
-                    <div className="relative w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center shadow-xl shadow-amber-500/30 border border-amber-400/30 mx-auto">
-                      <BookOpen className="w-10 h-10 text-white" />
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-stone-50 mb-2">
-                    Get Started in Seconds
-                  </h3>
-                  <p className="text-stone-300">
-                    Sign in with your Google account to join our growing community of readers
-                  </p>
-                </div>
+        <a href="/" className="relative flex items-center gap-2.5">
+          <Image src="/brand-logo.png" width={32} height={32} alt="" className="rounded-md" />
+          <span className="font-display text-lg font-semibold text-ink">Bookmarkd</span>
+        </a>
 
-                {/* Google Sign In Button */}
-                <button 
-  onClick={handleGoogleSignIn} 
-  disabled={isGoogleLoading} 
-  className="w-full mb-6 bg-white hover:bg-gray-50 text-gray-900 font-semibold py-4 px-6 rounded-lg  
-             transition-all duration-300 ease-out flex items-center justify-center gap-3 
-             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500/50 focus:ring-offset-transparent 
-             active:scale-95 shadow-lg hover:shadow-sm hover:shadow-gray-200/50
-             disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-gray-200
-             hover:border-gray-300 hover:-translate-y-0.5 hover:scale-[1.02]
-             group relative overflow-hidden" 
-> 
-  {/* Subtle background animation */}
-  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-50/30 to-transparent 
-                  translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
-  
-  {isGoogleLoading ? ( 
-    <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" /> 
-  ) : ( 
-    <> 
-      <svg className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" viewBox="0 0 24 24"> 
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/> 
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/> 
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/> 
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/> 
-      </svg> 
-      <span className="transition-all duration-300 group-hover:tracking-wide relative z-10">
-        Continue with Google
-      </span> 
-    </> 
-  )}
-</button>
-
-                {/* Email/Password Login */}
-                {true && (
-                  <div className="mb-6">
-                    <div className="flex items-center my-4">
-                      <div className="flex-1 border-t border-[#3D4451]"></div>
-                      <span className="px-3 text-xs text-stone-400 bg-[#2C3440] rounded-full">No Google?</span>
-                      <div className="flex-1 border-t border-[#3D4451]"></div>
-                    </div>
-
-                    <button
-                      onClick={() => setShowDevLogin(!showDevLogin)}
-                      className="w-full mb-4 bg-stone-700/30 hover:bg-stone-700/50 text-stone-200 font-medium py-3 px-4 rounded-lg border border-stone-600/30 transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      {showDevLogin ? 'Hide' : 'Show'} Email/Password Login
-                    </button>
-
-                    {showDevLogin && (
-                      <div className="bg-[#2C3440] backdrop-blur-sm rounded-lg p-4 border border-stone-600/30">
-                        <form onSubmit={handleDevEmailSignIn} className="space-y-4">
-                          <div>
-                            <label htmlFor="dev-email" className="block text-sm font-medium text-stone-200 mb-1">
-                              Email
-                            </label>
-                            <input
-                              id="dev-email"
-                              type="email"
-                              placeholder="Enter your email"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              required
-                              className="w-full px-3 py-2 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 text-sm"
-                            />
-                          </div>
-
-                          <div>
-                            <label htmlFor="dev-password" className="block text-sm font-medium text-stone-200 mb-1">
-                              Password
-                            </label>
-                            <input
-                              id="dev-password"
-                              type="password"
-                              placeholder="Enter your password (min 8 chars)"
-                              value={password}
-                              onChange={handlePasswordChange}
-                              required
-                              className={`w-full px-3 py-2 bg-[#2C3440] backdrop-blur-sm border rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 text-sm ${
-                                passwordError ? 'border-red-500/50' : 'border-[#3D4451]'
-                              }`}
-                            />
-                            {passwordError && (
-                              <p className="text-xs text-red-400 mt-1">{passwordError}</p>
-                            )}
-                          </div>
-
-                          <div className="flex gap-2">
-                            <button
-                              type="submit"
-                              disabled={isDevLoginLoading || !email.trim() || !password.trim()}
-                              className="flex-1 bg-amber-600/80 hover:bg-amber-600 text-stone-50 font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                            >
-                              {isDevLoginLoading ? (
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
-                              ) : (
-                                'Sign In'
-                              )}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={handleDevEmailSignUp}
-                              disabled={isDevLoginLoading || !email.trim() || !isPasswordValid}
-                              className="flex-1 bg-stone-600/80 hover:bg-stone-600 text-stone-50 font-medium py-2 px-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                            >
-                              Sign Up
-                            </button>
-                          </div>
-                        </form>
-
-                        <p className="text-xs text-stone-500 mt-2 text-center">
-                          Email Will be sent to your inbox for verification.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Benefits */}
-                {/* <div className="bg-[#2C3440]/60 backdrop-blur-sm rounded-lg p-6 border border-[#3D4451]">
-                  <h4 className="font-semibold text-stone-50 mb-3 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Why use Google Sign-In?
-                  </h4>
-                  <ul className="space-y-2 text-sm text-stone-300">
-                    <li className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-amber-400 rounded-full"></div>
-                      No passwords to remember or manage
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-amber-400 rounded-full"></div>
-                      Secure authentication handled by Google
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-amber-400 rounded-full"></div>
-                      Quick access across all your devices
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1 h-1 bg-amber-400 rounded-full"></div>
-                      Get started reading in under 30 seconds
-                    </li>
-                  </ul>
-                </div> */}
-
-                {/* Privacy Note */}
-                <div className="mt-6 text-center">
-                  <p className="text-xs text-stone-400">
-                    By continuing, you agree to our Terms of Service and Privacy Policy. 
-                    We'll only access your basic profile information.
-                  </p>
-                </div>
-              </>
+        <div className="relative max-w-md">
+          <h1 className="font-display text-[clamp(2rem,3vw,2.9rem)] font-semibold leading-[1.12] tracking-[-0.02em] text-ink">
+            {showProfileSetup ? (
+              <>One more step to make it yours.</>
             ) : (
-              /* Profile Setup Form */
               <>
-                <div className="text-center mb-8">
-                  <div className="relative mx-auto mb-6">
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-400/30 to-emerald-500/30 rounded-full blur-xl" />
-                    <div className="relative w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-xl shadow-green-500/30 border border-green-400/30 mx-auto">
-                      <User className="w-10 h-10 text-white" />
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-stone-50 mb-2">
-                    Complete Your Profile
-                  </h3>
-                  <p className="text-stone-300">
-                    Choose a username and optionally add a profile picture
-                  </p>
+                Your reading life,{' '}
+                <span className="italic text-gold" style={{ fontVariationSettings: '"WONK" 1' }}>
+                  in one place.
+                </span>
+              </>
+            )}
+          </h1>
+          <p className="mt-5 max-w-sm text-[0.95rem] leading-relaxed text-ink-mute">
+            {showProfileSetup
+              ? 'Pick a name other readers will know you by. You can change it later.'
+              : 'Keep every book you’ve read, rate them honestly, and build a shelf that actually reflects your taste.'}
+          </p>
+          <ul className="mt-8 space-y-3">
+            {features.map((f) => (
+              <li key={f} className="flex items-center gap-3 text-sm text-ink-soft">
+                <span className="h-1 w-1 rounded-full bg-gold" />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="relative max-w-sm">
+          <p className="font-display text-lg italic leading-snug text-ink-soft">
+            Reading is worth keeping a record of.
+          </p>
+          <p className="mt-3 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-ink-faint">
+            Free forever &middot; No credit card
+          </p>
+        </div>
+      </div>
+
+      {/* ---- Right: form ---- */}
+      <div className="flex flex-col justify-center px-6 py-14 sm:px-10">
+        <div className="mx-auto w-full max-w-sm">
+          {!showProfileSetup ? (
+            <>
+              <p className="kicker">Welcome</p>
+              <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.02em] text-ink">
+                Get started
+              </h2>
+              <p className="mt-2 text-sm text-ink-mute">
+                Sign in or create an account — takes about 30 seconds.
+              </p>
+
+              <button
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleLoading}
+                className="mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-[#1a1a1a] transition-all hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isGoogleLoading ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#1a1a1a] border-t-transparent" />
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                    Continue with Google
+                  </>
+                )}
+              </button>
+
+              <div className="my-6 flex items-center gap-4">
+                <div className="h-px flex-1 bg-line" />
+                <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-ink-faint">
+                  or with email
+                </span>
+                <div className="h-px flex-1 bg-line" />
+              </div>
+
+              <form onSubmit={handleDevEmailSignIn} className="space-y-4">
+                <div>
+                  <label htmlFor="dev-email" className="mb-1.5 block text-xs font-medium text-ink-mute">
+                    Email
+                  </label>
+                  <input
+                    id="dev-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full rounded-lg border border-line bg-overlay px-3.5 py-2.5 text-sm text-ink placeholder-ink-faint transition-colors focus:border-gold/40 focus:outline-none focus:ring-1 focus:ring-gold/30"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="dev-password" className="mb-1.5 block text-xs font-medium text-ink-mute">
+                    Password
+                  </label>
+                  <input
+                    id="dev-password"
+                    type="password"
+                    placeholder="At least 8 characters"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    required
+                    className={`w-full rounded-lg border bg-overlay px-3.5 py-2.5 text-sm text-ink placeholder-ink-faint transition-colors focus:outline-none focus:ring-1 focus:ring-gold/30 ${
+                      passwordError ? 'border-rate-bad/60' : 'border-line focus:border-gold/40'
+                    }`}
+                  />
+                  {passwordError && <p className="mt-1 text-xs text-rate-bad">{passwordError}</p>}
                 </div>
 
-                <form onSubmit={handleProfileSetup} className="space-y-6">
-                  {/* Profile Picture Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-stone-200 mb-2">
-                      Profile Picture <span className="text-stone-400">(Optional)</span>
-                    </label>
-                    <div className="flex items-center gap-4">
-                      {/* Profile Picture Preview */}
-                      <div className="relative">
-                        <div className="w-16 h-16 rounded-full bg-[#2C3440] backdrop-blur-sm border-2 border-[#3D4451] flex items-center justify-center overflow-hidden">
-                          {profileImagePreview ? (
-                            <Image 
-                              src={profileImagePreview} 
-                              alt="Profile preview" 
-                              fill
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <User className="w-6 h-6 text-stone-400" />
-                          )}
-                        </div>
-                        {profileImagePreview && (
-                          <button
-                            type="button"
-                            onClick={removeImage}
-                            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-stone-50 rounded-full flex items-center justify-center transition-colors"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                      
-                      {/* Upload Button */}
-                      <div className="flex-1">
-                        <label
-                          htmlFor="profileImage"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#2C3440] backdrop-blur-sm border border-[#3D4451] rounded-lg hover:bg-white/10 cursor-pointer transition-colors text-sm text-stone-200"
-                        >
-                          <Upload className="w-4 h-4 text-amber-400" />
-                          {profileImage ? 'Change Photo' : 'Upload Photo'}
-                        </label>
-                        <input
-                          id="profileImage"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                        <p className="text-xs text-stone-400 mt-1">
-                          JPG, PNG, or GIF up to 5MB
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Username Field */}
-                  <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-stone-200 mb-2">
-                      Username *
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-amber-400" />
-                      </div>
-                      <input
-                        id="username"
-                        type="text"
-                        placeholder="Enter your username"
-                        value={username}
-                        onChange={handleUsernameChange}
-                        maxLength={20}
-                        required
-                        className={`w-full pl-10 pr-4 py-3 bg-[#2C3440] backdrop-blur-sm border rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-colors placeholder-stone-400 text-stone-50 ${
-                          usernameError ? 'border-red-500/50' : 'border-[#3D4451]'
-                        }`}
-                      />
-                    </div>
-                    {usernameError ? (
-                      <p className="text-xs text-red-400 mt-1">{usernameError}</p>
-                    ) : (
-                      <p className="text-xs text-stone-400 mt-1">
-                        3-20 characters, letters, numbers, underscores, dashes only
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Submit Button */}
+                <div className="flex gap-2 pt-1">
                   <button
                     type="submit"
-                    disabled={isUploadingImage || !isUsernameValid}
-                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-50 font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-amber-500/30 border border-amber-400/30"
+                    disabled={isDevLoginLoading || !email.trim() || !password.trim()}
+                    className="flex-1 rounded-full bg-ember px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ember-strong disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {isUploadingImage ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    {isDevLoginLoading ? (
+                      <div className="mx-auto h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                     ) : (
-                      <>
-                        Complete Setup
-                        <ArrowRight className="w-4 h-4" />
-                      </>
+                      'Sign in'
                     )}
                   </button>
-                </form>
-              </>
-            )}
+                  <button
+                    type="button"
+                    onClick={handleDevEmailSignUp}
+                    disabled={isDevLoginLoading || !email.trim() || !isPasswordValid}
+                    className="flex-1 rounded-full border border-line-strong bg-overlay px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-overlay-hover disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Create account
+                  </button>
+                </div>
+              </form>
 
-            {/* Message Display */}
-            {message && (
-              <div className={`mt-6 p-4 rounded-lg flex items-center gap-3 backdrop-blur-sm border ${
-                message.includes('Success') || message.includes('successfully') || message.includes('created')
-                  ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30' 
-                  : 'bg-red-500/20 text-red-200 border-red-400/30'
-              }`}>
-                {message.includes('Success') || message.includes('successfully') || message.includes('created') ? (
-                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                )}
-                <span className="text-sm">{message}</span>
-              </div>
-            )}
-          </div>
-        </div></>}
+              <p className="mt-6 text-center text-xs leading-relaxed text-ink-faint">
+                By continuing you agree to our Terms of Service and Privacy Policy.
+              </p>
+            </>
+          ) : (
+            /* Profile setup */
+            <>
+              <p className="kicker">Almost there</p>
+              <h2 className="font-display mt-3 text-3xl font-semibold tracking-[-0.02em] text-ink">
+                Set up your profile
+              </h2>
+              <p className="mt-2 text-sm text-ink-mute">Pick a username, add a photo if you like.</p>
+
+              <form onSubmit={handleProfileSetup} className="mt-8 space-y-6">
+                <div>
+                  <label className="mb-2 block text-xs font-medium text-ink-mute">
+                    Profile picture <span className="text-ink-faint">(optional)</span>
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-2">
+                        {profileImagePreview ? (
+                          <Image src={profileImagePreview} alt="" fill className="object-cover" />
+                        ) : (
+                          <User className="h-5 w-5 text-ink-faint" />
+                        )}
+                      </div>
+                      {profileImagePreview && (
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rate-bad text-white transition-colors hover:opacity-90"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <label
+                        htmlFor="profileImage"
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-overlay px-4 py-2 text-xs font-medium text-ink transition-colors hover:bg-overlay-hover"
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        {profileImage ? 'Change photo' : 'Upload photo'}
+                      </label>
+                      <input id="profileImage" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                      <p className="mt-1.5 text-xs text-ink-faint">JPG, PNG or GIF, up to 5MB</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="username" className="mb-1.5 block text-xs font-medium text-ink-mute">
+                    Username
+                  </label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <User className="h-4 w-4 text-ink-faint" />
+                    </span>
+                    <input
+                      id="username"
+                      type="text"
+                      placeholder="yourname"
+                      value={username}
+                      onChange={handleUsernameChange}
+                      maxLength={20}
+                      required
+                      className={`w-full rounded-lg border bg-overlay py-2.5 pl-9 pr-3.5 text-sm text-ink placeholder-ink-faint transition-colors focus:outline-none focus:ring-1 focus:ring-gold/30 ${
+                        usernameError ? 'border-rate-bad/60' : 'border-line focus:border-gold/40'
+                      }`}
+                    />
+                  </div>
+                  <p className={`mt-1.5 text-xs ${usernameError ? 'text-rate-bad' : 'text-ink-faint'}`}>
+                    {usernameError || '3–20 characters — letters, numbers, _ and - only'}
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isUploadingImage || !isUsernameValid}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-ember px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-ember-strong disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {isUploadingImage ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    <>
+                      Finish setup
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
+
+          {message && (
+            <div
+              className={`mt-6 flex items-start gap-3 rounded-lg border p-3.5 text-sm ${
+                isSuccessMsg
+                  ? 'border-rate-high/30 bg-rate-high/10 text-rate-high'
+                  : 'border-rate-bad/30 bg-rate-bad/10 text-rate-bad'
+              }`}
+            >
+              {isSuccessMsg ? (
+                <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              )}
+              <span>{message}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -742,8 +642,8 @@ function AuthPageContent() {
 // Loading fallback for Suspense
 function AuthLoading() {
   return (
-    <div className="min-h-screen bg-[#14181C] flex items-center justify-center">
-      <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
+      <Loader2 className="h-8 w-8 animate-spin text-gold" />
     </div>
   )
 }

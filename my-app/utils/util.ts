@@ -26,7 +26,6 @@ export const getBookData = async (id: string, searchAuthor?: string): Promise<Bo
         params: { id: id, searchAuthor: searchAuthor },
         headers
       }, )
-      console.log('book data:', res.data)
       return {
         title: res.data.title || 'Unknown Title',
         author: res.data.author || 'Unknown Author',
@@ -57,9 +56,7 @@ export const getBookData = async (id: string, searchAuthor?: string): Promise<Bo
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/search`, {
         params: { q: query },
       });
-  
-      console.log('book data:', res.data);
-  
+
       if (!Array.isArray(res.data)) {
         throw new Error('Expected an array of books from backend');
       }

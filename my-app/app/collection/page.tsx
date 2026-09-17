@@ -87,7 +87,6 @@ const MyCollectionPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('books fetched');
       fetchBooks();
     }
   }, [isAuthenticated])
@@ -127,11 +126,7 @@ const MyCollectionPage = () => {
       })
   
       response.data && setBooks(response.data)
-      
-  
-      console.log('Books fetched:', response.data)
     } catch (error) {
-      console.error('Error fetching books:', error)
     }
   }
 
@@ -990,18 +985,33 @@ return (
                 </div>
               )}
               {filteredAndSortedBooks.length === 0 && statusFilter === "all" &&  (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 border border-[#3D4451]">
-                    <BookOpen className="w-8 h-8 text-stone-400" />
+                <div className="text-center py-12 max-w-md mx-auto">
+                  <div className="w-20 h-20 bg-gradient-to-br from-amber-500/20 to-amber-600/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 border border-amber-500/30">
+                    <BookOpen className="w-10 h-10 text-amber-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-stone-50 mb-2">No books found</h3>
-                  <p className="text-stone-300 mb-4">Try adding some books to your collection!</p>
-                  <button 
-                    type='button' 
+                  <h3 className="text-2xl font-bold text-stone-50 mb-3">Start Your Collection</h3>
+                  <p className="text-stone-300 mb-6 leading-relaxed">
+                    Your personal library awaits! Add books you've read, are reading, or want to read.
+                  </p>
+
+                  {/* Recommendation unlock hint */}
+                  <div className="bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 border border-emerald-500/30 rounded-xl p-4 mb-6">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <Award className="w-5 h-5 text-emerald-400" />
+                      <span className="text-emerald-300 font-medium">Unlock Recommendations</span>
+                    </div>
+                    <p className="text-stone-400 text-sm">
+                      Add <span className="text-emerald-400 font-semibold">5 books</span> to your collection to get personalized book recommendations tailored just for you!
+                    </p>
+                  </div>
+
+                  <button
+                    type='button'
                     onClick={() => router.push('/browse')}
-                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg font-medium"
+                    className="px-8 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25 font-semibold flex items-center gap-2 mx-auto"
                   >
-                    Browse
+                    <Search className="w-5 h-5" />
+                    Browse Books
                   </button>
                 </div>
               )}

@@ -26,8 +26,6 @@ router.get("/api/favorites", authenticateUser, async (req, res) => {
 router.post("/api/favorites", writeLimiter, authenticateUser, async (req, res) => {
   const { bookId } = req.body;
 
-  console.log("book id", bookId);
-
   if (!bookId) {
     return res.status(400).json({ error: "openLibrary is required" });
   }

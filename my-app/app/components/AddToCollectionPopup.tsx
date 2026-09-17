@@ -28,8 +28,6 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
   const router = useRouter();
 
-  console.log('userStatus', userStatus);
-
   const ratingOptions = [
     { value: 10, label: 'Masterpiece', description: 'A perfect work of art', color: 'text-purple-600' },
     { value: 9, label: 'Great', description: 'Exceptional quality', color: 'text-indigo-600' },
@@ -74,7 +72,6 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
     setIsSubmitting(true);
 
-    console.log(openLibraryId); 
     try {
       const {
         data: { session }
@@ -112,8 +109,6 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
         }
       );
 
-      console.log('Book added response:', res.data);
-
       // Reset form
       setRating(0);
       setStatus('');
@@ -123,13 +118,10 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
       alert('Successfully added to collection!');
     } catch (error) {
-      console.error('Error adding book to user list:', error);
     } finally {
       setIsSubmitting(false);
     }
-    
-    console.log('Adding to collection:', { rating, status });
-    
+
     // Reset form
     setRating(0);
     setStatus('');
@@ -152,25 +144,22 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
       {/* Trigger Button */}
       {buttonType === "book-page" && (
   (userStatus !== null || isInCollection) ? (
-    <button          
-      className="w-full font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 transform bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800 border-2 border-emerald-300 shadow-lg cursor-default"
-    >         
-      <Plus className="w-4 h-4" />         
-      In Collection       
+    <button
+      className="flex w-full cursor-default items-center justify-center gap-2 rounded-full border border-line-strong bg-overlay px-6 py-3 text-sm font-medium text-ink"
+    >
+      <CheckCircle2 className="h-4 w-4 text-rate-high" />
+      In your collection
     </button>
   ) : (
     <button
-      className="w-full font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-105 active:scale-95 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl hover:shadow-amber-500/25 border-2 border-amber-400/50 hover:border-amber-300 relative overflow-hidden group"
+      className="group flex w-full items-center justify-center gap-2 rounded-full bg-ember px-6 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-ember-strong hover:shadow-[0_12px_40px_-10px_rgba(217,119,6,0.55)]"
       onClick={() => setIsOpen(true)}
     >
-      {/* Shimmer effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
-
-      <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-      Add to Collection
+      <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+      Add to collection
     </button>
   )
-)}        
+)}
 
 {buttonType === "ranking-laptop" && (
   <div className="flex items-center justify-center col-span-2">         
@@ -195,22 +184,22 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
       {/* Popup Overlay */}
        {isOpen && (
-        <div className="fixed inset-0 bg-[#14181C]/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           {/* Mobile: slide up from bottom, Desktop: centered modal */}
-          <div className="bg-[#14181C] backdrop-blur-xl border border-[#3D4451] w-full max-w-lg mx-4 rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-canvas backdrop-blur-xl border border-line w-full max-w-lg mx-4 rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden flex flex-col">
             
             {/* Header - Fixed */}
-            <div className="bg-gradient-to-r from-[#2C3440]/80 to-[#2C3440]/80 backdrop-blur-sm p-4 sm:p-6 border-b border-[#3D4451] flex-shrink-0">
+            <div className="bg-gradient-to-r from-surface/80 to-surface/80 backdrop-blur-sm p-4 sm:p-6 border-b border-line flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-stone-50 mb-1">Add to Collection</h2>
-                  <p className="text-sm text-stone-300">Rate and organize your reading</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-ink mb-1">Add to Collection</h2>
+                  <p className="text-sm text-ink-soft">Rate and organize your reading</p>
                 </div>
                 <button
                   onClick={handleClose}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200 touch-manipulation"
+                  className="p-2 hover:bg-overlay-hover rounded-full transition-colors duration-200 touch-manipulation"
                 >
-                  <X size={20} className="text-stone-300" />
+                  <X size={20} className="text-ink-soft" />
                 </button>
               </div>
             </div>
@@ -220,41 +209,41 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
               
               {/* Rating Section */}
               <div className="space-y-3 sm:space-y-4">
-                <label className="block text-sm font-semibold text-stone-50 mb-2">
+                <label className="block text-sm font-semibold text-ink mb-2">
                   Your Rating
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowRatingDropdown(!showRatingDropdown)}
-                    className="w-full p-3 sm:p-4 bg-white/5 border-2 border-[#3D4451] rounded-xl hover:border-[#3D4451] hover:bg-white/10 transition-all duration-200 flex items-center justify-between touch-manipulation active:bg-white/15"
+                    className="w-full p-3 sm:p-4 bg-overlay border border-line rounded-xl hover:border-line hover:bg-overlay-hover transition-all duration-200 flex items-center justify-between touch-manipulation active:bg-overlay-hover"
                   >
                     <div className="flex items-center gap-3">
                       {rating > 0 ? (
                         <>
                           <div className="flex items-center gap-1">
-                            <Star size={18} className="text-amber-400 fill-amber-400" />
-                            <span className="font-bold text-base sm:text-lg text-stone-50">{rating}</span>
+                            <Star size={18} className="text-gold fill-gold" />
+                            <span className="font-bold text-base sm:text-lg text-ink">{rating}</span>
                           </div>
                           <div className="text-left">
                             <div className={`font-medium text-sm sm:text-base ${selectedRating?.color}`}>
                               {selectedRating?.label}
                             </div>
-                            <div className="text-xs sm:text-sm text-stone-400">
+                            <div className="text-xs sm:text-sm text-ink-mute">
                               {selectedRating?.description}
                             </div>
                           </div>
                         </>
                       ) : (
-                        <span className="text-stone-400 text-sm sm:text-base">Select a rating</span>
+                        <span className="text-ink-mute text-sm sm:text-base">Select a rating</span>
                       )}
                     </div>
-                    <ChevronDown size={20} className={`text-stone-400 transition-transform duration-200 ${showRatingDropdown ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={20} className={`text-ink-mute transition-transform duration-200 ${showRatingDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Rating Dropdown */}
                   {showRatingDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#14181C]/60 backdrop-blur-xl border-2 border-[#3D4451] rounded-xl shadow-xl z-10 max-h-48 sm:max-h-64 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-canvas/90 backdrop-blur-xl border border-line rounded-xl shadow-xl z-10 max-h-48 sm:max-h-64 overflow-y-auto">
                       {ratingOptions.map((option) => (
                         <button
                           key={option.value}
@@ -263,20 +252,20 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
                             setRating(option.value);
                             setShowRatingDropdown(false);
                           }}
-                          className={`w-full p-3 sm:p-4 text-left hover:bg-white/10 active:bg-white/15 transition-colors duration-150 border-b border-[#3D4451] last:border-b-0 touch-manipulation ${
+                          className={`w-full p-3 sm:p-4 text-left hover:bg-overlay-hover active:bg-overlay-hover transition-colors duration-150 border-b border-line last:border-b-0 touch-manipulation ${
                             rating === option.value ? 'bg-white/10' : ''
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 min-w-[50px] sm:min-w-[60px]">
-                              <Star size={14} className="text-amber-400 fill-amber-400" />
-                              <span className="font-bold text-base sm:text-lg text-stone-50">{option.value}</span>
+                              <Star size={14} className="text-gold fill-gold" />
+                              <span className="font-bold text-base sm:text-lg text-ink">{option.value}</span>
                             </div>
                             <div className="flex-1">
                               <div className={`font-medium text-sm sm:text-base ${option.color}`}>
                                 {option.label}
                               </div>
-                              <div className="text-xs sm:text-sm text-stone-400">
+                              <div className="text-xs sm:text-sm text-ink-mute">
                                 {option.description}
                               </div>
                             </div>
@@ -290,7 +279,7 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
 
               {/* Status Section */}
               <div className="space-y-3 sm:space-y-4">
-                <label className="block text-sm font-semibold text-stone-50 mb-2">
+                <label className="block text-sm font-semibold text-ink mb-2">
                   Reading Status
                 </label>
                 <div className="space-y-2 sm:space-y-3">
@@ -304,16 +293,16 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
                         className={`w-full p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 text-left touch-manipulation active:scale-[0.98] ${
                           status === option.value
                             ? `${option.color} shadow-lg`
-                            : 'border-[#3D4451] hover:border-[#3D4451] bg-white/5 hover:bg-white/10 active:bg-white/15'
+                            : 'border-line hover:border-line bg-overlay hover:bg-overlay-hover active:bg-overlay-hover'
                         }`}
                       >
                         <div className="flex items-center gap-3 sm:gap-4">
-                          <Icon size={18} className={status === option.value ? 'text-current' : 'text-stone-400'} />
+                          <Icon size={18} className={status === option.value ? 'text-current' : 'text-ink-mute'} />
                           <div className="flex-1">
-                            <div className={`font-semibold text-sm sm:text-base ${status === option.value ? 'text-current' : 'text-stone-50'}`}>
+                            <div className={`font-semibold text-sm sm:text-base ${status === option.value ? 'text-current' : 'text-ink'}`}>
                               {option.label}
                             </div>
-                            <div className={`text-xs sm:text-sm ${status === option.value ? 'text-current opacity-80' : 'text-stone-400'}`}>
+                            <div className={`text-xs sm:text-sm ${status === option.value ? 'text-current opacity-80' : 'text-ink-mute'}`}>
                               {option.description}
                             </div>
                           </div>
@@ -326,12 +315,12 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
             </div>
 
             {/* Fixed Bottom Actions */}
-            <div className="flex-shrink-0 p-4 sm:p-6 bg-[#2C3440]/60 backdrop-blur-sm border-t border-[#3D4451]">
+            <div className="flex-shrink-0 p-4 sm:p-6 bg-surface/60 backdrop-blur-sm border-t border-line">
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="w-full sm:flex-1 px-6 py-3 sm:py-3 border-2 border-[#3D4451] text-stone-300 rounded-xl hover:bg-white/10 hover:border-white/30 hover:text-white active:bg-white/15 transition-all duration-200 font-medium touch-manipulation"
+                  className="w-full sm:flex-1 px-6 py-3 sm:py-3 border border-line text-ink-soft rounded-xl hover:bg-overlay-hover hover:border-white/30 hover:text-white active:bg-overlay-hover transition-all duration-200 font-medium touch-manipulation"
                 >
                   Cancel
                 </button>
@@ -339,7 +328,7 @@ export default function AddToCollectionPopup({ openLibraryId, buttonType, userSt
                   type="button"
                   onClick={handleSubmit}
                   disabled={!status || isSubmitting}
-                  className="w-full sm:flex-1 px-6 py-3 sm:py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl active:scale-[0.98] disabled:transform-none touch-manipulation"
+                  className="w-full sm:flex-1 px-6 py-3 sm:py-3 bg-ember text-white rounded-full hover:bg-ember-strong disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-lg hover:shadow-xl active:scale-[0.98] disabled:transform-none touch-manipulation"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center gap-2">

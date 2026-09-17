@@ -95,12 +95,12 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
   if (loading) {
     return (
       <div className="mt-8">
-        <h2 className="text-2xl font-bold text-stone-50 mb-4">More by {author}</h2>
+        <h2 className="text-2xl font-bold text-ink mb-4">More by {author}</h2>
         <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="w-32 h-48 bg-stone-700/50 animate-pulse rounded-lg flex-shrink-0"
+              className="w-32 h-48 bg-surface-2 animate-pulse rounded-lg flex-shrink-0"
             />
           ))}
         </div>
@@ -114,7 +114,7 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
 
   return (
     <div className="w-full overflow-hidden">
-      <h2 className="text-lg sm:text-2xl font-bold text-stone-50 mb-4">
+      <h2 className="text-lg sm:text-2xl font-bold text-ink mb-4">
         More by {author}
       </h2>
 
@@ -123,7 +123,7 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#14181C]/70 hover:bg-black/90 text-stone-50 p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/90 text-ink p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg"
             aria-label="Scroll left"
           >
             <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -133,7 +133,7 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#14181C]/70 hover:bg-black/90 text-stone-50 p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/90 text-ink p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-lg"
             aria-label="Scroll right"
           >
             <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -165,26 +165,26 @@ export default function MoreByAuthor({ author, currentBookId }: MoreByAuthorProp
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-stone-700 to-[#14181C] flex items-center justify-center p-4">
-                    <p className="text-stone-50 text-xs text-center font-medium line-clamp-4">
+                  <div className="w-full h-full bg-gradient-to-br from-surface-2 to-surface flex items-center justify-center p-4">
+                    <p className="text-ink text-xs text-center font-medium line-clamp-4">
                       {book.title}
                     </p>
                   </div>
                 )}
 
                 {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#14181C]/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                <div className="absolute inset-0 bg-gradient-to-t from-canvas/85 via-canvas/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                   <div className="p-2 sm:p-3 w-full">
-                    <h3 className="text-stone-50 text-xs font-semibold line-clamp-2 mb-1">
+                    <h3 className="text-ink text-xs font-semibold line-clamp-2 mb-1">
                       {book.title}
                     </h3>
                     {book.averageRating > 0 && (
                       <div className="flex items-center gap-1">
-                        <span className="text-amber-400 text-xs">★</span>
-                        <span className="text-stone-50 text-xs">
+                        <span className="text-gold text-xs">★</span>
+                        <span className="text-ink text-xs">
                           {book.averageRating.toFixed(1)}
                         </span>
-                        <span className="text-stone-400 text-xs">
+                        <span className="text-ink-mute text-xs">
                           ({book.totalRatings})
                         </span>
                       </div>
